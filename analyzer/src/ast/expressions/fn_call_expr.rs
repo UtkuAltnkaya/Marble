@@ -1,5 +1,5 @@
 use crate::{
-    ast::{parenthesis::Parenthesis, AstNode},
+    ast::{parenthesis::Parenthesis, AstParse},
     error::Result,
     lexer::token_type::TokenType,
     parser::Parser,

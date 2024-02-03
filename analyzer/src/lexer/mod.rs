@@ -6,11 +6,10 @@ pub mod token_type;
 
 use std::collections::HashMap;
 
-use crate::{error::CompilerError, error_lexer};
+use crate::{error::CompilerError, error_lexer, symbol_table::SymbolTableP};
 
 use self::{keywords::init_keywords, token::Token, token_type::TokenType};
 
-#[allow(dead_code)]
 pub struct Lexer {
     content: Vec<u8>,
     cursor: usize,
@@ -18,11 +17,12 @@ pub struct Lexer {
     line: usize,
     line_start: usize,
     file_name: String,
+    symbol_table: SymbolTableP,
     keywords: HashMap<String, TokenType>,
 }
 
 impl Lexer {
-    pub fn new(content: String, file_name: String) -> Self {
+    pub fn new(content: String, file_name: String, symbol_table: SymbolTableP) -> Self {
         Self {
             content: content.into_bytes(),
             file_name,
@@ -30,6 +30,7 @@ impl Lexer {
             cursor_start: 0,
             line_start: 0,
             line: 0,
+            symbol_table,
             keywords: init_keywords(),
         }
     }

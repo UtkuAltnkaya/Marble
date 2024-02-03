@@ -1,10 +1,11 @@
 pub mod syntactic_error;
 
 use crate::{
-    ast::{program::Program, AstNode},
+    ast::{program::Program, AstParse},
     error::Result,
     error_parser,
     lexer::{token::Token, token_type::TokenType, Lexer},
+    symbol_table::SymbolTableP,
 };
 
 #[allow(dead_code)]
@@ -13,16 +14,18 @@ pub struct Parser {
     previous: Option<Token>,
     current: Token,
     next: Token,
+    symbol_table: SymbolTableP,
 }
 
 #[allow(dead_code)]
 impl Parser {
-    pub fn new(mut lexer: Lexer) -> Result<Self> {
+    pub fn new(mut lexer: Lexer, symbol_table: SymbolTableP) -> Result<Self> {
         Ok(Self {
             previous: None,
             current: lexer.next_token()?,
             next: lexer.next_token()?,
             lexer,
+            symbol_table,
         })
     }
 

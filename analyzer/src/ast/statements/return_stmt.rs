@@ -1,5 +1,5 @@
 use crate::{
-    ast::{expressions::Expression, AstNode},
+    ast::{expressions::Expression, AstParse},
     error::Result,
     lexer::token_type::TokenType,
     parser::Parser,
@@ -16,7 +16,7 @@ impl ReturnStmt {
     }
 }
 
-impl AstNode for ReturnStmt {
+impl AstParse for ReturnStmt {
     fn parse(parser: &mut Parser) -> Result<Self> {
         if parser.next().token_type() == &TokenType::Semicolon {
             parser.next_token()?;

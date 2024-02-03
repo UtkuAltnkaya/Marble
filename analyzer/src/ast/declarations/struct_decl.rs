@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         access_specifier::AccessSpecifier, identifier::Identifier, parenthesis::Parenthesis,
-        variable_type::VariableType, AstNode,
+        variable_type::VariableType, AstParse,
     },
     error::Result,
     lexer::token_type::TokenType,
@@ -21,7 +21,7 @@ pub struct StructField {
     pub field: VariableType,
 }
 
-impl AstNode for StructDeclaration {
+impl AstParse for StructDeclaration {
     fn parse(parser: &mut Parser) -> Result<Self> {
         let name = Identifier::parse(parser)?;
         parser.next_token_and_expect(TokenType::OpenCurlyBrace)?;
@@ -45,7 +45,7 @@ impl StructDeclaration {
         }
     }
 }
-impl AstNode for StructField {
+impl AstParse for StructField {
     fn parse(parser: &mut Parser) -> Result<Self> {
         let access_specifier = AccessSpecifier::parse(parser)?;
         let field = VariableType::parse(parser)?;

@@ -1,26 +1,26 @@
 struct Person
 {
-    name: String,
-    surname: String,
-    age: int,
+    age: int
 }
 
-enum TokenType
-{
-    Int,
-    Float,
+impl Person {
+
+    fn (p:Person*) set_age(age:int) -> void
+    {
+        p->age = age;
+    }
+
+    fn name() -> str 
+    {
+        return "";
+    }
+        
 }
 
-fn main() -> int {
-    let x: int = 1;
-    let y: int = 2;
 
-    let mem = Mem::allocate();
-    defer mem.deallocate();
+fn main () -> int {
+
+    x[1] = 1;
 
     return 0;
-}
-
-fn add(x: int*, y: int*) -> int {
-    return *x + *y;
 }

@@ -1,4 +1,4 @@
-use crate::{ast::AstNode, error::Result, lexer::token_type::TokenType, parser::Parser};
+use crate::{ast::AstParse, error::Result, lexer::token_type::TokenType, parser::Parser};
 
 use super::{Expression, Precedence};
 
@@ -18,8 +18,8 @@ impl ArrayIndexExpression {
         if parser.next().token_type() != &TokenType::OpenBracket {
             return Ok(left);
         }
-        parser.next_token()?;
-        parser.next_token()?;
+        parser.next_token()?; // Skip array_name
+        parser.next_token()?; // Skip open bracket token
         let right = Expression::parse(parser)?;
         parser.next_token_and_expect(TokenType::CloseBracket)?;
         return Ok(Expression::ArrayIndex(Self::new(

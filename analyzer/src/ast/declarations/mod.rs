@@ -1,10 +1,14 @@
 pub mod enum_decl;
 pub mod fn_decl;
+pub mod impl_decl;
 pub mod struct_decl;
 
-use self::{enum_decl::EnumDeclaration, fn_decl::FnDeclaration, struct_decl::StructDeclaration};
+use self::{
+    enum_decl::EnumDeclaration, fn_decl::FnDeclaration, impl_decl::ImplDeclaration,
+    struct_decl::StructDeclaration,
+};
 
-use super::{access_specifier::AccessSpecifier, AstNode};
+use super::{access_specifier::AccessSpecifier, AstParse};
 use crate::{error::CompilerError, error_parser, lexer::token_type::TokenType, parser::Parser};
 
 #[derive(Debug)]
@@ -12,10 +16,10 @@ pub enum Declarations {
     Fn(FnDeclaration),
     Struct(StructDeclaration),
     Enum(EnumDeclaration),
-    Impl(),
+    Impl(ImplDeclaration),
 }
 
-impl AstNode for Declarations {
+impl AstParse for Declarations {
     fn parse(parser: &mut Parser) -> Result<Self, CompilerError> {
         let access_specifier = AccessSpecifier::parse(parser)?;
         match parser.current().token_type() {
@@ -34,7 +38,12 @@ impl AstNode for Declarations {
                 enum_decl.access_specifier = access_specifier;
                 return Ok(Declarations::Enum(enum_decl));
             }
-            TokenType::Impl => todo!("IMPL"),
+            TokenType::Impl => {
+                if let AccessSpecifier::Public = access_specifier {
+                    return error_parser!(parser, "Unexpected access specifier");
+                }
+                return Ok(Declarations::Impl(ImplDeclaration::parse(parser)?));
+            }
             _ => return error_parser!(parser, "Unknown declarations"),
         }
     }

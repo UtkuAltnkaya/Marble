@@ -1,6 +1,5 @@
 use super::{Expression, Precedence};
 use crate::{
-    ast::AstNode,
     error::{CompilerError, Result},
     lexer::token_type::TokenType,
     parser::Parser,
@@ -49,8 +48,6 @@ pub enum BinaryPrecedence {
     Sum,
     Product,
 }
-
-impl AstNode for BinaryExpression {}
 
 impl BinaryExpression {
     pub fn new(left: Box<Expression>, operator: BinaryOperators, right: Box<Expression>) -> Self {
@@ -102,6 +99,7 @@ impl BinaryExpression {
         if parser.next().token_type() != &TokenType::BitOr {
             return Ok(left);
         }
+
         parser.next_token()?;
         let op = BinaryOperators::from_str(parser.current().text())?;
         parser.next_token()?;

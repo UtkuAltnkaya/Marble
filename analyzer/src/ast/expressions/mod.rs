@@ -24,7 +24,7 @@ use self::{
     unary_expr::UnaryExpression,
 };
 
-use super::AstNode;
+use super::AstParse;
 
 #[derive(Debug)]
 pub enum Expression {
@@ -54,7 +54,7 @@ pub enum Precedence {
     Primitive,
 }
 
-impl AstNode for Expression {
+impl AstParse for Expression {
     fn parse(parser: &mut Parser) -> Result<Self> {
         return Self::parse_expr(parser, Precedence::default());
     }

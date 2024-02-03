@@ -1,11 +1,15 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::{error::Result, lexer::token_type::TokenType, parser::Parser};
 
-use super::{declarations::Declarations, AstNode};
+use super::{declarations::Declarations, AstParse};
 
 #[derive(Debug)]
 pub struct Program {
     pub declarations: Vec<Declarations>,
 }
+
+pub type ProgramP = Rc<RefCell<Program>>;
 
 impl Program {
     pub fn new(declarations: Vec<Declarations>) -> Self {
@@ -13,7 +17,7 @@ impl Program {
     }
 }
 
-impl AstNode for Program {
+impl AstParse for Program {
     fn parse(parser: &mut Parser) -> Result<Self> {
         let mut decls = Vec::new();
         while parser.current().token_type() != &TokenType::Eof {

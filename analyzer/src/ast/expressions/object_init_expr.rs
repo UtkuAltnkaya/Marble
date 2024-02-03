@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         expressions::identifier_expression::IdentifierExpression, identifier::Identifier,
-        parenthesis::Parenthesis, AstNode,
+        parenthesis::Parenthesis, AstParse,
     },
     error::Result,
     lexer::token_type::TokenType,

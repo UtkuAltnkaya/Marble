@@ -19,6 +19,7 @@ impl AssignmentExpression {
         if parser.next().token_type() != &TokenType::Assign {
             return Ok(left);
         }
+
         parser.next_token()?;
         parser.next_token()?;
         let right = Expression::parse_expr(parser, Precedence::default())?;

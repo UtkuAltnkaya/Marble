@@ -1,5 +1,5 @@
 use crate::{
-    ast::{type_specifier::TypeSpecifier, AstNode},
+    ast::{type_specifier::TypeSpecifier, AstParse},
     error::Result,
     error_parser,
     lexer::token_type::TokenType,

@@ -2,7 +2,7 @@ use std::{num::ParseIntError, usize};
 
 use crate::{error::Result, error_parser, lexer::token_type::TokenType, parser::Parser};
 
-use super::{identifier::Identifier, AstNode};
+use super::{identifier::Identifier, AstParse};
 
 #[derive(Debug, Clone)]
 pub enum TypeSpecifier {
@@ -22,7 +22,7 @@ pub enum TypeSpecifier {
     },
 }
 
-impl AstNode for TypeSpecifier {
+impl AstParse for TypeSpecifier {
     fn parse(parser: &mut Parser) -> Result<Self> {
         if parser.current().token_type() == &TokenType::Identifier {
             return Self::handle_user_define(parser);
@@ -32,6 +32,20 @@ impl AstNode for TypeSpecifier {
 }
 
 impl TypeSpecifier {
+    pub fn to_symbol(&self) -> Result<&str> {
+        Ok(match self {
+            TypeSpecifier::Int => "int",
+            TypeSpecifier::Usize => "usize",
+            TypeSpecifier::Float => "float",
+            TypeSpecifier::Double => "double",
+            TypeSpecifier::Char => "char",
+            TypeSpecifier::Str => "str",
+            TypeSpecifier::Bool => "bool",
+            TypeSpecifier::UserDefine(id) => id.as_ref(),
+            _ => todo!("Type cannot be symbol"),
+        })
+    }
+
     fn handle_primitive(parser: &mut Parser) -> Result<Self> {
         let primitive = Self::get_primitive(parser)?;
         if let Some(complex) = Self::check(parser, &primitive)? {

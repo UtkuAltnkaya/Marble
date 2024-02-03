@@ -1,8 +1,7 @@
 use crate::{
     ast::{
-        expressions::Expression, identifier::Identifier, type_specifier::TypeSpecifier, AstNode,
+        expressions::Expression, identifier::Identifier, type_specifier::TypeSpecifier, AstParse,
     },
-    debug_current_token,
     error::Result,
     error_parser,
     lexer::token_type::TokenType,
@@ -16,7 +15,7 @@ pub struct LetStmt {
     pub value: Option<Expression>,
 }
 
-impl AstNode for LetStmt {
+impl AstParse for LetStmt {
     fn parse(parser: &mut Parser) -> Result<Self> {
         let identifier = Identifier::parse(parser)?;
         parser.next_token()?;
@@ -31,7 +30,6 @@ impl AstNode for LetStmt {
 
         parser.expect(TokenType::Assign)?;
         parser.next_token()?;
-        debug_current_token!(parser);
         let value = Expression::parse(parser)?;
         parser.next_token_and_expect(TokenType::Semicolon)?;
         return Ok(LetStmt::new(identifier, type_specifier, Some(value)));

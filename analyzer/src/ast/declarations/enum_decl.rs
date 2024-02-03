@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         access_specifier::AccessSpecifier, identifier::Identifier, parenthesis::Parenthesis,
-        AstNode,
+        AstParse,
     },
     error::Result,
     lexer::token_type::TokenType,
@@ -15,7 +15,7 @@ pub struct EnumDeclaration {
     pub fields: Vec<Identifier>,
 }
 
-impl AstNode for EnumDeclaration {
+impl AstParse for EnumDeclaration {
     fn parse(parser: &mut Parser) -> Result<Self> {
         let name = Identifier::parse(parser)?;
         parser.next_token_and_expect(TokenType::OpenCurlyBrace)?;
