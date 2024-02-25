@@ -8,13 +8,15 @@ pub type Result<T> = std::result::Result<T, CompilerError>;
 pub enum CompilerError {
     Lexical(LexicalError),
     Syntactic(SyntacticError),
+    Semantic(String),
 }
 
 impl Error for CompilerError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             CompilerError::Lexical(lexical) => Some(lexical),
-            CompilerError::Syntactic(_syntactic) => None,
+            CompilerError::Syntactic(syntactic) => Some(syntactic),
+            CompilerError::Semantic(_semantic) => None,
         }
     }
 
@@ -28,6 +30,7 @@ impl fmt::Display for CompilerError {
         match self {
             CompilerError::Lexical(lexical) => write!(f, "{}", lexical),
             CompilerError::Syntactic(syntactic) => write!(f, "{}", syntactic),
+            CompilerError::Semantic(semantic) => write!(f, "{}", semantic),
         }
     }
 }

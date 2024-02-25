@@ -69,7 +69,7 @@ impl Token {
         match lexer.keywords.get(&text) {
             Some(token_type) => Self::new(token_type.to_owned(), Span::new(start, end), text),
             None => {
-                lexer.symbol_table.borrow_mut().insert_symbol(&text);
+                // lexer.symbol_table.borrow_mut().insert_symbol(&text);
                 Self::new(TokenType::Identifier, Span::new(start, end), text)
             }
         }

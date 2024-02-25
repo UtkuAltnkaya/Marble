@@ -5,7 +5,7 @@ use crate::{
     error::Result,
     error_parser,
     lexer::{token::Token, token_type::TokenType, Lexer},
-    symbol_table::SymbolTableP,
+    symbol_table::SymbolTableRef,
 };
 
 #[allow(dead_code)]
@@ -14,12 +14,12 @@ pub struct Parser {
     previous: Option<Token>,
     current: Token,
     next: Token,
-    symbol_table: SymbolTableP,
+    symbol_table: SymbolTableRef,
 }
 
 #[allow(dead_code)]
 impl Parser {
-    pub fn new(mut lexer: Lexer, symbol_table: SymbolTableP) -> Result<Self> {
+    pub fn new(mut lexer: Lexer, symbol_table: SymbolTableRef) -> Result<Self> {
         Ok(Self {
             previous: None,
             current: lexer.next_token()?,

@@ -5,15 +5,15 @@ use crate::{
     },
     error::Result,
     semantic::AstAnalyze,
-    symbol_table::{symbol_node::Scope, SymbolTable},
+    symbol_table::SymbolTable,
 };
 
 impl AstAnalyze for BlockStmt {
-    fn analyze(&mut self, symbol_table: &mut SymbolTable, scope: &Scope) -> Result<TypeSpecifier> {
+    fn analyze(&mut self, symbol_table: &mut SymbolTable) -> Result<TypeSpecifier> {
         for stmt in self.stmts.iter_mut() {
             if let Statements::Block(_) = stmt {
             } else {
-                stmt.analyze(symbol_table, scope)?;
+                stmt.analyze(symbol_table)?;
             }
         }
         return Ok(TypeSpecifier::Void);

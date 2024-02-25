@@ -1,6 +1,14 @@
-struct Person
+pub struct Person
 {
-    age: int
+   pub age: int
+}
+
+enum NodeType 
+{
+    Function,
+    Enum,
+    Struct,
+    Impl
 }
 
 impl Person {
@@ -17,6 +25,9 @@ impl Person {
         
 }
 
+fn add(x:int,y:int) -> int {
+    return x + y;
+}
 
 fn main () -> int {
 

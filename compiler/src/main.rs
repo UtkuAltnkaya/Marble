@@ -20,7 +20,7 @@ fn run() -> Result<(), CompilerError> {
     semantic_analyzer.analyze()?;
 
     dbg!(program);
-    dbg!(symbol_table);
+    println!("{}", symbol_table.borrow());
     return Ok(());
 }
 

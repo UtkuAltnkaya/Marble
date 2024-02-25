@@ -1,35 +1,53 @@
-pub mod fn_symbol;
-pub mod scope;
-pub mod struct_symbol;
-pub mod symbol_node;
-pub mod variable_symbol;
+pub mod symbol;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
-use self::symbol_node::SymbolNode;
+use crate::ast::access_specifier::AccessSpecifier;
 
-#[allow(dead_code)]
+use self::symbol::{
+    data::{Access, SymbolData},
+    iter::{SymbolIterator, ToIter},
+    node::NodeTypes,
+    SymbolNode, SymbolNodeRef,
+};
+
+pub type SymbolTableRef = Rc<RefCell<SymbolTable>>;
+
 #[derive(Debug)]
 pub struct SymbolTable {
-    table: HashMap<String, Vec<SymbolNode>>,
+    root: SymbolNodeRef,
 }
 
-pub type SymbolTableP = Rc<RefCell<SymbolTable>>;
+impl Display for SymbolTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        return writeln!(f, "{}", self.root.borrow());
+    }
+}
 
 impl SymbolTable {
     pub fn new() -> Self {
-        Self {
-            table: HashMap::new(),
-        }
+        let data = SymbolData::new(
+            String::from("Global"),
+            Access::from(AccessSpecifier::Public),
+            NodeTypes::Global,
+        );
+        let root = SymbolNode::new(data, None, HashMap::new());
+        Self { root: root.into() }
     }
 
-    pub fn insert_symbol(&mut self, symbol: &str) {
-        self.table.insert(symbol.to_owned(), Vec::new());
+    pub fn root(&self) -> SymbolNodeRef {
+        return self.root.clone();
     }
+}
 
-    pub fn insert_node(&mut self, symbol: &str, node: SymbolNode) {
-        if let Some(symbol_node) = self.table.get_mut(symbol) {
-            symbol_node.push(node);
-        }
+impl ToIter for SymbolTableRef {
+    fn iter(&self) -> SymbolIterator {
+        return SymbolIterator::new(self.borrow().root.clone());
+    }
+}
+
+impl ToIter for SymbolTable {
+    fn iter(&self) -> SymbolIterator {
+        return SymbolIterator::new(self.root.clone());
     }
 }

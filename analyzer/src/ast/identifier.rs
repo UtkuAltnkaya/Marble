@@ -16,6 +16,12 @@ impl AsRef<str> for Identifier {
     }
 }
 
+impl ToString for Identifier {
+    fn to_string(&self) -> String {
+        return self.id.clone();
+    }
+}
+
 impl Identifier {
     pub fn new(id: String) -> Self {
         Self { id }

@@ -3,13 +3,13 @@ pub mod block_stmt;
 use crate::{
     ast::{statements::Statements, type_specifier::TypeSpecifier},
     error::Result,
-    symbol_table::{symbol_node::Scope, SymbolTable},
+    symbol_table::SymbolTable,
 };
 
 use super::AstAnalyze;
 
 impl AstAnalyze for Statements {
-    fn analyze(&mut self, symbol_table: &mut SymbolTable, scope: &Scope) -> Result<TypeSpecifier> {
+    fn analyze(&mut self, symbol_table: &mut SymbolTable) -> Result<TypeSpecifier> {
         match self {
             Statements::Let(_) => todo!(),
             Statements::Return(_) => todo!(),
@@ -17,7 +17,7 @@ impl AstAnalyze for Statements {
             Statements::For(_) => todo!(),
             Statements::While(_) => todo!(),
             Statements::If(_) => todo!(),
-            Statements::Block(block) => block.analyze(symbol_table, scope),
+            Statements::Block(block) => block.analyze(symbol_table),
             Statements::Expression(_) => todo!(),
         }
     }
