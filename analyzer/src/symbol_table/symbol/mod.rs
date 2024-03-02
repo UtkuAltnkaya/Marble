@@ -4,13 +4,13 @@ pub mod node;
 
 use crate::{
     ast::{
+        access_specifier::AccessSpecifier,
         declarations::{
-            enum_decl::EnumDeclaration, fn_decl::FnDeclaration, impl_decl::ImplDeclaration,
-            struct_decl::StructDeclaration,
+            enum_decl::EnumDeclaration, fn_decl::FnDeclaration, struct_decl::StructDeclaration,
         },
+        identifier::Identifier,
         variable_type::VariableType,
     },
-    error::{CompilerError, Result},
     symbol_table::symbol::{data::Access, node::NodeTypes},
 };
 
@@ -46,35 +46,6 @@ impl SymbolNode {
     pub fn append(&mut self, child: SymbolNodeRef) {
         let key = child.borrow().data.name.to_owned();
         self.children.insert(key, child);
-    }
-
-    pub fn append_impl(impl_decl: &ImplDeclaration, root: SymbolNodeRef) -> Result<()> {
-        let struct_name = impl_decl.name.to_symbol()?; // TODO allow to implement other than user define type
-        let struct_sym = root
-            .iter()
-            .struct_sym(struct_name)
-            .ok_or(CompilerError::Semantic("Struct not found".to_owned()))?
-            .find();
-
-        for member in impl_decl.member_functions.iter() {
-            let data = SymbolData::from((
-                member.prototype.name.as_ref(),
-                &member.prototype.access_specifier,
-                &member.prototype.return_type,
-                &member.prototype.params,
-            ));
-            let node: SymbolNodeRef =
-                SymbolNode::new(data, Some(struct_sym.clone()), HashMap::new()).into();
-
-            if let Some(method) = &member.prototype.method {
-                node.borrow_mut()
-                    .append(SymbolNode::from((method, node.clone())).into());
-            }
-
-            struct_sym.borrow_mut().append(node);
-        }
-
-        return Ok(());
     }
 
     fn dfs(&self, f: &mut std::fmt::Formatter<'_>, depth: usize) -> std::fmt::Result {
@@ -144,7 +115,6 @@ impl From<(&StructDeclaration, SymbolNodeRef)> for SymbolNode {
             Access::from(&struct_decl.access_specifier),
             NodeTypes::Struct,
         );
-
         return SymbolNode::new(data, Some(parent), HashMap::new());
     }
 }
@@ -160,12 +130,24 @@ impl From<(&EnumDeclaration, SymbolNodeRef)> for SymbolNode {
     }
 }
 
-impl From<(&VariableType, SymbolNodeRef)> for SymbolNode {
-    fn from((variable_type, parent): (&VariableType, SymbolNodeRef)) -> Self {
+//Enum Field
+impl From<(&Identifier, SymbolNodeRef)> for SymbolNode {
+    fn from((enum_field, parent): (&Identifier, SymbolNodeRef)) -> Self {
+        let data = SymbolData::new(
+            enum_field.to_string(),
+            Access::from(AccessSpecifier::Public),
+            NodeTypes::EnumItem,
+        );
+        return SymbolNode::new(data, Some(parent), HashMap::new());
+    }
+}
+
+impl From<(&VariableType, Access, SymbolNodeRef)> for SymbolNode {
+    fn from((variable_type, access, parent): (&VariableType, Access, SymbolNodeRef)) -> Self {
         let variable_node = VariableNode::new(variable_type.type_specifier.clone());
         let data = SymbolData::new(
             variable_type.identifier.to_string(),
-            Access::Local,
+            access,
             NodeTypes::Variable(variable_node),
         );
         return SymbolNode::new(data, Some(parent), HashMap::new());

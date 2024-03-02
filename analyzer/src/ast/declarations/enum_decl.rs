@@ -6,6 +6,7 @@ use crate::{
     error::Result,
     lexer::token_type::TokenType,
     parser::Parser,
+    symbol_table::ToSymbol,
 };
 
 #[derive(Debug)]
@@ -22,7 +23,9 @@ impl AstParse for EnumDeclaration {
         let fields = Parenthesis::parse(parser, TokenType::CloseCurlyBrace, |parser| {
             return Ok(Identifier::from(parser.expect(TokenType::Identifier)?));
         })?;
-        return Ok(Self::new(AccessSpecifier::Private, name, fields));
+        let enum_decl = Self::new(AccessSpecifier::Private, name, fields);
+        enum_decl.to_symbol(parser.symbol_table().borrow().root())?;
+        return Ok(enum_decl);
     }
 }
 

@@ -6,6 +6,7 @@ use crate::{
     error::Result,
     lexer::token_type::TokenType,
     parser::Parser,
+    symbol_table::ToSymbol,
 };
 
 #[derive(Debug)]
@@ -28,7 +29,9 @@ impl AstParse for StructDeclaration {
         let fields = Parenthesis::parse(parser, TokenType::CloseCurlyBrace, |parser| {
             return StructField::parse(parser);
         })?;
-        return Ok(Self::new(AccessSpecifier::Private, name, fields));
+        let struct_decl = Self::new(AccessSpecifier::Private, name, fields);
+        struct_decl.to_symbol(parser.symbol_table().borrow().root())?;
+        return Ok(struct_decl);
     }
 }
 

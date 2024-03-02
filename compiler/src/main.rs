@@ -19,8 +19,8 @@ fn run() -> Result<(), CompilerError> {
         SemanticAnalyzer::new(Rc::clone(&symbol_table), Rc::clone(&program));
     semantic_analyzer.analyze()?;
 
-    dbg!(program);
-    println!("{}", symbol_table.borrow());
+    println!("Program: {:#?}\n\n", program.borrow());
+    println!("SymbolTable: {{\n{}}}", symbol_table.borrow());
     return Ok(());
 }
 

@@ -8,6 +8,7 @@ use crate::{
     error_parser,
     lexer::token_type::TokenType,
     parser::Parser,
+    symbol_table::ToSymbol,
 };
 
 #[derive(Debug)]
@@ -48,7 +49,9 @@ impl AstParse for ImplDeclaration {
             }
             member_func.push(MemberFunction::parse(parser)?);
         }
-        return Ok(ImplDeclaration::new(name, member_func));
+        let impl_decl = ImplDeclaration::new(name, member_func);
+        impl_decl.to_symbol(parser.symbol_table().borrow().root())?;
+        return Ok(impl_decl);
     }
 }
 

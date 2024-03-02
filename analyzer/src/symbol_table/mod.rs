@@ -2,7 +2,7 @@ pub mod symbol;
 
 use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
-use crate::ast::access_specifier::AccessSpecifier;
+use crate::{ast::access_specifier::AccessSpecifier, error::Result};
 
 use self::symbol::{
     data::{Access, SymbolData},
@@ -18,9 +18,13 @@ pub struct SymbolTable {
     root: SymbolNodeRef,
 }
 
+pub trait ToSymbol {
+    fn to_symbol(&self, root: SymbolNodeRef) -> Result<()>;
+}
+
 impl Display for SymbolTable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        return writeln!(f, "{}", self.root.borrow());
+        return write!(f, "{}", self.root.borrow());
     }
 }
 

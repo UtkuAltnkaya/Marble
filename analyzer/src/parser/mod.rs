@@ -56,6 +56,10 @@ impl Parser {
         return self.expect(token_type);
     }
 
+    pub fn symbol_table(&self) -> SymbolTableRef {
+        return self.symbol_table.clone();
+    }
+
     pub fn previous(&self) -> Option<&Token> {
         self.previous.as_ref()
     }

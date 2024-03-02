@@ -7,6 +7,7 @@ use crate::{
     error::Result,
     lexer::token_type::TokenType,
     parser::Parser,
+    symbol_table::ToSymbol,
 };
 
 #[derive(Debug)]
@@ -24,13 +25,10 @@ impl AstParse for FnDeclaration {
         let params = Self::parse_params(parser)?;
         let return_type = Self::parse_return_type(parser)?;
         let body = Self::parse_body(parser)?;
-        return Ok(FnDeclaration::new(
-            AccessSpecifier::Private,
-            fn_name,
-            params,
-            return_type,
-            body,
-        ));
+        let fn_decl =
+            FnDeclaration::new(AccessSpecifier::Private, fn_name, params, return_type, body);
+        fn_decl.to_symbol(parser.symbol_table().borrow().root())?;
+        return Ok(fn_decl);
     }
 }
 

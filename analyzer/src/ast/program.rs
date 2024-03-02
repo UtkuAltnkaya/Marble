@@ -9,7 +9,7 @@ pub struct Program {
     pub declarations: Vec<Declarations>,
 }
 
-pub type ProgramP = Rc<RefCell<Program>>;
+pub type ProgramRef = Rc<RefCell<Program>>;
 
 impl Program {
     pub fn new(declarations: Vec<Declarations>) -> Self {

@@ -1,17 +1,52 @@
 use crate::{
-    ast::{declarations::fn_decl::FnDeclaration, type_specifier::TypeSpecifier},
-    error::Result,
+    ast::{
+        declarations::fn_decl::FnDeclaration, statements::Statements, type_specifier::TypeSpecifier,
+    },
+    error::{CompilerError, Result},
     semantic::AstAnalyze,
-    symbol_table::SymbolTable,
+    symbol_table::{
+        symbol::{data::Access, iter::ToIter, SymbolNode, SymbolNodeRef},
+        ToSymbol,
+    },
 };
 
 impl AstAnalyze for FnDeclaration {
-    fn analyze(&mut self, _symbol_table: &mut SymbolTable) -> Result<TypeSpecifier> {
-        // let scope = Scope::Function(self.fn_name.as_ref().to_owned());
-        // for param in self.params.iter() {
-        //     VariableSymbol::insert(symbol_table, (param, &scope))?;
-        // }
-        // self.body.analyze(symbol_table, &scope)?;
-        todo!()
+    fn analyze(&mut self, parent: SymbolNodeRef) -> Result<TypeSpecifier> {
+        let fn_symbol: SymbolNodeRef = parent
+            .iter()
+            .function(self.fn_name.as_ref())
+            .ok_or_else(|| CompilerError::Semantic(String::from("Function not found")))?
+            .find();
+
+        self.body.analyze(fn_symbol)?;
+
+        if self.return_type == TypeSpecifier::Void {
+            return Ok(TypeSpecifier::Void);
+        }
+
+        let return_stmt = self
+            .body
+            .stmts
+            .last()
+            .ok_or_else(|| CompilerError::Semantic(String::from("Statement expected")))?;
+
+        if let Statements::Return(_) = return_stmt {
+            return Ok(TypeSpecifier::Void);
+        }
+        return Err(CompilerError::Semantic(String::from(
+            "Return Statement Expected",
+        )));
+    }
+}
+
+impl ToSymbol for FnDeclaration {
+    fn to_symbol(&self, root: SymbolNodeRef) -> Result<()> {
+        let fn_symbol: SymbolNodeRef = SymbolNode::from((self, root.clone())).into();
+        for param in self.params.iter() {
+            let param_symbol = SymbolNode::from((param, Access::Local, fn_symbol.clone()));
+            fn_symbol.borrow_mut().append(param_symbol.into());
+        }
+        root.borrow_mut().append(fn_symbol);
+        return Ok(());
     }
 }

@@ -4,7 +4,7 @@ use crate::{error::Result, error_parser, lexer::token_type::TokenType, parser::P
 
 use super::{identifier::Identifier, AstParse};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TypeSpecifier {
     Int,
     Usize,

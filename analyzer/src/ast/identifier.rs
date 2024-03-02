@@ -5,7 +5,7 @@ use crate::{
     parser::Parser,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Identifier {
     pub id: String,
 }

@@ -1,15 +1,15 @@
 use crate::{
     ast::{program::Program, type_specifier::TypeSpecifier},
     error::Result,
-    symbol_table::SymbolTable,
+    symbol_table::symbol::SymbolNodeRef,
 };
 
 use super::AstAnalyze;
 
 impl AstAnalyze for Program {
-    fn analyze(&mut self, symbol_table: &mut SymbolTable) -> Result<TypeSpecifier> {
+    fn analyze(&mut self, parent: SymbolNodeRef) -> Result<TypeSpecifier> {
         for decl in self.declarations.iter_mut() {
-            decl.analyze(symbol_table)?;
+            decl.analyze(parent.clone())?;
         }
         return Ok(TypeSpecifier::Void);
     }
