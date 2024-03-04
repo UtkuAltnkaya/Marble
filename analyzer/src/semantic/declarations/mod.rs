@@ -12,10 +12,10 @@ use crate::{
 use super::AstAnalyze;
 
 impl AstAnalyze for Declarations {
-    fn analyze(&mut self, parent: SymbolNodeRef) -> Result<TypeSpecifier> {
+    fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
         match self {
-            Declarations::Fn(fn_decl) => fn_decl.analyze(parent),
-            Declarations::Impl(_) => todo!(),
+            Declarations::Fn(fn_decl) => fn_decl.analyze(parent, root),
+            // Declarations::Impl(_) => todo!(),
             _ => Ok(TypeSpecifier::Void),
         }
     }

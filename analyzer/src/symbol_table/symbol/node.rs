@@ -7,9 +7,25 @@ pub enum NodeTypes {
     Block,
     Global,
     Struct,
-    StructItem(VariableNode),
+    StructField(VariableNode),
     Enum,
     EnumItem,
+}
+
+impl NodeTypes {
+    pub fn variable(&self) -> &VariableNode {
+        return match self {
+            NodeTypes::Variable(var) | NodeTypes::StructField(var) => var,
+            _ => unreachable!("Something went wrong"),
+        };
+    }
+
+    pub fn function(&self) -> &FunctionNode {
+        return match self {
+            NodeTypes::Function(function) => function,
+            _ => unreachable!("Something went wrong"),
+        };
+    }
 }
 
 #[derive(Debug)]

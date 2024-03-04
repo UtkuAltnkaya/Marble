@@ -5,20 +5,22 @@ use crate::{
     error::{CompilerError, Result},
     semantic::AstAnalyze,
     symbol_table::{
-        symbol::{data::Access, iter::ToIter, SymbolNode, SymbolNodeRef},
+        symbol::{
+            data::Access, iter::ToIter, node::NodeTypes, NodeCallBack, SymbolNode, SymbolNodeRef,
+        },
         ToSymbol,
     },
 };
 
 impl AstAnalyze for FnDeclaration {
-    fn analyze(&mut self, parent: SymbolNodeRef) -> Result<TypeSpecifier> {
+    fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
         let fn_symbol: SymbolNodeRef = parent
             .iter()
             .function(self.fn_name.as_ref())
             .ok_or_else(|| CompilerError::Semantic(String::from("Function not found")))?
             .find();
 
-        self.body.analyze(fn_symbol)?;
+        self.body.analyze(fn_symbol, root)?;
 
         if self.return_type == TypeSpecifier::Void {
             return Ok(TypeSpecifier::Void);
@@ -43,7 +45,12 @@ impl ToSymbol for FnDeclaration {
     fn to_symbol(&self, root: SymbolNodeRef) -> Result<()> {
         let fn_symbol: SymbolNodeRef = SymbolNode::from((self, root.clone())).into();
         for param in self.params.iter() {
-            let param_symbol = SymbolNode::from((param, Access::Local, fn_symbol.clone()));
+            let param_symbol = SymbolNode::from((
+                param,
+                Access::Local,
+                fn_symbol.clone(),
+                Box::new(|var| NodeTypes::Variable(var)) as NodeCallBack,
+            ));
             fn_symbol.borrow_mut().append(param_symbol.into());
         }
         root.borrow_mut().append(fn_symbol);

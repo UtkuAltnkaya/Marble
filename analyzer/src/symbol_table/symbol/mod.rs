@@ -9,6 +9,7 @@ use crate::{
             enum_decl::EnumDeclaration, fn_decl::FnDeclaration, struct_decl::StructDeclaration,
         },
         identifier::Identifier,
+        type_specifier::TypeSpecifier,
         variable_type::VariableType,
     },
     symbol_table::symbol::{data::Access, node::NodeTypes},
@@ -142,12 +143,29 @@ impl From<(&Identifier, SymbolNodeRef)> for SymbolNode {
     }
 }
 
-impl From<(&VariableType, Access, SymbolNodeRef)> for SymbolNode {
-    fn from((variable_type, access, parent): (&VariableType, Access, SymbolNodeRef)) -> Self {
+pub type NodeCallBack = Box<dyn Fn(VariableNode) -> NodeTypes>;
+impl From<(&VariableType, Access, SymbolNodeRef, NodeCallBack)> for SymbolNode {
+    fn from(
+        (variable_type, access, parent, node_callback): (
+            &VariableType,
+            Access,
+            SymbolNodeRef,
+            NodeCallBack,
+        ),
+    ) -> Self {
         let variable_node = VariableNode::new(variable_type.type_specifier.clone());
+        let node_type = node_callback(variable_node);
+        let data = SymbolData::new(variable_type.identifier.to_string(), access, node_type);
+        return SymbolNode::new(data, Some(parent), HashMap::new());
+    }
+}
+
+impl From<(&Identifier, &TypeSpecifier, SymbolNodeRef)> for SymbolNode {
+    fn from((name, type_specifier, parent): (&Identifier, &TypeSpecifier, SymbolNodeRef)) -> Self {
+        let variable_node = VariableNode::new(type_specifier.clone());
         let data = SymbolData::new(
-            variable_type.identifier.to_string(),
-            access,
+            name.to_string(),
+            Access::Local,
             NodeTypes::Variable(variable_node),
         );
         return SymbolNode::new(data, Some(parent), HashMap::new());

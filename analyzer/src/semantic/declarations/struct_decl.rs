@@ -2,7 +2,7 @@ use crate::{
     ast::declarations::struct_decl::{StructDeclaration, StructField},
     error::Result,
     symbol_table::{
-        symbol::{data::Access, SymbolNode, SymbolNodeRef},
+        symbol::{data::Access, node::NodeTypes, NodeCallBack, SymbolNode, SymbolNodeRef},
         ToSymbol,
     },
 };
@@ -24,6 +24,7 @@ impl ToSymbol for StructField {
             &self.field,
             Access::from(&self.access_specifier),
             root.clone(),
+            Box::new(|var| NodeTypes::StructField(var)) as NodeCallBack,
         ));
         root.borrow_mut().append(field.into());
         return Ok(());

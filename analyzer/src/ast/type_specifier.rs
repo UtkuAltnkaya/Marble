@@ -46,6 +46,18 @@ impl TypeSpecifier {
         })
     }
 
+    pub fn is_primitive(&self) -> bool {
+        return matches!(
+            self,
+            TypeSpecifier::Int
+                | TypeSpecifier::Usize
+                | TypeSpecifier::Float
+                | TypeSpecifier::Double
+                | TypeSpecifier::Char
+                | TypeSpecifier::Bool
+        );
+    }
+
     fn handle_primitive(parser: &mut Parser) -> Result<Self> {
         let primitive = Self::get_primitive(parser)?;
         if let Some(complex) = Self::check(parser, &primitive)? {

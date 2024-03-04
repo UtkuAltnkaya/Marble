@@ -34,5 +34,6 @@ pub fn init_keywords() -> HashMap<String, TokenType> {
     map.insert(String::from("true"), TokenType::True);
     map.insert(String::from("false"), TokenType::False);
     map.insert(String::from("defer"), TokenType::Defer);
+    map.insert(String::from("as"), TokenType::As);
     return map;
 }

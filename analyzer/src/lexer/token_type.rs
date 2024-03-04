@@ -67,6 +67,7 @@ pub enum TokenType {
     True,
     False,
     Defer,
+    As,
 
     // keywords end
     Number,
@@ -151,6 +152,7 @@ impl Display for TokenType {
             TokenType::Pub => "Pub Keyword",
             TokenType::True => "True Keyword",
             TokenType::False => "False Keyword",
+            TokenType::As => "As Keyword",
             TokenType::BitLeft => "BitLeft '<<'",
             TokenType::BitRight => "BitRight '>>'",
         };

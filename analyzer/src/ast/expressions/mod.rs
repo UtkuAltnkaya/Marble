@@ -2,6 +2,7 @@ pub mod array_index_expr;
 pub mod array_init_expr;
 pub mod assignment_expr;
 pub mod binary_expr;
+pub mod cast_expr;
 pub mod fn_call_expr;
 pub mod identifier_expression;
 pub mod member_access_expr;
@@ -16,6 +17,7 @@ use self::{
     array_init_expr::ArrayInitExpression,
     assignment_expr::AssignmentExpression,
     binary_expr::{BinaryExpression, BinaryPrecedence},
+    cast_expr::CastExpression,
     fn_call_expr::FnCallExpression,
     identifier_expression::IdentifierExpression,
     member_access_expr::MemberAccessExpression,
@@ -38,6 +40,7 @@ pub enum Expression {
     ObjectInit(ObjectInitExpression),
     Identifier(IdentifierExpression),
     Primitive(PrimitiveExpression),
+    Cast(CastExpression),
 }
 
 #[derive(Clone)]
@@ -50,6 +53,7 @@ pub enum Precedence {
     FunctionCall,
     ArrayInit,
     ObjectInit,
+    Cast,
     Identifier,
     Primitive,
 }
@@ -73,6 +77,7 @@ impl Expression {
             Precedence::FunctionCall => FnCallExpression::parse(parser, precedence),
             Precedence::ArrayInit => ArrayInitExpression::parse(parser, precedence),
             Precedence::ObjectInit => ObjectInitExpression::parse(parser, precedence),
+            Precedence::Cast => CastExpression::parse(parser, precedence),
             Precedence::Identifier => IdentifierExpression::parse(parser, precedence),
             Precedence::Primitive => PrimitiveExpression::parse(parser),
         }
@@ -80,6 +85,7 @@ impl Expression {
 }
 
 impl Precedence {
+    #[inline(always)]
     pub fn next(&self) -> Precedence {
         match *self {
             Precedence::Binary => Precedence::Assignment,
@@ -89,7 +95,8 @@ impl Precedence {
             Precedence::MemberAccess => Precedence::FunctionCall,
             Precedence::FunctionCall => Precedence::ArrayInit,
             Precedence::ArrayInit => Precedence::ObjectInit,
-            Precedence::ObjectInit => Precedence::Identifier,
+            Precedence::ObjectInit => Precedence::Cast,
+            Precedence::Cast => Precedence::Identifier,
             Precedence::Identifier => Precedence::Primitive,
             Precedence::Primitive => Precedence::Primitive,
         }

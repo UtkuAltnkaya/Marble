@@ -7,7 +7,8 @@ use crate::{
         symbol::{
             data::{Access, SymbolData},
             iter::ToIter,
-            SymbolNode, SymbolNodeRef,
+            node::NodeTypes,
+            NodeCallBack, SymbolNode, SymbolNodeRef,
         },
         ToSymbol,
     },
@@ -41,9 +42,13 @@ impl ToSymbol for MemberFunction {
             SymbolNode::new(member_data, Some(root.clone()), HashMap::new()).into();
 
         if let Some(method) = &self.prototype.method {
-            member_symbol
-                .borrow_mut()
-                .append(SymbolNode::from((method, Access::Local, member_symbol.clone())).into());
+            let node = SymbolNode::from((
+                method,
+                Access::Local,
+                member_symbol.clone(),
+                Box::new(|var| NodeTypes::Variable(var)) as NodeCallBack,
+            ));
+            member_symbol.borrow_mut().append(node.into());
         }
 
         root.borrow_mut().append(member_symbol);

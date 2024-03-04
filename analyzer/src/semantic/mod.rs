@@ -1,4 +1,5 @@
 pub mod declarations;
+pub mod expressions;
 pub mod program;
 pub mod statements;
 
@@ -14,7 +15,7 @@ pub struct SemanticAnalyzer {
 }
 
 pub trait AstAnalyze: Sized {
-    fn analyze(&mut self, parent: SymbolNodeRef) -> Result<TypeSpecifier>;
+    fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier>;
 }
 
 impl SemanticAnalyzer {
@@ -27,7 +28,10 @@ impl SemanticAnalyzer {
 
     pub fn analyze(&mut self) -> Result<()> {
         let mut program = self.program.borrow_mut();
-        program.analyze(self.symbol_table.borrow().root())?;
+        program.analyze(
+            self.symbol_table.borrow().root(),
+            self.symbol_table.borrow().root(),
+        )?;
         return Ok(());
     }
 }

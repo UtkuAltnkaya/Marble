@@ -27,7 +27,7 @@ impl PrimitiveExpression {
             return Ok(expr);
         }
         let token = parser.current();
-        return Ok(Expression::Primitive(match token.token_type() {
+        let primitive_expr = match token.token_type() {
             TokenType::Number => {
                 let type_specifier = if parser.current().text().contains(".") {
                     TypeSpecifier::Double
@@ -40,8 +40,9 @@ impl PrimitiveExpression {
             TokenType::Char => Self::new(TypeSpecifier::Char, token.text().to_string()),
             TokenType::True => Self::new(TypeSpecifier::Bool, token.text().to_string()),
             TokenType::False => Self::new(TypeSpecifier::Bool, token.text().to_string()),
-            _ => return error_parser!(parser, "Unknown Expression"),
-        }));
+            _ => return error_parser!(parser, "Unknown Expression!"),
+        };
+        return Ok(Expression::Primitive(primitive_expr));
     }
 
     fn parse_parenthesis(parser: &mut Parser) -> Result<Option<Expression>> {

@@ -1,37 +1,39 @@
-pub struct Person
+fn main () -> int 
 {
-   pub age: int
+    let person = Person::new();
+    let age = person.get_age();
+    let x = 10;
+    let y = 15;
+
+    let z = add(x, y);
+
+    return 0;
 }
 
-enum NodeType 
+pub struct Person
 {
-    Function,
-    Enum,
-    Struct,
-    Impl
+   pub age: int,
+   pub name: int
 }
 
 impl Person {
+    pub fn new() -> Person 
+    {
+        return Person {age: 1, name: 2};
+    }    
 
-    fn (p:Person*) set_age(age:int) -> void
+    pub fn (p: Person*) get_age() -> int 
+    {
+        return p->age;
+    }
+
+    pub fn (p: Person*) set_age(age: int) -> void
     {
         p->age = age;
     }
-
-    fn name() -> str 
-    {
-        return "";
-    }
-        
 }
 
-fn add(x:int,y:int) -> int {
+fn add(x: int, y: int) -> int
+{
     return x + y;
-}
-
-fn main () -> int {
-
-    x[1] = 1;
-
-    return 0;
 }

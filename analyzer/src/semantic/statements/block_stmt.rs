@@ -9,11 +9,11 @@ use crate::{
 };
 
 impl AstAnalyze for BlockStmt {
-    fn analyze(&mut self, parent: SymbolNodeRef) -> Result<TypeSpecifier> {
+    fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
         for stmt in self.stmts.iter_mut() {
             if let Statements::Block(_) = stmt {
             } else {
-                stmt.analyze(parent.clone())?;
+                stmt.analyze(parent.clone(), root.clone())?;
             }
         }
         return Ok(TypeSpecifier::Void);
