@@ -1,5 +1,8 @@
 use crate::{
-    ast::{expressions::binary_expr::BinaryExpression, type_specifier::TypeSpecifier},
+    ast::{
+        expressions::binary_expr::{BinaryExpression, BinaryOperators},
+        type_specifier::TypeSpecifier,
+    },
     error::{CompilerError, Result},
     semantic::AstAnalyze,
     symbol_table::symbol::SymbolNodeRef,
@@ -22,6 +25,16 @@ impl AstAnalyze for BinaryExpression {
             )));
         }
 
-        return Ok(left_type);
+        return Ok(match self.operator {
+            BinaryOperators::Equal
+            | BinaryOperators::NotEqual
+            | BinaryOperators::And
+            | BinaryOperators::Or
+            | BinaryOperators::GreaterThan
+            | BinaryOperators::LessThan
+            | BinaryOperators::GreaterThanOrEqual
+            | BinaryOperators::LessThanOrEqual => TypeSpecifier::Bool,
+            _ => left_type,
+        });
     }
 }

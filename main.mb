@@ -2,11 +2,26 @@ fn main () -> int
 {
     let person = Person::new();
     let age = person.get_age();
-    let x = 10;
-    let y = 15;
 
-    let z = add(x, y);
+    for (let i = 0; i < 10; i++)
+    {
+        age = age + i;
+    }
 
+    if (age > 0)
+    {
+        age = 23;
+    }
+    else
+    {
+        defer age = 1;
+    }
+
+
+    while (age < 0)
+    {
+        age--;
+    }
     return 0;
 }
 

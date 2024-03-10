@@ -1,11 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{
-        statements::{block_stmt::BlockStmt, Statements},
-        type_specifier::TypeSpecifier,
-    },
-    error::Result,
+    ast::{statements::while_stmt::WhileStmt, type_specifier::TypeSpecifier},
+    error::{CompilerError, Result},
     semantic::AstAnalyze,
     symbol_table::symbol::{
         data::{Access, SymbolData},
@@ -14,26 +11,30 @@ use crate::{
     },
 };
 
-impl AstAnalyze for BlockStmt {
+impl AstAnalyze for WhileStmt {
     fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
-        for stmt in self.stmts.iter_mut() {
-            if let Statements::Block(block_stmt) = stmt {
-                let block_node = block_stmt.create_symbol(parent.clone())?;
-                block_stmt.analyze(block_node, root.clone())?;
-            } else {
-                stmt.analyze(parent.clone(), root.clone())?;
-            }
+        let while_node: SymbolNodeRef = self.create_symbol(parent.clone())?;
+        let condition_type = self.condition.analyze(parent, root.clone())?;
+
+        if condition_type != TypeSpecifier::Bool {
+            return Err(CompilerError::Semantic(String::from(
+                "Condition type must be boolean",
+            )));
         }
+
+        self.block.analyze(while_node, root)?;
         return Ok(TypeSpecifier::Void);
     }
 }
 
-impl BlockStmt {
+impl WhileStmt {
     fn create_symbol(&self, parent: SymbolNodeRef) -> Result<SymbolNodeRef> {
-        let data = SymbolData::new("block_1".to_owned(), Access::Local, NodeTypes::Block);
+        let data = SymbolData::new("while_1".to_owned(), Access::Local, NodeTypes::Block);
         let node: SymbolNodeRef =
             SymbolNode::new(data, Some(parent.clone()), HashMap::new()).into();
+
         parent.borrow_mut().append(node.clone());
+
         return Ok(node);
     }
 }

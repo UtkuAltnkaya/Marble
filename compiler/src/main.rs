@@ -2,14 +2,14 @@ use std::{cell::RefCell, fs, rc::Rc};
 
 use analyzer::{
     ast::program::ProgramRef,
-    error::CompilerError,
+    error::Result,
     lexer::Lexer,
     parser::Parser,
     semantic::SemanticAnalyzer,
     symbol_table::{SymbolTable, SymbolTableRef},
 };
 
-fn run() -> Result<(), CompilerError> {
+fn run() -> Result<()> {
     let file_name = String::from("main.mb");
     let content = fs::read_to_string(&file_name).expect("File not found");
 

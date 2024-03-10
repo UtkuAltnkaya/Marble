@@ -15,7 +15,7 @@ impl AstAnalyze for Declarations {
     fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
         match self {
             Declarations::Fn(fn_decl) => fn_decl.analyze(parent, root),
-            // Declarations::Impl(_) => todo!(),
+            Declarations::Impl(impl_decl) => impl_decl.analyze(parent, root),
             _ => Ok(TypeSpecifier::Void),
         }
     }

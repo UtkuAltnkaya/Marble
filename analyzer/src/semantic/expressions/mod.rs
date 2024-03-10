@@ -1,5 +1,6 @@
 pub mod array_index_expr;
 pub mod array_init_expr;
+pub mod assignment_expr;
 pub mod binary_expr;
 pub mod cast_expr;
 pub mod fn_call_expr;
@@ -7,6 +8,7 @@ pub mod identifier_expr;
 pub mod member_access_expr;
 pub mod object_init_expr;
 pub mod primitive_expr;
+pub mod unary_expr;
 
 use crate::{
     ast::{
@@ -23,8 +25,8 @@ impl AstAnalyze for Expression {
     fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
         return match self {
             Expression::Binary(binary_expr) => binary_expr.analyze(parent, root),
-            Expression::Assignment(_) => todo!(),
-            Expression::Unary(_) => todo!(),
+            Expression::Assignment(assignment_expr) => assignment_expr.analyze(parent, root),
+            Expression::Unary(unary_expr) => unary_expr.analyze(parent, root),
             Expression::ArrayIndex(array_index) => array_index.analyze(parent, root),
             Expression::MemberAccess(member_access) => member_access.analyze(parent, root),
             Expression::FnCall(fn_call_expr) => fn_call_expr.analyze(parent, root),
