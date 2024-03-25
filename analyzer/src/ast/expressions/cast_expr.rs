@@ -26,7 +26,7 @@ impl CastExpression {
         if parser.next().token_type() != &TokenType::As {
             return Ok(left);
         }
-        parser.next_token()?;
+        parser.next_token()?; // Skip as token
         parser.next_token()?;
 
         let target_type = TypeSpecifier::parse(parser)?;

@@ -36,19 +36,20 @@ pub enum BinaryOperators {
 }
 
 pub enum BinaryPrecedence {
+    Or,
+    And,
     BitOr,
     BitXor,
     BitAnd,
     BitLeft,
     BitRight,
-    Or,
-    And,
     Equal,
     Relational,
     Sum,
     Product,
 }
 
+//TODO FIX Is valid token, Maybe ? -> rewrite the parse function for every binary precedence
 impl BinaryExpression {
     pub fn new(left: Box<Expression>, operator: BinaryOperators, right: Box<Expression>) -> Self {
         Self {
@@ -64,39 +65,69 @@ impl BinaryExpression {
         binary_precedence: BinaryPrecedence,
     ) -> Result<Expression> {
         match binary_precedence {
-            BinaryPrecedence::BitOr => Self::parse_bitor(parser, precedence, binary_precedence),
+            BinaryPrecedence::Or => Self::parse_or(parser, precedence, binary_precedence),
+            BinaryPrecedence::And => {
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::And)
+                })
+            }
+            BinaryPrecedence::BitOr => {
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::BitOr)
+                })
+            }
             BinaryPrecedence::BitXor => {
-                Self::parse_expression(parser, precedence, binary_precedence)
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::BitXor)
+                })
             }
             BinaryPrecedence::BitAnd => {
-                Self::parse_expression(parser, precedence, binary_precedence)
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::BitAnd)
+                })
             }
             BinaryPrecedence::BitLeft => {
-                Self::parse_expression(parser, precedence, binary_precedence)
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::BitLeft)
+                })
             }
             BinaryPrecedence::BitRight => {
-                Self::parse_expression(parser, precedence, binary_precedence)
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::BitLeft)
+                })
             }
-            BinaryPrecedence::Or => Self::parse_expression(parser, precedence, binary_precedence),
-            BinaryPrecedence::And => Self::parse_expression(parser, precedence, binary_precedence),
             BinaryPrecedence::Equal => {
-                Self::parse_expression(parser, precedence, binary_precedence)
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::Equal | TokenType::NotEqual)
+                })
             }
             BinaryPrecedence::Relational => {
-                Self::parse_expression(parser, precedence, binary_precedence)
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(
+                        token_type,
+                        TokenType::LessThan
+                            | TokenType::LessEqual
+                            | TokenType::GreaterThan
+                            | TokenType::GreaterEqual
+                    )
+                })
             }
-            BinaryPrecedence::Sum => Self::parse_expression(parser, precedence, binary_precedence),
+            BinaryPrecedence::Sum => {
+                Self::parse_expression(parser, precedence, binary_precedence, |token_type| {
+                    matches!(token_type, TokenType::Plus | TokenType::Minus)
+                })
+            }
             BinaryPrecedence::Product => Self::parse_product(parser, precedence, binary_precedence),
         }
     }
 
-    fn parse_bitor(
+    fn parse_or(
         parser: &mut Parser,
         precedence: &Precedence,
         binary_precedence: BinaryPrecedence,
     ) -> Result<Expression> {
         let left = Self::parse(parser, precedence, binary_precedence.next())?;
-        if parser.next().token_type() != &TokenType::BitOr {
+        if parser.next().token_type() != &TokenType::Or {
             return Ok(left);
         }
 
@@ -116,9 +147,10 @@ impl BinaryExpression {
         parser: &mut Parser,
         precedence: &Precedence,
         binary_precedence: BinaryPrecedence,
+        condition: impl Fn(&TokenType) -> bool,
     ) -> Result<Expression> {
         let left = Self::parse(parser, precedence, binary_precedence.next())?;
-        if !Self::is_valid_token(parser) {
+        if !condition(parser.next().token_type()) {
             return Ok(left);
         }
         parser.next_token()?;
@@ -156,44 +188,24 @@ impl BinaryExpression {
             Box::from(right),
         )));
     }
-
-    fn is_valid_token(parser: &Parser) -> bool {
-        return matches!(
-            parser.next().token_type(),
-            TokenType::Plus
-                | TokenType::Minus
-                | TokenType::Equal
-                | TokenType::NotEqual
-                | TokenType::LessThan
-                | TokenType::GreaterThan
-                | TokenType::LessEqual
-                | TokenType::BitAnd
-                | TokenType::BitOr
-                | TokenType::BitXor
-                | TokenType::BitLeft
-                | TokenType::BitRight
-                | TokenType::And
-                | TokenType::GreaterEqual
-        );
-    }
 }
 
 impl Default for BinaryPrecedence {
     fn default() -> Self {
-        return Self::BitOr;
+        return Self::Or;
     }
 }
 
 impl BinaryPrecedence {
     pub fn next(&self) -> Self {
         match *self {
+            Self::Or => Self::And,
+            Self::And => Self::BitOr,
             Self::BitOr => Self::BitXor,
             Self::BitXor => Self::BitAnd,
             Self::BitAnd => Self::BitLeft,
             Self::BitLeft => Self::BitRight,
-            Self::BitRight => Self::Or,
-            Self::Or => Self::And,
-            Self::And => Self::Equal,
+            Self::BitRight => Self::Equal,
             Self::Equal => Self::Relational,
             Self::Relational => Self::Sum,
             Self::Sum => Self::Product,
@@ -223,6 +235,8 @@ impl FromStr for BinaryOperators {
             ">" => Self::GreaterThan,
             "<=" => Self::LessThanOrEqual,
             ">=" => Self::GreaterThanOrEqual,
+            ">>" => Self::BitRight,
+            "<<" => Self::BitLeft,
             _ => unreachable!(),
         });
     }

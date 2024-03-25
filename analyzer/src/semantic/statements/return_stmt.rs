@@ -2,14 +2,19 @@ use crate::{
     ast::{statements::return_stmt::ReturnStmt, type_specifier::TypeSpecifier},
     error::{CompilerError, Result},
     semantic::AstAnalyze,
-    symbol_table::symbol::SymbolNodeRef,
+    symbol_table::symbol::{iter::ToIter, node::NodeTypes, SymbolNodeRef},
 };
 
 impl AstAnalyze for ReturnStmt {
     fn analyze(&mut self, parent: SymbolNodeRef, root: SymbolNodeRef) -> Result<TypeSpecifier> {
-        let binding = parent.clone();
-        let binding = binding.borrow();
-        let fn_node = binding.data.node_type.function();
+        let parent_binding = parent.clone();
+        let binding = parent_binding.borrow();
+        let fn_node = &binding.data.node_type;
+
+        let NodeTypes::Function(fn_node) = fn_node else {
+        let parent:SymbolNodeRef = parent.iter().parent().ok_or_else(|| CompilerError::Semantic(String::from("Cannot find the parent")))?.find();
+            return self.analyze(parent,root);
+        };
 
         if let Some(value) = self.value.as_mut() {
             let type_specifier = value.analyze(parent, root)?;

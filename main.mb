@@ -1,54 +1,25 @@
-fn main () -> int 
-{
-    let person = Person::new();
-    let age = person.get_age();
-
-    for (let i = 0; i < 10; i++)
-    {
-        age = age + i;
-    }
-
-    if (age > 0)
-    {
-        age = 23;
-    }
-    else
-    {
-        defer age = 1;
-    }
-
-
-    while (age < 0)
-    {
-        age--;
-    }
+fn main() -> int {
+    let item = calculate_fib(10);
+    let result = fib(10);
     return 0;
 }
 
-pub struct Person
-{
-   pub age: int,
-   pub name: int
-}
+fn calculate_fib(n:int) -> int {
+    let result = 1;
 
-impl Person {
-    pub fn new() -> Person 
+    for (let i = 1; i < n; i++)
     {
-        return Person {age: 1, name: 2};
-    }    
-
-    pub fn (p: Person*) get_age() -> int 
-    {
-        return p->age;
+        result = result + i;
     }
 
-    pub fn (p: Person*) set_age(age: int) -> void
-    {
-        p->age = age;
-    }
+    return result;
 }
 
-fn add(x: int, y: int) -> int
-{
-    return x + y;
+fn fib(n:int) -> int {
+    if (n == 1 && n == 2)
+    {
+        return 1;
+    }
+
+    return fib(n-1) + fib(n-2);
 }
