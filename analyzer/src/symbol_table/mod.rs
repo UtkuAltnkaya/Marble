@@ -44,6 +44,12 @@ impl SymbolTable {
     }
 }
 
+impl Into<SymbolTableRef> for SymbolTable {
+    fn into(self) -> SymbolTableRef {
+        return Rc::new(RefCell::new(self));
+    }
+}
+
 impl ToIter for SymbolTableRef {
     fn iter(&self) -> SymbolIterator {
         return SymbolIterator::new(self.borrow().root.clone());

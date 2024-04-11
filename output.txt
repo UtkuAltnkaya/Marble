@@ -1,0 +1,475 @@
+Program: Program {
+    declarations: [
+        Fn(
+            FnDeclaration {
+                access_specifier: Private,
+                fn_name: Identifier {
+                    id: "main",
+                },
+                params: [],
+                return_type: Int,
+                body: BlockStmt {
+                    stmts: [
+                        Let(
+                            LetStmt {
+                                identifier: Identifier {
+                                    id: "item",
+                                },
+                                type_specifier: Some(
+                                    Int,
+                                ),
+                                value: Some(
+                                    FnCall(
+                                        FnCallExpression {
+                                            fn_name: Identifier(
+                                                IdentifierExpression {
+                                                    id: Identifier {
+                                                        id: "calculate_fib",
+                                                    },
+                                                },
+                                            ),
+                                            namespace: None,
+                                            args: [
+                                                Primitive(
+                                                    PrimitiveExpression {
+                                                        type_specifier: Int,
+                                                        value: "10",
+                                                    },
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                ),
+                            },
+                        ),
+                        Let(
+                            LetStmt {
+                                identifier: Identifier {
+                                    id: "result",
+                                },
+                                type_specifier: Some(
+                                    Int,
+                                ),
+                                value: Some(
+                                    FnCall(
+                                        FnCallExpression {
+                                            fn_name: Identifier(
+                                                IdentifierExpression {
+                                                    id: Identifier {
+                                                        id: "fib",
+                                                    },
+                                                },
+                                            ),
+                                            namespace: None,
+                                            args: [
+                                                Primitive(
+                                                    PrimitiveExpression {
+                                                        type_specifier: Int,
+                                                        value: "10",
+                                                    },
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                ),
+                            },
+                        ),
+                        Return(
+                            ReturnStmt {
+                                value: Some(
+                                    Primitive(
+                                        PrimitiveExpression {
+                                            type_specifier: Int,
+                                            value: "0",
+                                        },
+                                    ),
+                                ),
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+        Fn(
+            FnDeclaration {
+                access_specifier: Private,
+                fn_name: Identifier {
+                    id: "calculate_fib",
+                },
+                params: [
+                    VariableType {
+                        identifier: Identifier {
+                            id: "n",
+                        },
+                        type_specifier: Int,
+                    },
+                ],
+                return_type: Int,
+                body: BlockStmt {
+                    stmts: [
+                        Let(
+                            LetStmt {
+                                identifier: Identifier {
+                                    id: "result",
+                                },
+                                type_specifier: Some(
+                                    Int,
+                                ),
+                                value: Some(
+                                    Primitive(
+                                        PrimitiveExpression {
+                                            type_specifier: Int,
+                                            value: "1",
+                                        },
+                                    ),
+                                ),
+                            },
+                        ),
+                        For(
+                            ForStmt {
+                                init: Let(
+                                    LetStmt {
+                                        identifier: Identifier {
+                                            id: "i",
+                                        },
+                                        type_specifier: Some(
+                                            Int,
+                                        ),
+                                        value: Some(
+                                            Primitive(
+                                                PrimitiveExpression {
+                                                    type_specifier: Int,
+                                                    value: "1",
+                                                },
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                condition: Binary(
+                                    BinaryExpression {
+                                        left: Identifier(
+                                            IdentifierExpression {
+                                                id: Identifier {
+                                                    id: "i",
+                                                },
+                                            },
+                                        ),
+                                        operator: LessThan,
+                                        right: Identifier(
+                                            IdentifierExpression {
+                                                id: Identifier {
+                                                    id: "n",
+                                                },
+                                            },
+                                        ),
+                                    },
+                                ),
+                                increment: Unary(
+                                    UnaryExpression {
+                                        operator: Increment,
+                                        value: Identifier(
+                                            IdentifierExpression {
+                                                id: Identifier {
+                                                    id: "i",
+                                                },
+                                            },
+                                        ),
+                                        expression_type: Postfix,
+                                    },
+                                ),
+                                block: BlockStmt {
+                                    stmts: [
+                                        Expression(
+                                            Assignment(
+                                                AssignmentExpression {
+                                                    variable: Identifier(
+                                                        IdentifierExpression {
+                                                            id: Identifier {
+                                                                id: "result",
+                                                            },
+                                                        },
+                                                    ),
+                                                    value: Binary(
+                                                        BinaryExpression {
+                                                            left: Identifier(
+                                                                IdentifierExpression {
+                                                                    id: Identifier {
+                                                                        id: "result",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            operator: Add,
+                                                            right: Identifier(
+                                                                IdentifierExpression {
+                                                                    id: Identifier {
+                                                                        id: "i",
+                                                                    },
+                                                                },
+                                                            ),
+                                                        },
+                                                    ),
+                                                },
+                                            ),
+                                        ),
+                                    ],
+                                },
+                            },
+                        ),
+                        Return(
+                            ReturnStmt {
+                                value: Some(
+                                    Identifier(
+                                        IdentifierExpression {
+                                            id: Identifier {
+                                                id: "result",
+                                            },
+                                        },
+                                    ),
+                                ),
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+        Fn(
+            FnDeclaration {
+                access_specifier: Private,
+                fn_name: Identifier {
+                    id: "fib",
+                },
+                params: [
+                    VariableType {
+                        identifier: Identifier {
+                            id: "n",
+                        },
+                        type_specifier: Int,
+                    },
+                ],
+                return_type: Int,
+                body: BlockStmt {
+                    stmts: [
+                        If(
+                            IfStmt {
+                                condition: Binary(
+                                    BinaryExpression {
+                                        left: Binary(
+                                            BinaryExpression {
+                                                left: Identifier(
+                                                    IdentifierExpression {
+                                                        id: Identifier {
+                                                            id: "n",
+                                                        },
+                                                    },
+                                                ),
+                                                operator: Equal,
+                                                right: Primitive(
+                                                    PrimitiveExpression {
+                                                        type_specifier: Int,
+                                                        value: "1",
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                        operator: Or,
+                                        right: Binary(
+                                            BinaryExpression {
+                                                left: Identifier(
+                                                    IdentifierExpression {
+                                                        id: Identifier {
+                                                            id: "n",
+                                                        },
+                                                    },
+                                                ),
+                                                operator: Equal,
+                                                right: Primitive(
+                                                    PrimitiveExpression {
+                                                        type_specifier: Int,
+                                                        value: "2",
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    },
+                                ),
+                                block: BlockStmt {
+                                    stmts: [
+                                        Return(
+                                            ReturnStmt {
+                                                value: Some(
+                                                    Primitive(
+                                                        PrimitiveExpression {
+                                                            type_specifier: Int,
+                                                            value: "1",
+                                                        },
+                                                    ),
+                                                ),
+                                            },
+                                        ),
+                                    ],
+                                },
+                                else_ifs: [],
+                                else_stmt: None,
+                            },
+                        ),
+                        Return(
+                            ReturnStmt {
+                                value: Some(
+                                    Binary(
+                                        BinaryExpression {
+                                            left: FnCall(
+                                                FnCallExpression {
+                                                    fn_name: Identifier(
+                                                        IdentifierExpression {
+                                                            id: Identifier {
+                                                                id: "fib",
+                                                            },
+                                                        },
+                                                    ),
+                                                    namespace: None,
+                                                    args: [
+                                                        Binary(
+                                                            BinaryExpression {
+                                                                left: Identifier(
+                                                                    IdentifierExpression {
+                                                                        id: Identifier {
+                                                                            id: "n",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                operator: Subtract,
+                                                                right: Primitive(
+                                                                    PrimitiveExpression {
+                                                                        type_specifier: Int,
+                                                                        value: "1",
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                            operator: Add,
+                                            right: FnCall(
+                                                FnCallExpression {
+                                                    fn_name: Identifier(
+                                                        IdentifierExpression {
+                                                            id: Identifier {
+                                                                id: "fib",
+                                                            },
+                                                        },
+                                                    ),
+                                                    namespace: None,
+                                                    args: [
+                                                        Binary(
+                                                            BinaryExpression {
+                                                                left: Identifier(
+                                                                    IdentifierExpression {
+                                                                        id: Identifier {
+                                                                            id: "n",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                operator: Subtract,
+                                                                right: Primitive(
+                                                                    PrimitiveExpression {
+                                                                        type_specifier: Int,
+                                                                        value: "2",
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                ),
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+    ],
+}
+
+
+SymbolTable: {
+Name:Global
+Access:Public
+NodeType:Global
+Children: {
+      Name:calculate_fib
+      Access:Private
+      NodeType:Function(FunctionNode { return_type: Int, params: [Int] })
+      Parent:Global
+      Children: {
+            Name:for_1
+            Access:Local
+            NodeType:Block
+            Parent:calculate_fib
+            Children: {
+                  Name:i
+                  Access:Local
+                  NodeType:Variable(VariableNode { type_specifier: Int })
+                  Parent:for_1
+                  Children: {}
+
+            }
+
+            Name:n
+            Access:Local
+            NodeType:Variable(VariableNode { type_specifier: Int })
+            Parent:calculate_fib
+            Children: {}
+
+            Name:result
+            Access:Local
+            NodeType:Variable(VariableNode { type_specifier: Int })
+            Parent:calculate_fib
+            Children: {}
+
+      }
+
+      Name:main
+      Access:Private
+      NodeType:Function(FunctionNode { return_type: Int, params: [] })
+      Parent:Global
+      Children: {
+            Name:item
+            Access:Local
+            NodeType:Variable(VariableNode { type_specifier: Int })
+            Parent:main
+            Children: {}
+
+            Name:result
+            Access:Local
+            NodeType:Variable(VariableNode { type_specifier: Int })
+            Parent:main
+            Children: {}
+
+      }
+
+      Name:fib
+      Access:Private
+      NodeType:Function(FunctionNode { return_type: Int, params: [Int] })
+      Parent:Global
+      Children: {
+            Name:if_1
+            Access:Local
+            NodeType:Block
+            Parent:fib
+            Children: {}
+
+            Name:n
+            Access:Local
+            NodeType:Variable(VariableNode { type_specifier: Int })
+            Parent:fib
+            Children: {}
+
+      }
+
+}
+
+}

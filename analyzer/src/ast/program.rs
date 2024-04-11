@@ -27,3 +27,9 @@ impl AstParse for Program {
         return Ok(Program::new(decls));
     }
 }
+
+impl Into<ProgramRef> for Program {
+    fn into(self) -> ProgramRef {
+        return Rc::new(RefCell::new(self));
+    }
+}
