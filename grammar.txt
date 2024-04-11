@@ -53,7 +53,7 @@
 <unary_expression>              ::= <unary_operator> <expression> | <expression> <postfix_operator>
 <unary_operator>                ::= ++ | -- | + | - | ! | ~ | & | * 
 <postfix_operator>              ::= ++ | -- 
-<array_index_expression>        ::= <expression>[<expression>]
+<array_index_expression>        ::= <expression>[<expression>] | <expression>[<expression>,<expression>]
 <array_init_expression>         ::= [ <array_init_expressions> ]
 <array_init_expressions>        ::= <expression> <array_init_expressions'> | Epsilon
 <array_init_expressions'>       ::= , <expression> <array_init_expressions'> | Epsilon

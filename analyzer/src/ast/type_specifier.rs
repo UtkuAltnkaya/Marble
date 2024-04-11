@@ -90,6 +90,7 @@ impl TypeSpecifier {
 
     fn check(parser: &mut Parser, type_specifier: &TypeSpecifier) -> Result<Option<Self>> {
         if parser.next().token_type() == &TokenType::OpenBracket {
+            parser.next_token()?; // skip type token
             return Ok(Some(Self::handle_array(parser, type_specifier.clone())?));
         }
 
@@ -100,8 +101,8 @@ impl TypeSpecifier {
     }
 
     fn handle_array(parser: &mut Parser, type_specifier: TypeSpecifier) -> Result<Self> {
-        parser.next_token()?;
-        parser.next_token()?;
+        parser.next_token()?; // skip open bracket '['
+
         let size: usize = parser
             .current()
             .text()
@@ -109,6 +110,30 @@ impl TypeSpecifier {
             .or_else(|err: ParseIntError| error_parser!(parser, err.to_string()))?;
 
         parser.next_token_and_expect(TokenType::CloseBracket)?;
+
+        // Parse 2D array
+        if parser.next().token_type() == &TokenType::OpenBracket {
+            return Self::handle_two_dimensional_array(parser, type_specifier, size);
+        }
+
+        return Ok(TypeSpecifier::ArrayType {
+            type_specifier: Box::from(type_specifier),
+            size,
+        });
+    }
+
+    fn handle_two_dimensional_array(
+        parser: &mut Parser,
+        type_specifier: TypeSpecifier,
+        size: usize,
+    ) -> Result<Self> {
+        parser.next_token()?; // skip close bracket
+        let type_specifier = Self::handle_array(parser, type_specifier)?;
+        if let TypeSpecifier::ArrayType { type_specifier, .. } = &type_specifier {
+            if let TypeSpecifier::ArrayType { .. } = type_specifier.as_ref() {
+                return error_parser!(parser, "Arrays can only be 1 or 2 dimensional");
+            }
+        }
         return Ok(TypeSpecifier::ArrayType {
             type_specifier: Box::from(type_specifier),
             size,

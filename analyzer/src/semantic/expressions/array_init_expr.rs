@@ -16,6 +16,7 @@ impl AstAnalyze for ArrayInitExpression {
                 )));
             }
         }
+
         return Ok(TypeSpecifier::ArrayType {
             type_specifier: Box::new(expr_type),
             size: self.size,

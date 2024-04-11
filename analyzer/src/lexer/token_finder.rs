@@ -1,4 +1,4 @@
-use crate::{error::CompilerError, error_lexer};
+use crate::{error::Result, error_lexer};
 
 use super::{
     token::{Position, Span, Token},
@@ -75,9 +75,10 @@ impl Token {
         }
     }
 
-    pub(crate) fn get_number(lexer: &mut Lexer) -> Result<Token, CompilerError> {
+    pub(crate) fn get_number(lexer: &mut Lexer) -> Result<Token> {
         let mut count: u32 = 0;
         lexer.cursor_start = lexer.cursor;
+
         while lexer.current_char().is_ascii_digit() || lexer.current_char() == b'.' {
             if lexer.current_char() == b'.' {
                 count += 1;
@@ -91,7 +92,7 @@ impl Token {
         return Ok(Self::from_lexer(&lexer, TokenType::Number));
     }
 
-    pub(crate) fn get_string(lexer: &mut Lexer) -> Result<Self, CompilerError> {
+    pub(crate) fn get_string(lexer: &mut Lexer) -> Result<Self> {
         lexer.next_char();
         lexer.cursor_start = lexer.cursor;
 
@@ -112,7 +113,7 @@ impl Token {
         return Ok(token);
     }
 
-    pub(crate) fn get_char(lexer: &mut Lexer) -> Result<Self, CompilerError> {
+    pub(crate) fn get_char(lexer: &mut Lexer) -> Result<Self> {
         lexer.next_char();
         lexer.cursor_start = lexer.cursor;
         Self::is_escape_char(lexer)?;
@@ -122,7 +123,7 @@ impl Token {
         return Ok(token);
     }
 
-    pub(crate) fn is_escape_char(lexer: &mut super::Lexer) -> Result<(), CompilerError> {
+    pub(crate) fn is_escape_char(lexer: &mut super::Lexer) -> Result<()> {
         if lexer.current_char() == b'\\' {
             lexer.next_char();
             if !Self::check_escape(&lexer.current_char()) {
