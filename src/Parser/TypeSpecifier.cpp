@@ -1,0 +1,208 @@
+#include "Ast/TypeSpecifier.hpp"
+#include "Parser/Parser.hpp"
+
+namespace Marble
+{
+    TypeSpecifier::TypeSpecifier(Types type) : Ast{Span{}, AstType::TypeSpecifier}, m_Type{type}
+    {
+    }
+    TypeSpecifier::TypeSpecifier(Types type, const Span &span) : Ast{span, AstType::TypeSpecifier}, m_Type{type}
+    {
+    }
+    TypeSpecifier::TypeSpecifier(TypeSpecifier &&obj)
+        : Ast{std::move(obj.m_Span), AstType::TypeSpecifier}, m_Type{obj.m_Type}, m_Variants{std::move(obj.m_Variants)}
+    {
+    }
+    TypeSpecifier::TypeSpecifier(ArrayType array, const Span &span)
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::ArrayType}, m_Variants{array}
+    {
+    }
+    TypeSpecifier::TypeSpecifier(const Identifier &identifier, const Span &span)
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::UserDefine}, m_Variants{identifier}
+    {
+    }
+
+    TypeSpecifier::TypeSpecifier(PointerType pointer, const Span &span)
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::Pointer}, m_Variants{pointer}
+    {
+    }
+
+    TypeSpecifier::TypeSpecifier(GenericType generic, const Span &span)
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::GenericType}, m_Variants{generic}
+    {
+    }
+
+    const Identifier &TypeSpecifier::UserDefine()
+    {
+        if (std::holds_alternative<Identifier>(m_Variants))
+        {
+            return std::get<Identifier>(m_Variants);
+        }
+        throw "Cannot get the user define type";
+    }
+
+    const ArrayType &TypeSpecifier::Array()
+    {
+        if (std::holds_alternative<ArrayType>(m_Variants))
+        {
+            return std::get<ArrayType>(m_Variants);
+        }
+        throw "Cannot get the array type";
+    }
+
+    const PointerType &TypeSpecifier::Pointer()
+    {
+        if (std::holds_alternative<PointerType>(m_Variants))
+        {
+            return std::get<PointerType>(m_Variants);
+        }
+        throw "Cannot get the pointer type";
+    }
+
+    const GenericType &TypeSpecifier::Generic()
+    {
+        if (std::holds_alternative<GenericType>(m_Variants))
+        {
+            return std::get<GenericType>(m_Variants);
+        }
+        throw "Cannot get the generic type";
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::Parse(Parser &parser)
+    {
+        if (parser.Current().TokenType() == TokenType::Identifier)
+        {
+            return TypeSpecifier::UserDefine(parser);
+        }
+
+        return TypeSpecifier::Primitive(parser);
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::Primitive(Parser &parser)
+    {
+        Types primitive = TypeSpecifier::GetPrimitive(parser);
+        Ref<TypeSpecifier> typeSpecifier = MakeRef<TypeSpecifier>(primitive, parser.Current().Span());
+        return TypeSpecifier::Complex(parser, typeSpecifier);
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::UserDefine(Parser &parser)
+    {
+        const Token &token = parser.Current();
+        Ref<TypeSpecifier> typeSpecifier = MakeRef<TypeSpecifier>(Identifier{token}, token.Span());
+        Ref<TypeSpecifier> complex = TypeSpecifier::Complex(parser, typeSpecifier);
+        if (typeSpecifier != complex)
+        {
+            return complex;
+        }
+
+        if (parser.Next().TokenType() == TokenType::LessThan)
+        {
+            return TypeSpecifier::Generic(parser, typeSpecifier);
+        }
+        return typeSpecifier;
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::Complex(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
+    {
+        TokenType tokenType = parser.Next().TokenType();
+        if (tokenType == TokenType::OpenBracket)
+        {
+            parser.NextToken(); // Skip type token;
+            return TypeSpecifier::Array(parser, typeSpecifier);
+        }
+        if (tokenType == TokenType::Multiply)
+        {
+            return TypeSpecifier::Pointer(parser, typeSpecifier);
+        }
+        return typeSpecifier;
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::Array(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
+    {
+        parser.NextToken();
+        int size = std::stoi(parser.Current().Text());
+        if (size <= 0)
+        {
+            throw "Array sizes cannot be negative or zero!";
+        }
+        parser.NextTokenAndExpect(TokenType::CloseBracket);
+
+        if (parser.Next().TokenType() == TokenType::OpenBracket)
+        {
+            return TypeSpecifier::TwoDimensionalArray(parser, typeSpecifier, static_cast<size_t>(size));
+        }
+
+        Span span{typeSpecifier->GetSpan().Start, parser.Current().Span().End};
+        return MakeRef<TypeSpecifier>(ArrayType{typeSpecifier, static_cast<size_t>(size)}, span);
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::TwoDimensionalArray(Parser &parser, Ref<TypeSpecifier> typeSpecifier, size_t size)
+    {
+        const Span end = parser.Current().Span();
+        parser.NextToken(); // Skip close bracket
+
+        Ref<TypeSpecifier> array = TypeSpecifier::Array(parser, typeSpecifier);
+        const ArrayType &arrayType = array->Array();
+        if (arrayType.TypeSpecifier->m_Type == Types::ArrayType)
+        {
+            // throw SyntacticError(parser, "Arrays can only be 1 or 2 dimensional");
+            throw "Arrays can only be 1 or 2 dimensional";
+        }
+        Span span{Span{array->GetSpan().Start, end.Start}};
+        return MakeRef<TypeSpecifier>(ArrayType{array, size}, span);
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::Pointer(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
+    {
+        if (parser.Next().TokenType() != TokenType::Multiply)
+        {
+            return typeSpecifier;
+        }
+        Span span{typeSpecifier->m_Span.Start, parser.Next().Span().Start};
+        Ref<TypeSpecifier> pointer = MakeRef<TypeSpecifier>(PointerType{typeSpecifier}, span);
+        parser.NextToken();
+        return TypeSpecifier::Pointer(parser, pointer);
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::Generic(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
+    {
+        parser.NextToken(); // Skip '<' Token;
+
+        Ref<TypeSpecifier> genericType = TypeSpecifier::Parse(parser);
+        if (genericType->m_Type == Types::ArrayType)
+        {
+            throw "Array cannot be argument for generics";
+        }
+        Span span{typeSpecifier->m_Span.Start, parser.Current().Span().End};
+        parser.NextToken();
+
+        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine(), genericType}, span);
+    }
+
+    Types TypeSpecifier::GetPrimitive(Parser &parser)
+    {
+        switch (parser.Current().TokenType())
+        {
+        case TokenType::Int:
+            return Types::Int;
+        case TokenType::Usize:
+            return Types::Usize;
+        case TokenType::Float:
+            return Types::Float;
+        case TokenType::Double:
+            return Types::Double;
+        case TokenType::Bool:
+            return Types::Bool;
+        case TokenType::CharKeyword:
+            return Types::Char;
+        case TokenType::Str:
+            return Types::Str;
+        case TokenType::Void:
+            return Types::Void;
+        default:
+            // throw SyntacticError(parser, "Unknown TypeSpecifier");
+            throw "Unknown TypeSpecifier";
+        }
+    }
+
+} // namespace Marble
