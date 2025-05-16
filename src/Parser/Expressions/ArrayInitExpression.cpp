@@ -23,6 +23,6 @@ namespace Marble
                                             { return Expression::Parse(parser); });
         size_t size = array.size();
         const Span &end = parser.Current().Span();
-        return MakeBox<ArrayIndexExpression>(std::move(array), size, Span{start.Start, end.End});
+        return MakeBox<ArrayInitExpression>(std::move(array), size, Span{start.Start, end.End});
     }
 } // namespace Marble
