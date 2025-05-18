@@ -33,8 +33,8 @@ namespace Marble
         return Expect(tokenType);
     }
 
-    Ref<Ast> Parser::Parse()
+    Ref<Program> Parser::Parse()
     {
-        return nullptr;
+        return Program::Parse(*this);
     }
 } // namespace Marble

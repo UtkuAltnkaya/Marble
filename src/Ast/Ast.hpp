@@ -10,11 +10,12 @@ namespace Marble
     enum class AstType
     {
         Program,
-        Declaration,
+        Definition,
         Statement,
         Expression,
         Identifier,
         TypeSpecifier,
+        VariableType
     };
 
     class Ast

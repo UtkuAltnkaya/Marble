@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Lexer/Lexer.hpp"
-#include "Ast/Ast.hpp"
+#include "Ast/Program.hpp"
 #include "Utils/Memory.hpp"
 
 namespace Marble
@@ -21,7 +21,7 @@ namespace Marble
         inline const Token &Previous() const { return *m_Previous.get(); }
         inline const File &File() { return m_Lexer.File(); }
 
-        Ref<Ast> Parse();
+        Ref<Program> Parse();
 
     private:
         Lexer &m_Lexer;

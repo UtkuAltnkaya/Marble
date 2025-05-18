@@ -12,6 +12,10 @@ int main(int argc, char const *argv[])
     {
         std::cerr << e.what() << '\n';
     }
+    catch (const std::string &e)
+    {
+        std::cerr << e << '\n';
+    }
     catch (const char *e)
     {
         std::cerr << e << '\n';
