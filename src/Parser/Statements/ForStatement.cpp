@@ -14,7 +14,7 @@ namespace Marble
     {
     }
 
-    Box<Statement> Parse(Parser &parser)
+    Box<Statement> ForStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();
 

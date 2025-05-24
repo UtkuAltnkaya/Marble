@@ -7,3 +7,4 @@ target_include_directories(parser
     PUBLIC
         ${PROJECT_DIR}
 )
+target_link_libraries(parser PRIVATE lexer)

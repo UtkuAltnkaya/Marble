@@ -112,7 +112,7 @@ namespace Marble
     public:
         static Box<Expression> Parse(Parser &parser, Precedence precedence = DefaultPrecedence());
         static Precedence NextPrecedence(Precedence precedence);
-        inline ExpressionType ExpressionType() const { return m_ExpressionType; }
+        inline Marble::ExpressionType ExpressionType() const { return m_ExpressionType; }
         constexpr inline static Precedence DefaultPrecedence() { return (Precedence)((int)(Precedence::START) + 1); }
 
     protected:

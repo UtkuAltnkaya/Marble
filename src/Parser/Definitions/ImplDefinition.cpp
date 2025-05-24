@@ -1,8 +1,6 @@
 #include "Ast/Definitions.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
-#include "Definitions.hpp"
-
 namespace Marble
 {
 
@@ -27,6 +25,10 @@ namespace Marble
         const Span &end = parser.Current().Span();
 
         Box<ImplDefinition> implDefinition = MakeBox<ImplDefinition>(implName, std::move(memberFunctions), Span{start.Start, end.Start});
+
+        // TODO: Insert Symbol
+
+        return implDefinition;
     }
 
     MemberFunctionDefinition::MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span)
@@ -90,7 +92,6 @@ namespace Marble
 
     Box<VariableType> MemberFunctionPrototypeDefinition::ParseMethod(Parser &parser)
     {
-
         if (parser.Next().TokenType() != TokenType::OpenParen)
         {
             return nullptr;

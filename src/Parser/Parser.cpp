@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include "Lexer/Token/TokenType.hpp"
 
 namespace Marble
 {

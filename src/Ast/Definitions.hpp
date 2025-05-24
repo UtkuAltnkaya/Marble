@@ -28,7 +28,7 @@ namespace Marble
         virtual ~Definition() = default;
 
         static Box<Definition> Parse(Parser &parser);
-        inline DefinitionType DefinitionType() const { return m_DefinitionType; }
+        inline Marble::DefinitionType DefinitionType() const { return m_DefinitionType; }
 
     protected:
         Marble::DefinitionType m_DefinitionType;

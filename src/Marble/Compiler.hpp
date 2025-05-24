@@ -1,7 +1,9 @@
 #pragma once
 
-#include "File.hpp"
+#include "Utils/File.hpp"
 #include "Lexer/Lexer.hpp"
+#include "Parser/Parser.hpp"
+#include "Marble/ArgParser.hpp"
 
 namespace Marble
 {
@@ -14,8 +16,10 @@ namespace Marble
         void Compile();
 
     private:
-        File m_File;
-        Lexer m_Lexer;
+        void AddArgs();
+
+    private:
+        ArgParserBuilder m_ArgParserBuilder;
     };
 
 } // namespace Marble

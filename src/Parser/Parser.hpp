@@ -19,7 +19,7 @@ namespace Marble
         inline const Token &Next() const { return *m_Next.get(); }
         inline const Token &Current() const { return *m_Current.get(); }
         inline const Token &Previous() const { return *m_Previous.get(); }
-        inline const File &File() { return m_Lexer.File(); }
+        inline const Marble::File &File() { return m_Lexer.File(); }
 
         Ref<Program> Parse();
 

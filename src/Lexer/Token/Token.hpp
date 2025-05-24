@@ -30,14 +30,14 @@ namespace Marble
     class Token
     {
     public:
-        Token(TokenType tokenType, const std::string &text, const Span &span);
-        Token(Lexer &lexer, TokenType tokenType);
+        Token(Marble::TokenType tokenType, const std::string &text, const Span &span);
+        Token(Lexer &lexer, Marble::TokenType tokenType);
         ~Token() = default;
 
     public:
-        inline TokenType TokenType() const { return m_TokenType; }
+        inline Marble::TokenType TokenType() const { return m_TokenType; }
         inline const std::string &Text() const { return m_Text; }
-        inline const Span &Span() const { return m_Span; }
+        inline const Marble::Span &Span() const { return m_Span; }
 
     private:
         Marble::TokenType m_TokenType;

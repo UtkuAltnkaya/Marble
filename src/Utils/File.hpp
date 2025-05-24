@@ -2,6 +2,7 @@
 
 #include <string>
 #include <exception>
+#include <iostream>
 #include <fstream>
 
 namespace Marble
@@ -9,19 +10,19 @@ namespace Marble
     class File
     {
     public:
-        File(const char *fileName) : m_FileName{fileName}
+        File(const std::string &fileName) : m_FileName{fileName}
         {
             ReadFile();
         }
         ~File() = default;
 
         inline const std::string &Content() const { return m_Content; };
-        inline const std::string &FileName() const { return m_Content; };
+        inline const std::string &FileName() const { return m_FileName; };
 
     private:
         void ReadFile()
         {
-            std::fstream file{m_FileName};
+            std::fstream file(m_FileName);
             if (!file.is_open())
             {
                 throw std::runtime_error("Cannot open file");

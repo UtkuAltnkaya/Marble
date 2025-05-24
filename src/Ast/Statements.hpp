@@ -29,7 +29,7 @@ namespace Marble
         virtual ~Statement() = default;
 
         static Box<Statement> Parse(Parser &parser);
-        inline StatementType StatementType() const { return m_StatementType; }
+        inline Marble::StatementType StatementType() const { return m_StatementType; }
 
     protected:
         Marble::StatementType m_StatementType;

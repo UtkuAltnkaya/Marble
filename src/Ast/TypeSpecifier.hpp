@@ -29,13 +29,13 @@ namespace Marble
 
     struct ArrayType
     {
-        Ref<TypeSpecifier> TypeSpecifier;
+        Ref<Marble::TypeSpecifier> TypeSpecifier;
         size_t Size;
     };
 
     struct PointerType
     {
-        Ref<TypeSpecifier> TypeSpecifier;
+        Ref<Marble::TypeSpecifier> TypeSpecifier;
     };
 
     struct GenericType
