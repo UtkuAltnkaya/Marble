@@ -1,1 +1,28 @@
-fn main () -> void {}
+struct Person<T> {
+    pub name: T
+}
+
+impl Person<T,T>{
+    
+    fn new() -> Person {
+        return Person {name:42};
+    }
+
+    fn (p:Person*) get_name<T>() -> int {
+        return p.name;
+    }
+}
+
+fn add<T>(x:T,y:T) -> T {
+    let a = x + y;
+    return a;
+}
+
+
+fn main () -> void {
+    let x: Person<int,int> = Person::new();
+
+    let y = x.get_name();
+
+    let z: int = add<int,int>(1,2);
+}

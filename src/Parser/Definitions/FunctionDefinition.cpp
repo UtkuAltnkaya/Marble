@@ -5,11 +5,11 @@
 namespace Marble
 {
 
-  FunctionDefinition::FunctionDefinition(AccessSpecifier accessSpecifier, Box<Identifier> functionName,
+  FunctionDefinition::FunctionDefinition(AccessSpecifier accessSpecifier, Box<Identifier> functionName, Box<Generics> generics,
                                          std::vector<Box<VariableType>> &&params, Ref<TypeSpecifier> returnType,
                                          Box<Statement> block, const Span &span)
       : Definition{span, DefinitionType::Function}, m_AccessSpecifier{accessSpecifier}, m_FunctionName{std::move(functionName)},
-        m_Params{std::move(params)}, m_ReturnType{std::move(returnType)}, m_Block{std::move(block)}
+        m_Generics{std::move(generics)}, m_Params{std::move(params)}, m_ReturnType{std::move(returnType)}, m_Block{std::move(block)}
 
   {
   }
@@ -19,6 +19,8 @@ namespace Marble
     Span start = accessSpecifier == AccessSpecifier::Public ? span : parser.Current().Span();
     // Function Name
     Box<Identifier> functionName = Identifier::Parse(parser);
+
+    Box<Generics> generics = Generics::Parse(parser);
 
     // Parameters
     std::vector<Box<VariableType>> params;
@@ -37,7 +39,8 @@ namespace Marble
     const Span &end = parser.Current().Span();
 
     Box<FunctionDefinition> fnDefinition = MakeBox<FunctionDefinition>(
-        accessSpecifier, std::move(functionName), std::move(params), returnType, std::move(block), Span{start.Start, end.Start});
+        accessSpecifier, std::move(functionName), std::move(generics),
+        std::move(params), returnType, std::move(block), Span{start.Start, end.Start});
 
     // TODO: Insert Symbol
 

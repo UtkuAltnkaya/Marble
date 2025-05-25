@@ -15,7 +15,8 @@ namespace Marble
         Expression,
         Identifier,
         TypeSpecifier,
-        VariableType
+        VariableType,
+        Generics,
     };
 
     class Ast

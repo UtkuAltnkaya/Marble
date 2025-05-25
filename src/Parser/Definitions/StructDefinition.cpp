@@ -5,8 +5,10 @@
 namespace Marble
 {
 
-    StructDefinition::StructDefinition(AccessSpecifier accessSpecifier, Box<Identifier> structName, std::vector<Box<StructFieldDefinition>> &&field, const Span &span)
-        : Definition{span, DefinitionType::Struct}, m_AccessSpecifier{accessSpecifier}, m_StructName{std::move(structName)}, m_Field{std::move(field)}
+    StructDefinition::StructDefinition(
+        AccessSpecifier accessSpecifier, Box<Identifier> structName, Box<Generics> generics, std::vector<Box<StructFieldDefinition>> &&field, const Span &span)
+        : Definition{span, DefinitionType::Struct},
+          m_AccessSpecifier{accessSpecifier}, m_StructName{std::move(structName)}, m_Generics{std::move(generics)}, m_Field{std::move(field)}
 
     {
     }
@@ -16,7 +18,8 @@ namespace Marble
         Span start = accessSpecifier == AccessSpecifier::Public ? span : parser.Current().Span();
 
         // Struct Name
-        Box<Identifier> functionName = Identifier::Parse(parser);
+        Box<Identifier> structName = Identifier::Parse(parser);
+        Box<Generics> generics = Generics::Parse(parser);
 
         parser.NextTokenAndExpect(TokenType::OpenCurlyBrace);
 
@@ -27,7 +30,7 @@ namespace Marble
 
         const Span &end = parser.Current().Span();
         Box<StructDefinition> structDefinition = MakeBox<StructDefinition>(
-            accessSpecifier, std::move(functionName), std::move(fields), Span{start.Start, end.End});
+            accessSpecifier, std::move(structName), std::move(generics), std::move(fields), Span{start.Start, end.End});
         // TODO: Insert Symbol
 
         return structDefinition;

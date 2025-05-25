@@ -35,7 +35,7 @@ namespace Marble
 
     Ref<TypeSpecifier> LetStatement::HandleTypeSpecifier(Parser &parser)
     {
-        if (parser.Current().TokenType() == TokenType::Colon)
+        if (parser.Current().TokenType() != TokenType::Colon)
         {
             return nullptr;
         }

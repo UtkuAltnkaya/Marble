@@ -4,8 +4,8 @@
 namespace Marble
 {
 
-    ImplDefinition::ImplDefinition(Ref<TypeSpecifier> implName, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span)
-        : Definition{span, DefinitionType::Impl}, m_ImplName{implName}, m_MemberFunctions{std::move(m_MemberFunctions)}
+    ImplDefinition::ImplDefinition(Ref<TypeSpecifier> implName, Box<Generics> generics, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span)
+        : Definition{span, DefinitionType::Impl}, m_ImplName{implName}, m_Generics{std::move(generics)}, m_MemberFunctions{std::move(m_MemberFunctions)}
     {
     }
 
@@ -18,13 +18,37 @@ namespace Marble
 
         Ref<TypeSpecifier> implName = TypeSpecifier::Parse(parser);
 
+        Box<Generics> generics = nullptr;
+        if (implName->GetType() == Types::GenericType)
+        {
+            auto genericType = implName->Generic();
+            Identifier &identifier = genericType.OuterType;
+            Span span = Span{identifier.GetSpan().End, implName->GetSpan().End};
+            generics = MakeBox<Generics>(std::move(genericType.InnerType), span);
+            implName = MakeRef<TypeSpecifier>(identifier, identifier.GetSpan());
+        }
+
         std::vector<Box<MemberFunctionDefinition>> memberFunctions;
-        Parenthesis::Parse<Box<MemberFunctionDefinition>>(memberFunctions, parser, TokenType::CloseCurlyBrace, [](Parser &parser)
-                                                          { return MemberFunctionDefinition::Parse(parser); });
+        parser.NextTokenAndExpect(TokenType::OpenCurlyBrace);
+        do
+        {
+            parser.NextToken();
+            if (parser.Current().TokenType() == TokenType::CloseCurlyBrace)
+            {
+                break;
+            }
+            if (parser.Current().TokenType() == TokenType::Eof)
+            {
+                // throw SyntacticError(parser, "Missing curly brace '}'");
+                throw "Missing curly brace '}'";
+            }
+            memberFunctions.push_back(MemberFunctionDefinition::Parse(parser));
+        } while (true);
 
         const Span &end = parser.Current().Span();
 
-        Box<ImplDefinition> implDefinition = MakeBox<ImplDefinition>(implName, std::move(memberFunctions), Span{start.Start, end.Start});
+        Box<ImplDefinition> implDefinition = MakeBox<ImplDefinition>(
+            implName, std::move(generics), std::move(memberFunctions), Span{start.Start, end.Start});
 
         // TODO: Insert Symbol
 
@@ -49,11 +73,12 @@ namespace Marble
         AccessSpecifier accessSpecifier,
         Box<VariableType> method,
         Box<Identifier> name,
+        Box<Generics> generics,
         std::vector<Box<VariableType>> &&params,
         Ref<TypeSpecifier> returnType,
         const Span &span)
         : Definition{span, DefinitionType::MemberFunctionPrototype}, m_AccessSpecifier{accessSpecifier}, m_Method{std::move(method)},
-          m_Name{std::move(name)}, m_Params{std::move(params)}, m_ReturnType{returnType}
+          m_Name{std::move(name)}, m_Generics{std::move(generics)}, m_Params{std::move(params)}, m_ReturnType{returnType}
     {
     }
 
@@ -64,9 +89,14 @@ namespace Marble
 
         Span start = accessSpecifier == AccessSpecifier::Public ? span : parser.Current().Span();
 
+        parser.Expect(TokenType::Fn);
+        parser.NextToken();
+
         Box<VariableType> method = MemberFunctionPrototypeDefinition::ParseMethod(parser);
 
-        Box<Identifier> name = Identifier::Parse(parser);
+        Box<Identifier> name = MakeBox<Identifier>(parser.Expect(TokenType::Identifier));
+
+        Box<Generics> generics = Generics::Parse(parser);
 
         // Params
         std::vector<Box<VariableType>> params;
@@ -85,6 +115,7 @@ namespace Marble
             accessSpecifier,
             std::move(method),
             std::move(name),
+            std::move(generics),
             std::move(params),
             std::move(returnType),
             Span{start.Start, end.End});
@@ -92,18 +123,19 @@ namespace Marble
 
     Box<VariableType> MemberFunctionPrototypeDefinition::ParseMethod(Parser &parser)
     {
-        if (parser.Next().TokenType() != TokenType::OpenParen)
+        if (parser.Current().TokenType() != TokenType::OpenParen)
         {
             return nullptr;
         }
 
-        // Skip fn keyword
-        parser.NextToken();
         // Skip open parenthesis
         parser.NextToken();
 
         Box<VariableType> variableType = VariableType::Parse(parser);
         parser.NextTokenAndExpect(TokenType::CloseParen);
+
+        // Skip close parenthesis
+        parser.NextToken();
         return variableType;
     }
 } // namespace Marble

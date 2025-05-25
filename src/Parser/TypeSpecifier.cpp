@@ -1,5 +1,6 @@
 #include "Ast/TypeSpecifier.hpp"
 #include "Parser/Parser.hpp"
+#include "Parser/Parenthesis.hpp"
 
 namespace Marble
 {
@@ -97,6 +98,7 @@ namespace Marble
 
         if (parser.Next().TokenType() == TokenType::LessThan)
         {
+            parser.NextToken();
             return TypeSpecifier::Generic(parser, typeSpecifier);
         }
         return typeSpecifier;
@@ -166,17 +168,19 @@ namespace Marble
 
     Ref<TypeSpecifier> TypeSpecifier::Generic(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
     {
-        parser.NextToken(); // Skip '<' Token;
+        std::vector<Ref<TypeSpecifier>> genericTypes;
+        Parenthesis::Parse<Ref<TypeSpecifier>>(genericTypes, parser, TokenType::GreaterThan, [](Parser &parser)
+                                               { 
+                                                Ref<TypeSpecifier> genericType = TypeSpecifier::Parse(parser);
+                                                if (genericType->m_Type == Types::ArrayType)
+                                                {
+                                                    throw "Array cannot be argument for generics";
+                                                }
+                                                return genericType; });
 
-        Ref<TypeSpecifier> genericType = TypeSpecifier::Parse(parser);
-        if (genericType->m_Type == Types::ArrayType)
-        {
-            throw "Array cannot be argument for generics";
-        }
         Span span{typeSpecifier->m_Span.Start, parser.Current().Span().End};
-        parser.NextToken();
 
-        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine(), genericType}, span);
+        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine(), genericTypes}, span);
     }
 
     Types TypeSpecifier::GetPrimitive(Parser &parser)

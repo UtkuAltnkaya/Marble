@@ -4,6 +4,7 @@
 #include "Ast/AccessSpecifier.hpp"
 #include "Ast/Statements.hpp"
 #include "Ast/VariableType.hpp"
+#include "Ast/Generics.hpp"
 #include <vector>
 
 // TODO: Parse generic type definition
@@ -40,6 +41,7 @@ namespace Marble
         FunctionDefinition(
             AccessSpecifier accessSpecifier,
             Box<Identifier> functionName,
+            Box<Generics> generics,
             std::vector<Box<VariableType>> &&params,
             Ref<TypeSpecifier> returnType,
             Box<Statement> block,
@@ -51,6 +53,7 @@ namespace Marble
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<Identifier> m_FunctionName;
+        Box<Generics> m_Generics;
         std::vector<Box<VariableType>> m_Params;
         Ref<TypeSpecifier> m_ReturnType;
         Box<Statement> m_Block;
@@ -72,7 +75,7 @@ namespace Marble
     class StructDefinition : public Definition
     {
     public:
-        StructDefinition(AccessSpecifier accessSpecifier, Box<Identifier> structName, std::vector<Box<StructFieldDefinition>> &&field, const Span &span);
+        StructDefinition(AccessSpecifier accessSpecifier, Box<Identifier> structName, Box<Generics> generics, std::vector<Box<StructFieldDefinition>> &&field, const Span &span);
         ~StructDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
@@ -80,6 +83,7 @@ namespace Marble
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<Identifier> m_StructName;
+        Box<Generics> m_Generics;
         std::vector<Box<StructFieldDefinition>> m_Field;
     };
 
@@ -104,6 +108,7 @@ namespace Marble
             AccessSpecifier accessSpecifier,
             Box<VariableType> method,
             Box<Identifier> name,
+            Box<Generics> generics,
             std::vector<Box<VariableType>> &&params,
             Ref<TypeSpecifier> returnType,
             const Span &span);
@@ -118,6 +123,7 @@ namespace Marble
         AccessSpecifier m_AccessSpecifier;
         Box<VariableType> m_Method;
         Box<Identifier> m_Name;
+        Box<Generics> m_Generics;
         std::vector<Box<VariableType>> m_Params;
         Ref<TypeSpecifier> m_ReturnType;
     };
@@ -137,12 +143,13 @@ namespace Marble
     class ImplDefinition : public Definition
     {
     public:
-        ImplDefinition(Ref<TypeSpecifier> implName, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span);
+        ImplDefinition(Ref<TypeSpecifier> implName, Box<Generics> generics, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span);
         ~ImplDefinition() = default;
         static Box<Definition> Parse(Parser &parser);
 
     private:
         Ref<TypeSpecifier> m_ImplName;
+        Box<Generics> m_Generics;
         std::vector<Box<MemberFunctionDefinition>> m_MemberFunctions;
     };
 

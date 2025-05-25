@@ -1,6 +1,7 @@
 #pragma once
 
 #include <variant>
+#include <vector>
 #include "Ast/Identifier.hpp"
 #include "Lexer/Token/Token.hpp"
 #include "Utils/Memory.hpp"
@@ -41,7 +42,7 @@ namespace Marble
     struct GenericType
     {
         Identifier OuterType;
-        Ref<TypeSpecifier> InnerType;
+        std::vector<Ref<TypeSpecifier>> InnerType;
     };
 
     class TypeSpecifier : public Ast

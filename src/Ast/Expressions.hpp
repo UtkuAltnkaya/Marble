@@ -2,6 +2,7 @@
 
 #include "Ast/Ast.hpp"
 #include "Ast/TypeSpecifier.hpp"
+#include "Ast/Generics.hpp"
 #include <optional>
 #include <functional>
 
@@ -236,13 +237,14 @@ namespace Marble
     class FunctionCallExpression : public Expression
     {
     public:
-        FunctionCallExpression(Box<Expression> fnName, std::vector<Box<Expression>> &&args, const Span &span);
+        FunctionCallExpression(Box<Expression> fnName, Box<Generics> generics, std::vector<Box<Expression>> &&args, const Span &span);
         ~FunctionCallExpression() = default;
 
         static Box<Expression> Parse(Parser &parser, Precedence precedence);
 
     private:
         Box<Expression> m_FnName;
+        Box<Generics> m_Generics;
         std::vector<Box<Expression>> m_Args;
     };
 

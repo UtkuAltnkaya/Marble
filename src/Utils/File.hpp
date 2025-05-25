@@ -22,6 +22,7 @@ namespace Marble
     private:
         void ReadFile()
         {
+            std::cout << m_FileName << std::endl;
             std::fstream file(m_FileName);
             if (!file.is_open())
             {
