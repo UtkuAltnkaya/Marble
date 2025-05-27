@@ -35,7 +35,7 @@ namespace Marble
         }
     }
 
-    SymbolIterator SymbolNode::Iter()
+    SymbolIterator SymbolNode::Iter() const
     {
         return SymbolIterator(this);
     }

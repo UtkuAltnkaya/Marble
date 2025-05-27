@@ -42,6 +42,7 @@ namespace Marble
         ~LetStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
         inline const Identifier &GetIdentifier() const { return *m_Identifier.get(); }
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
@@ -63,6 +64,7 @@ namespace Marble
         ~ReturnStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Expression> m_Expression;
@@ -75,6 +77,7 @@ namespace Marble
         ~DeferStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Expression> m_Expression;
@@ -87,6 +90,9 @@ namespace Marble
         ~BlockStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
+
+        inline const std::vector<Box<Statement>> &Statements() const { return m_Statements; }
 
     private:
         std::vector<Box<Statement>> m_Statements;
@@ -100,6 +106,7 @@ namespace Marble
         ~ForStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Statement> m_LetStatement;
@@ -115,6 +122,7 @@ namespace Marble
         WhileStatement(Box<Expression> condition, Box<Statement> block, const Span &span);
         ~WhileStatement() = default;
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Expression> m_Condition;
@@ -127,6 +135,7 @@ namespace Marble
         ElseStatement(Box<Statement> block, const Span &span);
         ~ElseStatement() = default;
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Statement> m_Block;
@@ -138,6 +147,7 @@ namespace Marble
         ElseIfStatement(Box<Expression> condition, Box<Statement> block, const Span &span);
         ~ElseIfStatement() = default;
         static void Parse(Parser &parser, std::vector<Box<Statement>> &elseIfStatements);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Expression> m_Condition;
@@ -152,6 +162,7 @@ namespace Marble
         ~IfStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Expression> m_Condition;
@@ -170,6 +181,12 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser)
         {
             return MakeBox<ExpressionStatement>(Expression::Parse(parser));
+        }
+
+        Ref<TypeSpecifier> Analyze()
+        {
+            m_Expression->Analyze();
+            return TypeSpecifierOk;
         }
 
     private:

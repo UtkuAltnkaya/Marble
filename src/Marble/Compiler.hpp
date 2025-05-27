@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Utils/File.hpp"
+#include "Marble/ArgParser.hpp"
 #include "Lexer/Lexer.hpp"
 #include "Parser/Parser.hpp"
-#include "Marble/ArgParser.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {

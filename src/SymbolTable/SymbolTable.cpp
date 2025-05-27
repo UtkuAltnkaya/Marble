@@ -42,7 +42,7 @@ namespace Marble
         m_Root->Insert(name, node);
     }
 
-    const SymbolNode *SymbolTable::CurrentScope()
+    SymbolNode *const SymbolTable::CurrentScope()
     {
         return m_CurrentScope.top();
     }

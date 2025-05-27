@@ -13,7 +13,7 @@ namespace Marble
         static SymbolTable &GetInstance();
 
         void Insert(const std::string &name, SymbolNode *node);
-        const SymbolNode *CurrentScope();
+        SymbolNode *const CurrentScope();
         void EnterScope(SymbolNode *node);
         void LeaveScope();
         SymbolIterator Iter();

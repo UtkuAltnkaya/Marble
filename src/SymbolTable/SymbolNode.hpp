@@ -23,7 +23,7 @@ namespace Marble
         SymbolNode(const StructDefinition &structDefinition, SymbolNode *parent);
         virtual ~SymbolNode();
 
-        SymbolIterator Iter();
+        SymbolIterator Iter() const;
         void Insert(const std::string &name, SymbolNode *node);
         inline const SymbolData &GetSymbolData() const { return m_SymbolData; }
 

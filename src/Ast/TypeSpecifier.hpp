@@ -8,6 +8,9 @@
 
 namespace Marble
 {
+
+#define TypeSpecifierOk nullptr;
+
     enum class Types
     {
         START,
@@ -64,6 +67,9 @@ namespace Marble
         const GenericType &Generic();
         inline const Types GetType() { return m_Type; }
         inline void SetType(Types type) { m_Type = type; }
+        bool IsPrimitive();
+        bool operator==(const TypeSpecifier &obj) const;
+        bool operator!=(const TypeSpecifier &obj) const;
 
     public:
         static Ref<TypeSpecifier> Parse(Parser &parser);

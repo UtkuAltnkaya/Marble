@@ -12,10 +12,11 @@ namespace Marble
     class SymbolIterator
     {
     public:
+        SymbolIterator(SymbolNode *node);
         SymbolIterator(const SymbolNode *node);
         ~SymbolIterator() = default;
 
-        const SymbolNode *const Find();
+        SymbolNode *Find();
         SymbolIterator &Parent();
         SymbolIterator &Function(std::string_view name);
         SymbolIterator &Struct(std::string_view name);
@@ -37,12 +38,11 @@ namespace Marble
         }
 
     private:
-        const SymbolNode *const Find(std::string_view name, SymbolNodeTypes nodeType);
-        inline void SetNode(SymbolNode *node);
-        inline void SetNode(const SymbolNode *node);
+        SymbolNode *const Find(std::string_view name, SymbolNodeTypes nodeType);
+        inline void SetNode(SymbolNode *node) { m_Node = node; };
 
     private:
-        const SymbolNode *m_Node;
+        SymbolNode *m_Node;
         SymbolNodeTypes m_NodeType;
         bool m_Flag;
     };

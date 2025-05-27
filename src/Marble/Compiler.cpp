@@ -1,5 +1,4 @@
-#include "Compiler.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "Marble/Compiler.hpp"
 #include <iostream>
 
 namespace Marble
@@ -38,6 +37,8 @@ namespace Marble
         Parser parser{lexer};
 
         Ref<Program> program = parser.Parse();
+
+        program->Analyze();
     }
 
     void Compiler::AddArgs()

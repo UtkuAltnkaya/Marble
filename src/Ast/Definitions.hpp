@@ -7,9 +7,10 @@
 #include "Ast/Generics.hpp"
 #include <vector>
 
-// TODO: Parse generic type definition
 namespace Marble
 {
+    class SymbolNode;
+
     enum class DefinitionType
     {
         Function,
@@ -49,6 +50,7 @@ namespace Marble
         ~FunctionDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
+        Ref<TypeSpecifier> Analyze() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const Identifier &GetName() const { return *m_FunctionName.get(); }
@@ -160,6 +162,7 @@ namespace Marble
         MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span);
         ~MemberFunctionDefinition() = default;
         static Box<MemberFunctionDefinition> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
         inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
         inline const Statement &GetBody() const { return *m_Block.get(); }
@@ -175,6 +178,11 @@ namespace Marble
         ImplDefinition(Ref<TypeSpecifier> implName, Box<Generics> generics, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span);
         ~ImplDefinition() = default;
         static Box<Definition> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
+
+    private:
+        void CreateSymbol();
+        SymbolNode *HandleRoot(SymbolNode *node);
 
     private:
         Ref<TypeSpecifier> m_ImplName;

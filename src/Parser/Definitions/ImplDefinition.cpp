@@ -51,7 +51,7 @@ namespace Marble
         Box<ImplDefinition> implDefinition = MakeBox<ImplDefinition>(
             implName, std::move(generics), std::move(memberFunctions), Span{start.Start, end.Start});
 
-        // TODO: Insert Symbol
+        implDefinition->CreateSymbol();
 
         return implDefinition;
     }

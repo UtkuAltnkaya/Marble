@@ -5,12 +5,17 @@
 
 namespace Marble
 {
-    SymbolIterator::SymbolIterator(const SymbolNode *node)
+    SymbolIterator::SymbolIterator(SymbolNode *node)
         : m_Node{node}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
     {
     }
 
-    const SymbolNode *const SymbolIterator::Find()
+    SymbolIterator::SymbolIterator(const SymbolNode *node)
+        : m_Node{const_cast<SymbolNode *>(node)}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
+    {
+    }
+
+    SymbolNode *SymbolIterator::Find()
     {
         if (m_Flag)
         {
@@ -20,7 +25,7 @@ namespace Marble
         return m_Node;
     }
 
-    const SymbolNode *const SymbolIterator::Find(std::string_view name, SymbolNodeTypes nodeType)
+    SymbolNode *const SymbolIterator::Find(std::string_view name, SymbolNodeTypes nodeType)
     {
         if (m_Flag)
         {
@@ -57,35 +62,35 @@ namespace Marble
 
     SymbolIterator &SymbolIterator::Function(std::string_view name)
     {
-        const SymbolNode *node = Find(name, SymbolNodeTypes::Function);
+        SymbolNode *node = Find(name, SymbolNodeTypes::Function);
         SetNode(node);
         return *this;
     }
 
     SymbolIterator &SymbolIterator::Struct(std::string_view name)
     {
-        const SymbolNode *node = Find(name, SymbolNodeTypes::Struct);
+        SymbolNode *node = Find(name, SymbolNodeTypes::Struct);
         SetNode(node);
         return *this;
     }
 
     SymbolIterator &SymbolIterator::Enum(std::string_view name)
     {
-        const SymbolNode *node = Find(name, SymbolNodeTypes::Enum);
+        SymbolNode *node = Find(name, SymbolNodeTypes::Enum);
         SetNode(node);
         return *this;
     }
 
     SymbolIterator &SymbolIterator::Variable(std::string_view name)
     {
-        const SymbolNode *node = Find(name, SymbolNodeTypes::Variable);
+        SymbolNode *node = Find(name, SymbolNodeTypes::Variable);
         SetNode(node);
         return *this;
     }
 
     SymbolIterator &SymbolIterator::StructField(std::string_view name)
     {
-        const SymbolNode *node = Find(name, SymbolNodeTypes::StructField);
+        SymbolNode *node = Find(name, SymbolNodeTypes::StructField);
         SetNode(node);
         return *this;
     }
@@ -101,16 +106,6 @@ namespace Marble
             }
         }
         return i;
-    }
-
-    inline void SymbolIterator::SetNode(SymbolNode *node)
-    {
-        m_Node = node;
-    }
-
-    inline void SymbolIterator::SetNode(const SymbolNode *node)
-    {
-        m_Node = node;
     }
 
 } //  namespace Marble

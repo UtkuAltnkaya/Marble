@@ -13,6 +13,7 @@ namespace Marble
         ~Program() = default;
 
         static Ref<Program> Parse(Parser &parser);
+        Ref<TypeSpecifier> Analyze() override;
 
     private:
         std::vector<Box<Definition>> m_Definitions;
