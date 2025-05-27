@@ -5,7 +5,8 @@ namespace Marble
 {
 
     ImplDefinition::ImplDefinition(Ref<TypeSpecifier> implName, Box<Generics> generics, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span)
-        : Definition{span, DefinitionType::Impl}, m_ImplName{implName}, m_Generics{std::move(generics)}, m_MemberFunctions{std::move(m_MemberFunctions)}
+        : Definition{span, DefinitionType::Impl}, m_ImplName{implName},
+          m_Generics{std::move(generics)}, m_MemberFunctions{std::move(memberFunctions)}
     {
     }
 

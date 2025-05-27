@@ -1,4 +1,5 @@
 #include "Compiler.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 #include <iostream>
 
 namespace Marble
@@ -6,10 +7,12 @@ namespace Marble
     Compiler::Compiler(int argc, char const *argv[]) : m_ArgParserBuilder{argc, argv}
     {
         AddArgs();
+        SymbolTable::Init();
     }
 
     Compiler::~Compiler()
     {
+        SymbolTable::ShutDown();
     }
 
     void Compiler::Compile()

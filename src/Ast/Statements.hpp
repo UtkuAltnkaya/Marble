@@ -43,6 +43,10 @@ namespace Marble
 
         static Box<Statement> Parse(Parser &parser);
 
+        inline const Identifier &GetIdentifier() const { return *m_Identifier.get(); }
+        inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+        inline const Expression &GetValue() const { return *m_Value.get(); }
+
     private:
         static Ref<TypeSpecifier> HandleTypeSpecifier(Parser &parser);
 

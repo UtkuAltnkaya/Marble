@@ -1,6 +1,7 @@
 #include "Ast/Definitions.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {
@@ -25,7 +26,8 @@ namespace Marble
         Box<EnumDefinition> enumDefinition = MakeBox<EnumDefinition>(
             accessSpecifier, std::move(enumName), std::move(fields), Span{start.Start, end.Start});
 
-        // TODO: Insert Symbol
+        SymbolTable &table = SymbolTable::GetInstance();
+        table.Insert(enumDefinition->m_EnumName->Id(), new SymbolNode{*enumDefinition.get(), table.Root()});
 
         return enumDefinition;
     }

@@ -1,28 +1,35 @@
-struct Person<T> {
-    pub name: T
+struct Person {
+    age: int
 }
 
-impl Person<T,T>{
+
+fn main() -> void {
+    let x = 1;
+    let y = 2.0 as int;
+    let z = add(x,y);
+
+    let person = Person::new();
+    let person_age = person.age();
+    person.set_age(z+person_age);
     
+    
+    return 0;
+}
+
+fn add(x:int, y:int) -> int {
+    return x + y;
+}
+
+impl Person {
     fn new() -> Person {
-        return Person {name:42};
+        return Person{age: 42};
     }
 
-    fn (p:Person*) get_name<T>() -> int {
-        return p.name;
+    fn (p:Person*) get_age() -> int {
+        return p->age;
     }
-}
-
-fn add<T>(x:T,y:T) -> T {
-    let a = x + y;
-    return a;
-}
-
-
-fn main () -> void {
-    let x: Person<int,int> = Person::new();
-
-    let y = x.get_name();
-
-    let z: int = add<int,int>(1,2);
+    
+    fn (p:Person*) set_age(age:int) -> int {
+        p->age = age;
+    }
 }

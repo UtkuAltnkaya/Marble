@@ -50,6 +50,13 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
 
+        inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
+        inline const Identifier &GetName() const { return *m_FunctionName.get(); }
+        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
+        inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
+        inline const Statement &GetBody() const { return *m_Block.get(); }
+
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<Identifier> m_FunctionName;
@@ -67,6 +74,9 @@ namespace Marble
 
         static Box<StructFieldDefinition> Parse(Parser &parser);
 
+        inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
+        inline const VariableType &GetField() const { return *m_Field.get(); }
+
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<VariableType> m_Field;
@@ -79,6 +89,11 @@ namespace Marble
         ~StructDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
+
+        inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
+        inline const std::string &GetName() const { return m_StructName->Id(); }
+        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const std::vector<Box<StructFieldDefinition>> &GetFields() const { return m_Field; }
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -94,6 +109,10 @@ namespace Marble
         ~EnumDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
+
+        inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
+        inline const std::string &GetName() const { return m_EnumName->Id(); }
+        inline const std::vector<Box<Identifier>> &GetFields() const { return m_Fields; }
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -116,6 +135,13 @@ namespace Marble
         ~MemberFunctionPrototypeDefinition() = default;
         static Box<MemberFunctionPrototypeDefinition> Parse(Parser &parser);
 
+        inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
+        inline const VariableType *GetMethod() const { return m_Method.get(); }
+        inline const Identifier &GetName() const { return *m_Name.get(); }
+        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
+        inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
+
     private:
         static Box<VariableType> ParseMethod(Parser &parser);
 
@@ -134,6 +160,9 @@ namespace Marble
         MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span);
         ~MemberFunctionDefinition() = default;
         static Box<MemberFunctionDefinition> Parse(Parser &parser);
+
+        inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
+        inline const Statement &GetBody() const { return *m_Block.get(); }
 
     private:
         Box<MemberFunctionPrototypeDefinition> m_Prototype;

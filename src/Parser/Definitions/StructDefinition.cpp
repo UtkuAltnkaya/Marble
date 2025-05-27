@@ -1,6 +1,7 @@
 #include "Ast/Definitions.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {
@@ -33,6 +34,8 @@ namespace Marble
             accessSpecifier, std::move(structName), std::move(generics), std::move(fields), Span{start.Start, end.End});
         // TODO: Insert Symbol
 
+        SymbolTable &table = SymbolTable::GetInstance();
+        table.Insert(structDefinition->m_StructName->Id(), new SymbolNode{*structDefinition.get(), table.Root()});
         return structDefinition;
     }
 
