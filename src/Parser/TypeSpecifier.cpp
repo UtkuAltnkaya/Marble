@@ -71,9 +71,11 @@ namespace Marble
 
     Ref<TypeSpecifier> TypeSpecifier::Parse(Parser &parser)
     {
-        if (parser.Current().TokenType() == TokenType::Identifier)
+        const Token &token = parser.Current();
+        if (token.TokenType() == TokenType::Identifier)
         {
-            return TypeSpecifier::UserDefine(parser);
+            Ref<TypeSpecifier> typeSpecifier = MakeRef<TypeSpecifier>(Identifier{token}, token.Span());
+            return TypeSpecifier::UserDefine(parser, typeSpecifier);
         }
 
         return TypeSpecifier::Primitive(parser);
@@ -86,27 +88,25 @@ namespace Marble
         return TypeSpecifier::Complex(parser, typeSpecifier);
     }
 
-    Ref<TypeSpecifier> TypeSpecifier::UserDefine(Parser &parser)
+    Ref<TypeSpecifier> TypeSpecifier::UserDefine(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
     {
-        const Token &token = parser.Current();
-        Ref<TypeSpecifier> typeSpecifier = MakeRef<TypeSpecifier>(Identifier{token}, token.Span());
         Ref<TypeSpecifier> complex = TypeSpecifier::Complex(parser, typeSpecifier);
-        if (typeSpecifier != complex)
+        if (typeSpecifier == complex)
         {
-            return complex;
+            return typeSpecifier;
         }
 
-        if (parser.Next().TokenType() == TokenType::LessThan)
-        {
-            parser.NextToken();
-            return TypeSpecifier::Generic(parser, typeSpecifier);
-        }
-        return typeSpecifier;
+        return TypeSpecifier::UserDefine(parser, complex);
     }
 
     Ref<TypeSpecifier> TypeSpecifier::Complex(Parser &parser, Ref<TypeSpecifier> typeSpecifier)
     {
         TokenType tokenType = parser.Next().TokenType();
+        if (tokenType == TokenType::LessThan)
+        {
+            parser.NextToken();
+            return TypeSpecifier::Generic(parser, typeSpecifier);
+        }
         if (tokenType == TokenType::OpenBracket)
         {
             parser.NextToken(); // Skip type token;

@@ -10,6 +10,7 @@ namespace Marble
     class File
     {
     public:
+        File() = default;
         File(const std::string &fileName) : m_FileName{fileName}
         {
             ReadFile();
@@ -31,7 +32,7 @@ namespace Marble
             m_Content = std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
         }
 
-    private:
+    protected:
         std::string m_FileName;
         std::string m_Content;
     };

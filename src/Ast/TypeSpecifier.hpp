@@ -76,7 +76,7 @@ namespace Marble
 
     private:
         static Ref<TypeSpecifier> Primitive(Parser &parser);
-        static Ref<TypeSpecifier> UserDefine(Parser &parser);
+        static Ref<TypeSpecifier> UserDefine(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
         static Ref<TypeSpecifier> Complex(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
         static Ref<TypeSpecifier> Array(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
         static Ref<TypeSpecifier> TwoDimensionalArray(Parser &parser, Ref<TypeSpecifier> typeSpecifier, size_t size);

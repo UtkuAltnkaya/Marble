@@ -38,7 +38,7 @@ namespace Marble
 
         Ref<Program> program = parser.Parse();
 
-        program->Analyze();
+        // program->Analyze();
     }
 
     void Compiler::AddArgs()

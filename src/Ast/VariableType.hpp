@@ -14,6 +14,7 @@ namespace Marble
 
         inline const Identifier &GetIdentifier() const { return *m_Identifier.get(); }
         inline const Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+        bool operator==(const VariableType &obj) const { return m_TypeSpecifier->operator==(*obj.m_TypeSpecifier) && *m_Identifier == *obj.m_Identifier; }
 
     private:
         Box<Identifier> m_Identifier;

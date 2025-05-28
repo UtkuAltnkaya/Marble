@@ -59,6 +59,8 @@ namespace Marble
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
         inline const Statement &GetBody() const { return *m_Block.get(); }
 
+        bool operator==(const FunctionDefinition &obj) const;
+
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<Identifier> m_FunctionName;
@@ -179,6 +181,10 @@ namespace Marble
         ~ImplDefinition() = default;
         static Box<Definition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
+
+        inline Ref<TypeSpecifier> GetName() const { return m_ImplName; }
+        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const std::vector<Box<MemberFunctionDefinition>> &GetMemberFunctions() const { return m_MemberFunctions; }
 
     private:
         void CreateSymbol();

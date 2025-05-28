@@ -224,7 +224,7 @@ namespace Marble
                 tokenType = CheckNextOperator(lexer, '|') ? TokenType::Or : TokenType::BitOr;
                 break;
             case '^':
-                tokenType = TokenType::BitOr;
+                tokenType = TokenType::BitXor;
                 break;
             case '~':
                 tokenType = TokenType::Tilde;

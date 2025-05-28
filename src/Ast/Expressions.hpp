@@ -24,7 +24,23 @@ namespace Marble
         Identifier,
         Primitive,
     };
-
+    // enum class Precedence
+    // {
+    //     START,
+    //     Assignment = 0, // Lowest precedence (=, +=, -=, etc.)
+    //     Binary,         // Binary operators (+, -, *, /, etc.)
+    //     Cast,           // Type casting (1.0 as float)
+    //     Unary,          // Unary operators (!, -, +, ++, --, &, *)
+    //     MemberAccess,   // Member access (., ->)
+    //     FunctionCall,   // Function calls func()
+    //     ArrayIndex,     // Array indexing arr[i]
+    //     ArrayInit,      // Array initialization {1, 2, 3}
+    //     ObjectInit,     // Object initialization
+    //     NameSpace,      // Namespace resolution ::
+    //     Primitive,      // Primitive values (numbers, strings, booleans)
+    //     Identifier,     // Highest precedence - identifiers/variables
+    //     END,
+    // };
     enum class Precedence
     {
         START,
@@ -127,16 +143,17 @@ namespace Marble
         BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, Span &&span);
         ~BinaryExpression() = default;
 
-        inline const Expression &Left() const { return *m_Left.get(); }
-        inline BinaryOperators Operator() const { return m_Operator; }
-        inline const Expression &Right() const { return *m_Left.get(); }
-
-    public:
         static Box<Expression> Parse(
             Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence = DefaultPrecedence());
+        Ref<TypeSpecifier> Analyze() override;
+
         static BinaryPrecedence NextPrecedence(BinaryPrecedence binaryPrecedence);
         static BinaryOperators StrToOperator(const char *text);
         constexpr inline static BinaryPrecedence DefaultPrecedence() { return (BinaryPrecedence)((int)(BinaryPrecedence::START) + 1); }
+
+        inline const Expression &Left() const { return *m_Left.get(); }
+        inline BinaryOperators Operator() const { return m_Operator; }
+        inline const Expression &Right() const { return *m_Left.get(); }
 
     private:
         static Box<Expression> ParseOr(
@@ -159,16 +176,23 @@ namespace Marble
         UnaryExpression(UnaryOperators unaryOperator, Box<Expression> value, UnaryExpressionType expressionType, Span &&span);
         ~UnaryExpression() = default;
 
+        static Box<Expression> Parse(Parser &parser, Precedence precedence);
+        Ref<TypeSpecifier> Analyze() override;
+
         inline UnaryOperators Operator() const { return m_UnaryOperator; }
         inline const Expression &Value() const { return *m_Value.get(); }
         inline UnaryExpressionType GetUnaryExpressionType() const { return m_UnaryExpressionType; }
 
-    public:
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-
     private:
         static Box<Expression> ParsePrefix(Parser &parser, Precedence precedence);
         static std::optional<UnaryOperators> TokenTypeToOperator(TokenType tokenType);
+        Ref<TypeSpecifier> AnalyzePostFix();
+        Ref<TypeSpecifier> AnalyzePrefix();
+        Ref<TypeSpecifier> AnalyzeArithmetic();
+        Ref<TypeSpecifier> AnalyzeAddress();
+        Ref<TypeSpecifier> AnalyzePointer();
+        Ref<TypeSpecifier> AnalyzeNot();
+        void CheckType(Ref<TypeSpecifier> expressionType);
 
     private:
         UnaryOperators m_UnaryOperator;
@@ -184,6 +208,15 @@ namespace Marble
         ~CastExpression() = default;
 
         static Box<Expression> Parse(Parser &parser, Precedence precedence);
+        Ref<TypeSpecifier> Analyze() override
+        {
+            Ref<TypeSpecifier> ts = m_Expression->Analyze();
+            if (!ts->IsPrimitive())
+            {
+                throw "Cannot cast the complex type";
+            }
+            return ts;
+        }
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;
@@ -198,6 +231,7 @@ namespace Marble
         ~PrimitiveExpression() = default;
 
         static Box<Expression> Parse(Parser &parser, Precedence precedence);
+        Ref<TypeSpecifier> Analyze() override { return m_TypeSpecifier; }
 
     private:
         static Box<Expression> ParseParenthesis(Parser &parser);
@@ -214,6 +248,7 @@ namespace Marble
         ~AssignmentExpression() = default;
 
         static Box<Expression> Parse(Parser &parser, Precedence precedence);
+        // Ref<TypeSpecifier> Analyze() override;
 
     private:
         Box<Expression> m_Variable;
