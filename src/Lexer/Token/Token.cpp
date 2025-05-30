@@ -1,5 +1,6 @@
 #include "Lexer/Token/Token.hpp"
 #include "Lexer/Lexer.hpp"
+#include "Token.hpp"
 
 namespace Marble
 {
@@ -20,6 +21,10 @@ namespace Marble
         : Token{tokenType, lexer.File().Content().substr(lexer.CursorStart(), lexer.Cursor() - lexer.CursorStart()),
                 Marble::Span(Position(lexer.Line() + 1, lexer.CursorStart() - lexer.LineStart(), lexer.CursorStart()),
                              Position(lexer.Line() + 1, lexer.Cursor() - lexer.LineStart(), lexer.Cursor()))}
+    {
+    }
+
+    Token::Token(const Token &token) : Token{token.m_TokenType, token.m_Text, token.m_Span}
     {
     }
 

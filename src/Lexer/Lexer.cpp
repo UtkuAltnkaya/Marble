@@ -53,6 +53,19 @@ namespace Marble
         throw "Unkown Token!";
     }
 
+    LexerStates Lexer::GetLexerState()
+    {
+        return {m_Cursor, m_CursorStart, m_Line, m_LineStart};
+    }
+
+    void Lexer::SetLexerState(const LexerStates &state)
+    {
+        m_Cursor = state.Cursor;
+        m_CursorStart = state.CursorStart;
+        m_Line = state.Line;
+        m_LineStart = state.LineStart;
+    }
+
     void Lexer::SkipSpace()
     {
         while (std::isspace(CurrentChar()))

@@ -7,6 +7,7 @@
 #include "Ast/Generics.hpp"
 #include <vector>
 
+// TODO: Add interface or trait definition
 namespace Marble
 {
     class SymbolNode;
@@ -54,7 +55,7 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const Identifier &GetName() const { return *m_FunctionName.get(); }
-        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
         inline const Statement &GetBody() const { return *m_Block.get(); }
@@ -96,7 +97,7 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const { return m_StructName->Id(); }
-        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<StructFieldDefinition>> &GetFields() const { return m_Field; }
 
     private:
@@ -183,7 +184,7 @@ namespace Marble
         Ref<TypeSpecifier> Analyze() override;
 
         inline Ref<TypeSpecifier> GetName() const { return m_ImplName; }
-        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<MemberFunctionDefinition>> &GetMemberFunctions() const { return m_MemberFunctions; }
 
     private:

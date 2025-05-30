@@ -15,7 +15,7 @@ namespace Marble
         parser.NextTokenAndExpect(TokenType::OpenParen);
         parser.NextToken();
         Box<Expression> condition = Expression::Parse(parser);
-        parser.NextTokenAndExpect(TokenType::CloseBracket);
+        parser.NextTokenAndExpect(TokenType::CloseParen);
         Box<Statement> block_stmt = BlockStatement::Parse(parser);
         const Span &end = parser.Current().Span();
         return MakeBox<WhileStatement>(std::move(condition), std::move(block_stmt), Span{start.Start, end.Start});

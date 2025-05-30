@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "Parser.hpp"
 #include "Lexer/Token/TokenType.hpp"
 
@@ -5,14 +6,12 @@ namespace Marble
 {
     Parser::Parser(Lexer &lexer) : m_Lexer{lexer}
     {
-        m_Previous = nullptr;
         m_Current = m_Lexer.NextToken();
         m_Next = m_Lexer.NextToken();
     }
 
     void Parser::NextToken()
     {
-        m_Previous = std::move(m_Current);
         m_Current = std::move(m_Next);
         m_Next = m_Lexer.NextToken();
     }
@@ -32,6 +31,34 @@ namespace Marble
     {
         NextToken();
         return Expect(tokenType);
+    }
+
+    void Parser::CreateCheckpoint()
+    {
+        m_CheckPoints.push(ParserCheckpoint{
+            MakeBox<Token>(*m_Current),
+            MakeBox<Token>(*m_Next),
+            m_Lexer.GetLexerState()});
+    }
+
+    void Parser::RollBack()
+    {
+        assert(!m_CheckPoints.empty());
+
+        ParserCheckpoint checkPoint = std::move(m_CheckPoints.top());
+        m_CheckPoints.pop();
+
+        m_Current = std::move(checkPoint.Current);
+        m_Next = std::move(checkPoint.Next);
+        m_Lexer.SetLexerState(checkPoint.LexerState);
+    }
+
+    void Parser::DiscardCheckpoint()
+    {
+        if (!m_CheckPoints.empty())
+        {
+            m_CheckPoints.pop();
+        }
     }
 
     Ref<Program> Parser::Parse()

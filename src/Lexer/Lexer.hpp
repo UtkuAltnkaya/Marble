@@ -11,6 +11,13 @@
 
 namespace Marble
 {
+    struct LexerStates
+    {
+        size_t Cursor;
+        size_t CursorStart;
+        size_t Line;
+        size_t LineStart;
+    };
     class Lexer
     {
     public:
@@ -18,6 +25,8 @@ namespace Marble
         ~Lexer() = default;
 
         Box<Token> NextToken();
+        LexerStates GetLexerState();
+        void SetLexerState(const LexerStates &state);
 
         inline void SetCursorStart() { m_CursorStart = m_Cursor; }
         inline char CurrentChar() const { return m_Cursor < m_File.Content().size() ? m_File.Content()[m_Cursor] : 0; }

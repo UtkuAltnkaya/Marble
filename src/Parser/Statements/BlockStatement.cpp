@@ -11,13 +11,16 @@ namespace Marble
     {
     }
 
-    Box<Statement> BlockStatement::Parse(Parser &parser)
+    Box<Statement> BlockStatement::Parse(Parser &parser, bool passTokenCheck)
     {
         Span start = parser.Current().Span();
-        parser.NextTokenAndExpect(TokenType::OpenCurlyBrace);
+
+        if (!passTokenCheck)
+        {
+            parser.NextTokenAndExpect(TokenType::OpenCurlyBrace);
+        }
 
         std::vector<Box<Statement>> statements;
-
         do
         {
             parser.NextToken();
@@ -37,7 +40,7 @@ namespace Marble
             }
             else if (parser.Current().TokenType() == TokenType::OpenCurlyBrace)
             {
-                statements.push_back(BlockStatement::Parse(parser));
+                statements.push_back(BlockStatement::Parse(parser, true));
             }
             else
             {

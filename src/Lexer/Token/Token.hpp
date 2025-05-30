@@ -32,6 +32,7 @@ namespace Marble
     public:
         Token(Marble::TokenType tokenType, const std::string &text, const Span &span);
         Token(Lexer &lexer, Marble::TokenType tokenType);
+        Token(const Token &token);
         ~Token() = default;
 
     public:

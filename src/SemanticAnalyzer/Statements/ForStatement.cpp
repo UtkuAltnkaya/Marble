@@ -29,7 +29,7 @@ namespace Marble
             throw "Condition type must be boolean";
         }
 
-        m_increment->Analyze();
+        m_Increment->Analyze();
         m_Block->Analyze();
         table.LeaveScope();
         return TypeSpecifierOk;

@@ -65,6 +65,7 @@ namespace Marble
 
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
+        inline const Expression *const GetExpression() const { return m_Expression.get(); }
 
     private:
         Box<Expression> m_Expression;
@@ -78,6 +79,7 @@ namespace Marble
 
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
+        inline const Expression &GetExpression() const { return *m_Expression.get(); }
 
     private:
         Box<Expression> m_Expression;
@@ -89,7 +91,7 @@ namespace Marble
         BlockStatement(std::vector<Box<Statement>> statements, const Span &span);
         ~BlockStatement() = default;
 
-        static Box<Statement> Parse(Parser &parser);
+        static Box<Statement> Parse(Parser &parser, bool passTokenCheck = false);
         Ref<TypeSpecifier> Analyze() override;
 
         inline const std::vector<Box<Statement>> &Statements() const { return m_Statements; }
@@ -108,11 +110,17 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
 
+        inline const Statement *const GetLetStatement() const { return m_LetStatement.get(); }
+        inline const Expression *const GetAssignmentExpression() const { return m_AssignmentExpression.get(); }
+        inline const Expression &GetCondition() const { return *m_Condition.get(); }
+        inline const Expression &GetIncrement() const { return *m_Increment.get(); }
+        inline const Statement &GetBlock() const { return *m_Block.get(); }
+
     private:
         Box<Statement> m_LetStatement;
         Box<Expression> m_AssignmentExpression;
         Box<Expression> m_Condition;
-        Box<Expression> m_increment;
+        Box<Expression> m_Increment;
         Box<Statement> m_Block;
     };
 
@@ -123,6 +131,9 @@ namespace Marble
         ~WhileStatement() = default;
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
+
+        inline const Expression &GetCondition() const { return *m_Condition.get(); }
+        inline const Statement &GetBlock() const { return *m_Block.get(); }
 
     private:
         Box<Expression> m_Condition;
@@ -136,6 +147,7 @@ namespace Marble
         ~ElseStatement() = default;
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
+        inline const Statement &GetBlock() const { return *m_Block.get(); };
 
     private:
         Box<Statement> m_Block;
@@ -148,6 +160,9 @@ namespace Marble
         ~ElseIfStatement() = default;
         static void Parse(Parser &parser, std::vector<Box<Statement>> &elseIfStatements);
         Ref<TypeSpecifier> Analyze() override;
+
+        inline const Expression &GetCondition() const { return *m_Condition.get(); };
+        inline const Statement &GetBlock() const { return *m_Block.get(); };
 
     private:
         Box<Expression> m_Condition;
@@ -163,6 +178,11 @@ namespace Marble
 
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze() override;
+
+        inline const Expression &GetCondition() const { return *m_Condition.get(); };
+        inline const Statement &GetBlock() const { return *m_Block.get(); }
+        inline const std::vector<Box<Statement>> &GetElseIfStatements() const { return m_ElseIfStatements; }
+        inline const Statement *const GetElseStatement() const { return m_ElseStatement.get(); }
 
     private:
         Box<Expression> m_Condition;

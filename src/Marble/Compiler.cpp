@@ -38,6 +38,10 @@ namespace Marble
 
         Ref<Program> program = parser.Parse();
 
+        int x = 10;
+        x = 1;
+
+        std::cout << x << std::endl;
         // program->Analyze();
     }
 

@@ -4,7 +4,7 @@
 namespace Marble
 {
     IfStatement::IfStatement(Box<Expression> condition, Box<Statement> block, std::vector<Box<Statement>> &&elseIfStatements, Box<Statement> elseStatement, const Span &span)
-        : Statement{span, StatementType::If}, m_Condition{std::move(condition)},
+        : Statement{span, StatementType::If}, m_Condition{std::move(condition)}, m_Block{std::move(block)},
           m_ElseIfStatements{std::move(elseIfStatements)}, m_ElseStatement{std::move(elseStatement)}
     {
     }
@@ -30,7 +30,7 @@ namespace Marble
         }
         else if (elseIfStatements.size() > 0)
         {
-            end = elseIfStatements.end()->get()->GetSpan();
+            end = elseIfStatements.back()->GetSpan();
         }
         return MakeBox<IfStatement>(
             std::move(condition), std::move(block), std::move(elseIfStatements), std::move(elseStatement), Span{start.Start, end.Start});

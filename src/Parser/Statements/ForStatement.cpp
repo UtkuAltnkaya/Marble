@@ -5,12 +5,12 @@ namespace Marble
 {
     ForStatement::ForStatement(Box<Statement> letStatement, Box<Expression> condition, Box<Expression> increment, Box<Statement> block, const Span &span)
         : Statement{span, StatementType::For}, m_LetStatement{std::move(letStatement)}, m_AssignmentExpression{nullptr},
-          m_Condition{std::move(condition)}, m_increment{std::move(increment)}, m_Block{std::move(block)}
+          m_Condition{std::move(condition)}, m_Increment{std::move(increment)}, m_Block{std::move(block)}
     {
     }
     ForStatement::ForStatement(Box<Expression> assignmentExpression, Box<Expression> condition, Box<Expression> increment, Box<Statement> block, const Span &span)
         : Statement{span, StatementType::For}, m_LetStatement{nullptr}, m_AssignmentExpression{std::move(assignmentExpression)},
-          m_Condition{std::move(condition)}, m_increment{std::move(increment)}, m_Block{std::move(block)}
+          m_Condition{std::move(condition)}, m_Increment{std::move(increment)}, m_Block{std::move(block)}
     {
     }
 

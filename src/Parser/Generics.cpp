@@ -9,21 +9,35 @@ namespace Marble
     {
     }
 
+    // To prevent ambiguity between '<' operator and '<' generic greedy parsing strategy used
+    // TODO: Search for better parsing strategy
     Box<Generics> Generics::Parse(Parser &parser)
     {
         if (parser.Next().TokenType() != TokenType::LessThan)
         {
             return nullptr;
         }
+
+        parser.CreateCheckpoint();
         Span start = parser.Current().Span();
 
         // Skip '<' token
         parser.NextToken();
 
         std::vector<Ref<TypeSpecifier>> types;
-        Parenthesis::Parse<Ref<TypeSpecifier>>(types, parser, TokenType::GreaterThan, [](Parser &parser)
-                                               { return TypeSpecifier::Parse(parser); });
 
+        try
+        {
+            Parenthesis::Parse<Ref<TypeSpecifier>>(types, parser, TokenType::GreaterThan, [](Parser &parser)
+                                                   { return TypeSpecifier::Parse(parser); });
+        }
+        catch (...)
+        {
+            parser.RollBack();
+            return nullptr;
+        }
+
+        parser.DiscardCheckpoint();
         Span span = Span{start.Start, parser.Current().Span().Start};
         return MakeBox<Generics>(std::move(types), span);
     }
