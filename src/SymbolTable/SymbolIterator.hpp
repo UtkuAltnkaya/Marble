@@ -26,10 +26,8 @@ namespace Marble
         size_t Count(SymbolNodeTypes filter);
         // TODO:SymbolIterator &EnumField(std::string_view name);
 
-        template <typename T>
-        SymbolIterator &Ok(T *AstNode)
+        SymbolIterator &Ok()
         {
-            static_assert(std::is_base_of<Ast, T>::value, "Type of paramater must be Ast node");
             if (!m_Flag)
             {
                 return *this;

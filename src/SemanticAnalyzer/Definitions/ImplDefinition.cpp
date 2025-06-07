@@ -30,7 +30,7 @@ namespace Marble
         const SymbolNode *node = table.CurrentScope();
         SymbolNode *fnNode = node->Iter()
                                  .Function(m_Prototype->GetName().Id())
-                                 .Ok<MemberFunctionDefinition>(this)
+                                 .Ok()
                                  .Find();
         table.EnterScope(fnNode);
         m_Block->Analyze();
@@ -82,6 +82,6 @@ namespace Marble
         {
             return symbolNode;
         }
-        return iter.Enum(name).Ok<ImplDefinition>(this).Find();
+        return iter.Enum(name).Ok().Find();
     }
 } // namespace Marble

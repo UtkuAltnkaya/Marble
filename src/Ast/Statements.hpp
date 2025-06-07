@@ -209,6 +209,8 @@ namespace Marble
             return TypeSpecifierOk;
         }
 
+        inline const Expression &GetExpression() const { return *m_Expression.get(); }
+
     private:
         Box<Expression> m_Expression;
     };

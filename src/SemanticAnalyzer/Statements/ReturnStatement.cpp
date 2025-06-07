@@ -10,7 +10,7 @@ namespace Marble
 
         while (parent && parent->GetSymbolData().NodeType() != SymbolNodeTypes::Function)
         {
-            parent = parent->Iter().Parent().Ok<ReturnStatement>(this).Find();
+            parent = parent->Iter().Parent().Ok().Find();
         }
 
         FunctionSymbolNode *fnNode = static_cast<FunctionSymbolNode *>(parent);

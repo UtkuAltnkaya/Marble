@@ -8,7 +8,7 @@ namespace Marble
     {
         Ref<TypeSpecifier> condition = m_Condition->Analyze();
 
-        // TODO: Decide whether conditions must bool or bool and int
+        // TODO: Decide whether conditions must be bool or bool and int
         if (condition->GetType() != Types::Bool /*&& condition->GetType() != Types::Int*/)
         {
             throw "Condition type must be boolean";

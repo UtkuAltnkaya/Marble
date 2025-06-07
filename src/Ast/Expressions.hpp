@@ -1,363 +1,423 @@
 #pragma once
 
 #include "Ast/Ast.hpp"
-#include "Ast/TypeSpecifier.hpp"
 #include "Ast/Generics.hpp"
-#include <optional>
+#include "Ast/TypeSpecifier.hpp"
 #include <functional>
+#include <optional>
+#include <assert.h>
 
 namespace Marble
 {
-    enum class ExpressionType
+  enum class ExpressionType
+  {
+    ArrayInit,
+    ObjectInit,
+    ObjectField,
+    Binary,
+    Unary,
+    Assignment,
+    MemberAccess,
+    ArrayIndex,
+    FunctionCall,
+    Cast,
+    NameSpace,
+    Identifier,
+    Primitive,
+  };
+  enum class Precedence
+  {
+    START,
+    Assignment,
+    Binary,
+    Cast,
+    Unary,
+    MemberAccess,
+    FunctionCall,
+    ArrayIndex,
+    NameSpace,
+    ArrayInit,
+    ObjectInit,
+    Identifier,
+    Primitive,
+    END,
+  };
+  enum class BinaryOperators
+  {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Modulo,
+    Equal,
+    NotEqual,
+    And,
+    Or,
+    BitAnd,
+    BitOr,
+    BitXor,
+    GreaterThan,
+    LessThan,
+    GreaterThanOrEqual,
+    LessThanOrEqual,
+    BitLeft,
+    BitRight,
+  };
+
+  enum class BinaryPrecedence
+  {
+    START,
+    Or,
+    And,
+    BitOr,
+    BitXor,
+    BitAnd,
+    BitLeft,
+    BitRight,
+    Equal,
+    Relational,
+    Sum,
+    Product,
+    END,
+  };
+
+  enum class UnaryOperators
+  {
+    Plus,
+    Minus,
+    Increment,
+    Decrement,
+    LogicalNot,
+    BitwiseNot,
+    Address,
+    Indirection,
+  };
+
+  enum class UnaryExpressionType
+  {
+    Prefix,
+    PostFix,
+  };
+
+  class Expression : public Ast
+  {
+  public:
+    Expression(const Span &span, ExpressionType expressionType)
+        : Ast{span, AstType::Expression}, m_ExpressionType{expressionType} {};
+
+    Expression(Span &&span, ExpressionType expressionType)
+        : Ast{std::move(span), AstType::Expression}, m_ExpressionType{expressionType} {};
+
+    virtual ~Expression() = default;
+
+  public:
+    static Box<Expression> Parse(Parser &parser, Precedence precedence = DefaultPrecedence());
+    static Precedence NextPrecedence(Precedence precedence);
+    inline Marble::ExpressionType ExpressionType() const { return m_ExpressionType; }
+    constexpr inline static Precedence DefaultPrecedence() { return (Precedence)((int)(Precedence::START) + 1); }
+
+    template <typename T>
+    T *TryInto()
     {
-        ArrayInit,
-        ObjectInit,
-        ObjectField,
-        Binary,
-        Unary,
-        Assignment,
-        MemberAccess,
-        ArrayIndex,
-        FunctionCall,
-        Cast,
-        NameSpace,
-        Identifier,
-        Primitive,
-    };
-    // enum class Precedence
-    // {
-    //     START,
-    //     Assignment = 0, // Lowest precedence (=, +=, -=, etc.)
-    //     Binary,         // Binary operators (+, -, *, /, etc.)
-    //     Cast,           // Type casting (1.0 as float)
-    //     Unary,          // Unary operators (!, -, +, ++, --, &, *)
-    //     MemberAccess,   // Member access (., ->)
-    //     FunctionCall,   // Function calls func()
-    //     ArrayIndex,     // Array indexing arr[i]
-    //     ArrayInit,      // Array initialization {1, 2, 3}
-    //     ObjectInit,     // Object initialization
-    //     NameSpace,      // Namespace resolution ::
-    //     Primitive,      // Primitive values (numbers, strings, booleans)
-    //     Identifier,     // Highest precedence - identifiers/variables
-    //     END,
-    // };
-    enum class Precedence
+      static_assert(std::is_base_of<Expression, T>::value, "Type of paramater must be expression");
+      if (T::StaticType != m_ExpressionType)
+      {
+        throw "Expression types are not matched";
+      }
+      return static_cast<T *>(this);
+    }
+
+    template <typename T>
+    T *Into()
     {
-        START,
-        Binary,
-        Unary,
-        Cast,
-        Primitive,
-        Assignment,
-        MemberAccess,
-        FunctionCall,
-        ArrayIndex,
-        NameSpace,
-        ArrayInit,
-        ObjectInit,
-        Identifier,
-        END,
-    };
-    enum class BinaryOperators
+      static_assert(std::is_base_of<Expression, T>::value, "Type of paramater must be expression");
+      assert(m_ExpressionType == T::StaticType && "Invalid cast in Expression::Into");
+      return static_cast<T *>(this);
+    }
+
+    template <typename T>
+    const T *TryInto() const
     {
-        Add,
-        Subtract,
-        Multiply,
-        Divide,
-        Modulo,
-        Equal,
-        NotEqual,
-        And,
-        Or,
-        BitAnd,
-        BitOr,
-        BitXor,
-        GreaterThan,
-        LessThan,
-        GreaterThanOrEqual,
-        LessThanOrEqual,
-        BitLeft,
-        BitRight,
-    };
+      static_assert(std::is_base_of<Expression, T>::value, "Type of paramater must be expression");
+      if (T::StaticType != m_ExpressionType)
+      {
+        throw "Expression types are not matched";
+      }
+      return static_cast<const T *>(this);
+    }
 
-    enum class BinaryPrecedence
+    template <typename T>
+    const T *Into() const
     {
-        START,
-        Or,
-        And,
-        BitOr,
-        BitXor,
-        BitAnd,
-        BitLeft,
-        BitRight,
-        Equal,
-        Relational,
-        Sum,
-        Product,
-        END,
-    };
+      static_assert(std::is_base_of<Expression, T>::value, "Type of paramater must be expression");
+      assert(m_ExpressionType == T::StaticType && "Invalid cast in Expression::Into");
+      return static_cast<const T *>(this);
+    }
 
-    enum class UnaryOperators
+  protected:
+    Marble::ExpressionType m_ExpressionType;
+  };
+
+  class BinaryExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Binary;
+
+    BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, const Span &span);
+    BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, Span &&span);
+    ~BinaryExpression() = default;
+
+    static Box<Expression> Parse(Parser &parser, Precedence precedence,
+                                 BinaryPrecedence binaryPrecedence = DefaultPrecedence());
+    Ref<TypeSpecifier> Analyze() override;
+
+    static BinaryPrecedence NextPrecedence(BinaryPrecedence binaryPrecedence);
+    static BinaryOperators StrToOperator(const char *text);
+    constexpr inline static BinaryPrecedence DefaultPrecedence() { return (BinaryPrecedence)((int)(BinaryPrecedence::START) + 1); }
+
+    inline const Expression &Left() const { return *m_Left.get(); }
+    inline BinaryOperators Operator() const { return m_Operator; }
+    inline const Expression &Right() const { return *m_Right.get(); }
+
+  private:
+    static Box<Expression> ParseOr(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence);
+    static Box<Expression> ParseExpression(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence,
+                                           std::function<bool(TokenType)> condition);
+    static Box<Expression> ParseProduct(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence);
+
+  private:
+    Box<Expression> m_Left;
+    BinaryOperators m_Operator;
+    Box<Expression> m_Right;
+  };
+
+  class UnaryExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Unary;
+    UnaryExpression(UnaryOperators unaryOperator, Box<Expression> value, UnaryExpressionType expressionType,
+                    const Span &span);
+    UnaryExpression(UnaryOperators unaryOperator, Box<Expression> value, UnaryExpressionType expressionType,
+                    Span &&span);
+    ~UnaryExpression() = default;
+
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
+
+    inline UnaryOperators Operator() const { return m_UnaryOperator; }
+    inline const Expression &Value() const { return *m_Value.get(); }
+    inline UnaryExpressionType GetUnaryExpressionType() const { return m_UnaryExpressionType; }
+
+  private:
+    static Box<Expression> ParsePrefix(Parser &parser, Precedence precedence);
+    static std::optional<UnaryOperators> TokenTypeToOperator(TokenType tokenType);
+    Ref<TypeSpecifier> AnalyzePostFix();
+    Ref<TypeSpecifier> AnalyzePrefix();
+    Ref<TypeSpecifier> AnalyzeArithmetic();
+    Ref<TypeSpecifier> AnalyzeAddress();
+    Ref<TypeSpecifier> AnalyzePointer();
+    Ref<TypeSpecifier> AnalyzeNot();
+    void CheckType(Ref<TypeSpecifier> expressionType);
+
+  private:
+    UnaryOperators m_UnaryOperator;
+    Box<Expression> m_Value;
+    UnaryExpressionType m_UnaryExpressionType;
+  };
+
+  class CastExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Cast;
+
+    CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, const Span &span);
+    CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, Span &&span);
+    ~CastExpression() = default;
+
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override
     {
-        Plus,
-        Minus,
-        Increment,
-        Decrement,
-        LogicalNot,
-        BitwiseNot,
-        Address,
-        Indirection,
-    };
+      Ref<TypeSpecifier> ts = m_Expression->Analyze();
+      if (!ts->IsPrimitive())
+      {
+        throw "Cannot cast the complex type";
+      }
+      return ts;
+    }
 
-    enum class UnaryExpressionType
-    {
-        Prefix,
-        PostFix,
-    };
+  private:
+    Ref<TypeSpecifier> m_TypeSpecifier;
+    Box<Expression> m_Expression;
+  };
 
-    class Expression : public Ast
-    {
-    public:
-        Expression(const Span &span, ExpressionType expressionType)
-            : Ast{span, AstType::Expression}, m_ExpressionType{expressionType} {};
+  class PrimitiveExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Primitive;
 
-        Expression(Span &&span, ExpressionType expressionType)
-            : Ast{std::move(span), AstType::Expression}, m_ExpressionType{expressionType} {};
+    PrimitiveExpression(Ref<TypeSpecifier> typeSpecifier, const std::string &value, const Span &span);
+    PrimitiveExpression(Ref<TypeSpecifier> typeSpecifier, std::string &&value, Span &&span);
+    ~PrimitiveExpression() = default;
 
-        virtual ~Expression() = default;
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override { return m_TypeSpecifier; }
+    inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+    inline const std::string &GetValue() const { return m_Value; }
 
-    public:
-        static Box<Expression> Parse(Parser &parser, Precedence precedence = DefaultPrecedence());
-        static Precedence NextPrecedence(Precedence precedence);
-        inline Marble::ExpressionType ExpressionType() const { return m_ExpressionType; }
-        constexpr inline static Precedence DefaultPrecedence() { return (Precedence)((int)(Precedence::START) + 1); }
+  private:
+    static Box<Expression> ParseParenthesis(Parser &parser);
 
-    protected:
-        Marble::ExpressionType m_ExpressionType;
-    };
+  private:
+    Ref<TypeSpecifier> m_TypeSpecifier;
+    std::string m_Value;
+  };
 
-    class BinaryExpression : public Expression
-    {
-    public:
-        BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, const Span &span);
-        BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, Span &&span);
-        ~BinaryExpression() = default;
+  class AssignmentExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Assignment;
 
-        static Box<Expression> Parse(
-            Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence = DefaultPrecedence());
-        Ref<TypeSpecifier> Analyze() override;
+    AssignmentExpression(Box<Expression> variable, Box<Expression> value, const Span &span);
+    ~AssignmentExpression() = default;
 
-        static BinaryPrecedence NextPrecedence(BinaryPrecedence binaryPrecedence);
-        static BinaryOperators StrToOperator(const char *text);
-        constexpr inline static BinaryPrecedence DefaultPrecedence() { return (BinaryPrecedence)((int)(BinaryPrecedence::START) + 1); }
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
 
-        inline const Expression &Left() const { return *m_Left.get(); }
-        inline BinaryOperators Operator() const { return m_Operator; }
-        inline const Expression &Right() const { return *m_Left.get(); }
+  private:
+    void CheckVariableExpressionTypes() const;
 
-    private:
-        static Box<Expression> ParseOr(
-            Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence);
-        static Box<Expression> ParseExpression(
-            Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence, std::function<bool(TokenType)> condition);
-        static Box<Expression> ParseProduct(
-            Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence);
+  private:
+    Box<Expression> m_Variable;
+    Box<Expression> m_Value;
+  };
 
-    private:
-        Box<Expression> m_Left;
-        BinaryOperators m_Operator;
-        Box<Expression> m_Right;
-    };
+  class MemberAccessExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::MemberAccess;
 
-    class UnaryExpression : public Expression
-    {
-    public:
-        UnaryExpression(UnaryOperators unaryOperator, Box<Expression> value, UnaryExpressionType expressionType, const Span &span);
-        UnaryExpression(UnaryOperators unaryOperator, Box<Expression> value, UnaryExpressionType expressionType, Span &&span);
-        ~UnaryExpression() = default;
+    MemberAccessExpression(Box<Expression> objs, TokenType accessType, Box<Expression> property, const Span &span);
+    ~MemberAccessExpression() = default;
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-        Ref<TypeSpecifier> Analyze() override;
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
 
-        inline UnaryOperators Operator() const { return m_UnaryOperator; }
-        inline const Expression &Value() const { return *m_Value.get(); }
-        inline UnaryExpressionType GetUnaryExpressionType() const { return m_UnaryExpressionType; }
+  private:
+    Box<Expression> m_Object;
+    TokenType m_AccessType;
+    Box<Expression> m_Property;
+  };
 
-    private:
-        static Box<Expression> ParsePrefix(Parser &parser, Precedence precedence);
-        static std::optional<UnaryOperators> TokenTypeToOperator(TokenType tokenType);
-        Ref<TypeSpecifier> AnalyzePostFix();
-        Ref<TypeSpecifier> AnalyzePrefix();
-        Ref<TypeSpecifier> AnalyzeArithmetic();
-        Ref<TypeSpecifier> AnalyzeAddress();
-        Ref<TypeSpecifier> AnalyzePointer();
-        Ref<TypeSpecifier> AnalyzeNot();
-        void CheckType(Ref<TypeSpecifier> expressionType);
+  class FunctionCallExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::FunctionCall;
 
-    private:
-        UnaryOperators m_UnaryOperator;
-        Box<Expression> m_Value;
-        UnaryExpressionType m_UnaryExpressionType;
-    };
+    FunctionCallExpression(Box<Expression> fnName, Box<Generics> generics, std::vector<Box<Expression>> &&args,
+                           const Span &span);
+    ~FunctionCallExpression() = default;
 
-    class CastExpression : public Expression
-    {
-    public:
-        CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, const Span &span);
-        CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, Span &&span);
-        ~CastExpression() = default;
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-        Ref<TypeSpecifier> Analyze() override
-        {
-            Ref<TypeSpecifier> ts = m_Expression->Analyze();
-            if (!ts->IsPrimitive())
-            {
-                throw "Cannot cast the complex type";
-            }
-            return ts;
-        }
+    inline const Expression &FnName() const { return *m_FnName.get(); }
+    inline const Generics *const GetGenerics() { return m_Generics.get(); }
+    inline const std::vector<Box<Expression>> &GetArgs() const { return m_Args; }
 
-    private:
-        Ref<TypeSpecifier> m_TypeSpecifier;
-        Box<Expression> m_Expression;
-    };
+  private:
+    Box<Expression> m_FnName;
+    Box<Generics> m_Generics;
+    std::vector<Box<Expression>> m_Args;
+  };
 
-    class PrimitiveExpression : public Expression
-    {
-    public:
-        PrimitiveExpression(Ref<TypeSpecifier> typeSpecifier, const std::string &value, const Span &span);
-        PrimitiveExpression(Ref<TypeSpecifier> typeSpecifier, std::string &&value, Span &&span);
-        ~PrimitiveExpression() = default;
+  class ArrayIndexExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ArrayIndex;
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-        Ref<TypeSpecifier> Analyze() override { return m_TypeSpecifier; }
+    ArrayIndexExpression(Box<Expression> array, Box<Expression> index, Box<Expression> secondIndex, const Span &span);
+    ~ArrayIndexExpression() = default;
 
-    private:
-        static Box<Expression> ParseParenthesis(Parser &parser);
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
 
-    private:
-        Ref<TypeSpecifier> m_TypeSpecifier;
-        std::string m_Value;
-    };
+  private:
+    Box<Expression> m_Array;
+    Box<Expression> m_Index;
+    Box<Expression> m_SecondIndex;
+  };
 
-    class AssignmentExpression : public Expression
-    {
-    public:
-        AssignmentExpression(Box<Expression> variable, Box<Expression> value, const Span &span);
-        ~AssignmentExpression() = default;
+  class NamespaceExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::NameSpace;
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-        // Ref<TypeSpecifier> Analyze() override;
+    NamespaceExpression(Box<Expression> namespaceExpr, Box<Expression> value, const Span &span);
+    ~NamespaceExpression() = default;
 
-    private:
-        Box<Expression> m_Variable;
-        Box<Expression> m_Value;
-    };
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
 
-    class MemberAccessExpression : public Expression
-    {
-    public:
-        MemberAccessExpression(Box<Expression> objs, TokenType accessType, Box<Expression> property, const Span &span);
-        ~MemberAccessExpression() = default;
+  private:
+    Box<Expression> m_Namespace;
+    Box<Expression> m_Value;
+  };
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
+  class ArrayInitExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ArrayInit;
 
-    private:
-        Box<Expression> m_Object;
-        TokenType m_AccessType;
-        Box<Expression> m_Property;
-    };
+    ArrayInitExpression(std::vector<Box<Expression>> &&array, size_t size, const Span &span);
+    ~ArrayInitExpression() = default;
 
-    class FunctionCallExpression : public Expression
-    {
-    public:
-        FunctionCallExpression(Box<Expression> fnName, Box<Generics> generics, std::vector<Box<Expression>> &&args, const Span &span);
-        ~FunctionCallExpression() = default;
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
+  private:
+    std::vector<Box<Expression>> m_Array;
+    size_t m_Size;
+  };
 
-    private:
-        Box<Expression> m_FnName;
-        Box<Generics> m_Generics;
-        std::vector<Box<Expression>> m_Args;
-    };
+  class ObjectInitExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ObjectInit;
 
-    class ArrayIndexExpression : public Expression
-    {
-    public:
-        ArrayIndexExpression(Box<Expression> array, Box<Expression> index, Box<Expression> secondIndex, const Span &span);
-        ~ArrayIndexExpression() = default;
+    ObjectInitExpression(Box<Expression> object, std::vector<Box<Expression>> &&fields, const Span &span);
+    ~ObjectInitExpression() = default;
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
 
-    private:
-        Box<Expression> m_Array;
-        Box<Expression> m_Index;
-        Box<Expression> m_SecondIndex;
-    };
+  private:
+    Box<Expression> m_Object;
+    std::vector<Box<Expression>> m_Fields;
+  };
 
-    class NamespaceExpression : public Expression
-    {
-    public:
-        NamespaceExpression(Box<Expression> namespaceExpr, Box<Expression> value, const Span &span);
-        ~NamespaceExpression() = default;
+  class FieldExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ObjectField;
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    FieldExpression(Identifier &&name, Box<Expression> value, const Span &span);
+    ~FieldExpression() = default;
 
-    private:
-        Box<Expression> m_Namespace;
-        Box<Expression> m_Value;
-    };
+    static Box<Expression> Parse(Parser &parser);
 
-    class ArrayInitExpression : public Expression
-    {
-    public:
-        ArrayInitExpression(std::vector<Box<Expression>> &&array, size_t size, const Span &span);
-        ~ArrayInitExpression() = default;
+  private:
+    Identifier m_Name;
+    Box<Expression> m_Value;
+  };
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
+  class IdentifierExpression : public Expression
+  {
+  public:
+    static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Identifier;
 
-    private:
-        std::vector<Box<Expression>> m_Array;
-        size_t m_Size;
-    };
+    IdentifierExpression(Identifier &&identifier, const Span &span);
+    ~IdentifierExpression() = default;
 
-    class ObjectInitExpression : public Expression
-    {
-    public:
-        ObjectInitExpression(Box<Expression> object, std::vector<Box<Expression>> &&fields, const Span &span);
-        ~ObjectInitExpression() = default;
+    static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    inline const Identifier &GetIdentifier() const { return m_Identifier; }
 
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-
-    private:
-        Box<Expression> m_Object;
-        std::vector<Box<Expression>> m_Fields;
-    };
-
-    class FieldExpression : public Expression
-    {
-    public:
-        FieldExpression(Identifier &&name, Box<Expression> value, const Span &span);
-        ~FieldExpression() = default;
-
-        static Box<Expression> Parse(Parser &parser);
-
-    private:
-        Identifier m_Name;
-        Box<Expression> m_Value;
-    };
-
-    class IdentifierExpression : public Expression
-    {
-    public:
-        IdentifierExpression(Identifier &&identifier, const Span &span);
-        ~IdentifierExpression() = default;
-
-        static Box<Expression> Parse(Parser &parser, Precedence precedence);
-
-    private:
-        Identifier m_Identifier;
-    };
+  private:
+    Identifier m_Identifier;
+  };
 } // namespace Marble

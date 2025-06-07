@@ -12,7 +12,8 @@ namespace Marble
             throw "Left and Right hand-side must be the same type";
         }
 
-        if (leftType->IsPrimitive())
+        // TODO: Decide, allow operator overloading
+        if (!leftType->IsPrimitive())
         {
             throw "Cannot apply binary operation to complex type";
         }

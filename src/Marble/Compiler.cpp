@@ -33,16 +33,18 @@ namespace Marble
         }
 
         File file{optionalFileName.value()};
-        Lexer lexer{file};
-        Parser parser{lexer};
-
-        Ref<Program> program = parser.Parse();
+        Ref<Program> program = nullptr;
+        {
+            Lexer lexer{file};
+            Parser parser{lexer};
+            program = parser.Parse();
+        }
 
         int x = 10;
         x = 1;
 
+        program->Analyze();
         std::cout << x << std::endl;
-        // program->Analyze();
     }
 
     void Compiler::AddArgs()

@@ -27,6 +27,44 @@ namespace Marble
         void Insert(const std::string &name, SymbolNode *node);
         inline const SymbolData &GetSymbolData() const { return m_SymbolData; }
 
+        template <typename T>
+        T *TryInto()
+        {
+            static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
+            if (T::StaticType != m_ExpressionType)
+            {
+                throw "Expression types are not matched";
+            }
+            return static_cast<T *>(this);
+        }
+
+        template <typename T>
+        T *Into()
+        {
+            static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
+            assert(m_ExpressionType == T::StaticType && "Invalid cast in SymbolNode::Into");
+            return static_cast<T *>(this);
+        }
+
+        template <typename T>
+        const T *TryInto() const
+        {
+            static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
+            if (T::StaticType != m_ExpressionType)
+            {
+                throw "Expression types are not matched";
+            }
+            return static_cast<const T *>(this);
+        }
+
+        template <typename T>
+        const T *Into() const
+        {
+            static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
+            assert(m_ExpressionType == T::StaticType && "Invalid cast in SymbolNode::Into");
+            return static_cast<const T *>(this);
+        }
+
     protected:
         SymbolData m_SymbolData;
         SymbolNode *m_Parent;

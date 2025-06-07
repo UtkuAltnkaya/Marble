@@ -9,7 +9,7 @@ namespace Marble
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *iter = table.Iter()
                                .Function(m_FunctionName->Id())
-                               .Ok<FunctionDefinition>(this)
+                               .Ok()
                                .Find();
 
         table.EnterScope(iter);
