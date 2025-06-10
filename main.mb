@@ -1,35 +1,6 @@
-struct Person {
-    age: int
-}
-
-
 fn main() -> void {
-    let x = 1;
-    let y = 2.0 as int;
-    let z = add(x,y);
-
-    let person = Person::new();
-    let person_age = person.age();
-    person.set_age(z+person_age);
     
-    
-    return 0;
 }
 
-fn add(x:int, y:int) -> int {
-    return x + y;
-}
-
-impl Person {
-    fn new() -> Person {
-        return Person{age: 42};
-    }
-
-    fn (p:Person*) get_age() -> int {
-        return p->age;
-    }
-    
-    fn (p:Person*) set_age(age:int) -> int {
-        p->age = age;
-    }
+fn add() -> int {
 }

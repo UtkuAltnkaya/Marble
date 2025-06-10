@@ -27,7 +27,7 @@ namespace Marble
         {
         case ExpressionType::Unary:
         {
-            const UnaryExpression *expr = static_cast<const UnaryExpression *>(m_Variable.get());
+            const UnaryExpression *expr = m_Variable->Into<UnaryExpression>();
             if (expr->GetUnaryExpressionType() == UnaryExpressionType::Prefix && expr->Operator() == UnaryOperators::Indirection)
             {
                 break;

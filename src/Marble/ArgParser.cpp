@@ -1,6 +1,7 @@
 #include "Marble/ArgParser.hpp"
 #include "ArgParser.hpp"
 #include <iostream>
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -70,7 +71,7 @@ namespace Marble
                 }
                 else
                 {
-                    throw "Expected value for " + std::string(arg);
+                    ErrorSystem::AddError("Expected value for " + std::string(arg));
                 }
             }
         }

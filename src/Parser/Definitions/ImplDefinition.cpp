@@ -1,3 +1,4 @@
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "Ast/Definitions.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
@@ -40,8 +41,7 @@ namespace Marble
             }
             if (parser.Current().TokenType() == TokenType::Eof)
             {
-                // throw SyntacticError(parser, "Missing curly brace '}'");
-                throw "Missing curly brace '}'";
+                ErrorSystem::AddError(parser, "Missing curly brace '}'");
             }
             memberFunctions.push_back(MemberFunctionDefinition::Parse(parser));
         } while (true);

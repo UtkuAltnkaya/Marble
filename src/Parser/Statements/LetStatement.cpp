@@ -1,5 +1,6 @@
 #include "Ast/Statements.hpp"
 #include "Parser/Parser.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -19,8 +20,7 @@ namespace Marble
         {
             if (typeSpecifier == nullptr)
             {
-                // throw SyntacticError(parser, "Expect type specifier");
-                throw "Expect type specifier";
+                ErrorSystem::AddError(parser, "Expect type specifier");
             }
             Span span{start.Start, parser.Current().Span().Start};
             return MakeBox<LetStatement>(std::move(identifier), typeSpecifier, nullptr, span);

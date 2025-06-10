@@ -4,6 +4,7 @@
 #include <exception>
 #include <iostream>
 #include <fstream>
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -27,7 +28,7 @@ namespace Marble
             std::fstream file(m_FileName);
             if (!file.is_open())
             {
-                throw std::runtime_error("Cannot open file");
+                ErrorSystem::AddError("Cannot open file named" + m_FileName, nullptr);
             }
             m_Content = std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
         }

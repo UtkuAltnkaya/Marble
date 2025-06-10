@@ -13,14 +13,14 @@ namespace Marble
             parent = parent->Iter().Parent().Ok().Find();
         }
 
-        FunctionSymbolNode *fnNode = static_cast<FunctionSymbolNode *>(parent);
+        FunctionSymbolNode *fnNode = parent->Into<FunctionSymbolNode>();
 
         if (m_Expression)
         {
             Ref<TypeSpecifier> ts = m_Expression->Analyze();
             if (*ts == *fnNode->ReturnType())
             {
-                TypeSpecifierOk;
+                return TypeSpecifierOk;
             }
         }
         else if (fnNode->ReturnType()->GetType() == Types::Void)

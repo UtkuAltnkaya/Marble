@@ -8,7 +8,7 @@ namespace Marble
         if (m_Value)
         {
             Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze();
-            if (!typeSpecifier)
+            if (!m_TypeSpecifier)
             {
                 m_TypeSpecifier = typeSpecifier;
             }

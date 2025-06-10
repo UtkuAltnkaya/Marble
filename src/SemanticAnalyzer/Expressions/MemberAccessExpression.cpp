@@ -3,14 +3,9 @@
 
 namespace Marble
 {
-    static void CheckObjectExpressionType(ExpressionType expressionType);
-    static Ref<TypeSpecifier> AnalyzeMethod(FunctionCallExpression *fnCallExpression);
-    static Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression);
-    static void CheckAccessSpecifier(SymbolAccess access);
-
     Ref<TypeSpecifier> MemberAccessExpression::Analyze()
     {
-        CheckObjectExpressionType(m_Object->ExpressionType());
+        CheckObjectExpressionType();
         Ref<TypeSpecifier> objectType = m_Object->Analyze();
 
         const Identifier *identifier;
@@ -74,9 +69,9 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
-    void CheckObjectExpressionType(ExpressionType expressionType)
+    void MemberAccessExpression::CheckObjectExpressionType()
     {
-        switch (expressionType)
+        switch (m_Object->ExpressionType())
         {
         case ExpressionType::Binary:
         case ExpressionType::Assignment:
@@ -93,19 +88,24 @@ namespace Marble
         }
     }
 
-    Ref<TypeSpecifier> AnalyzeMethod(FunctionCallExpression *fnCallExpression)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(FunctionCallExpression *fnCallExpression)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
+        const IdentifierExpression *identifierExpression = fnCallExpression->FnName().TryInto<IdentifierExpression>();
+        if (identifierExpression)
+        {
+            throw "Function name must be identifier expression";
+        }
         SymbolNode *fnNode = structSymbol->Iter()
-                                 .Function(fnCallExpression->FnName().TryInto<IdentifierExpression>()->GetIdentifier().Id())
+                                 .Function(identifierExpression->GetIdentifier().Id())
                                  .Ok()
                                  .Find();
         CheckAccessSpecifier(fnNode->GetSymbolData().Access());
         return fnCallExpression->Analyze();
     }
 
-    Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(IdentifierExpression *identifierExpression)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
@@ -117,7 +117,7 @@ namespace Marble
         return identifierExpression->Analyze();
     }
 
-    void CheckAccessSpecifier(SymbolAccess access)
+    void MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)
     {
         if (access == SymbolAccess::Public)
         {

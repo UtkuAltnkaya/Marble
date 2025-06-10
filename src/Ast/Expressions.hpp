@@ -9,6 +9,10 @@
 
 namespace Marble
 {
+  class FunctionCallExpression;
+  class IdentifierExpression;
+  enum class SymbolAccess;
+
   enum class ExpressionType
   {
     ArrayInit,
@@ -122,7 +126,7 @@ namespace Marble
       static_assert(std::is_base_of<Expression, T>::value, "Type of paramater must be expression");
       if (T::StaticType != m_ExpressionType)
       {
-        throw "Expression types are not matched";
+        return nullptr;
       }
       return static_cast<T *>(this);
     }
@@ -141,7 +145,7 @@ namespace Marble
       static_assert(std::is_base_of<Expression, T>::value, "Type of paramater must be expression");
       if (T::StaticType != m_ExpressionType)
       {
-        throw "Expression types are not matched";
+        return nullptr;
       }
       return static_cast<const T *>(this);
     }
@@ -301,6 +305,12 @@ namespace Marble
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
     Ref<TypeSpecifier> Analyze() override;
+
+  private:
+    void CheckObjectExpressionType();
+    Ref<TypeSpecifier> AnalyzeMethod(FunctionCallExpression *fnCallExpression);
+    Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression);
+    void CheckAccessSpecifier(SymbolAccess access);
 
   private:
     Box<Expression> m_Object;

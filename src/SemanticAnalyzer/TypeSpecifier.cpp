@@ -2,7 +2,7 @@
 
 namespace Marble
 {
-    bool TypeSpecifier::IsPrimitive()
+    bool TypeSpecifier::IsPrimitive() const
     {
         return m_Type == Types::Int ||
                m_Type == Types::Usize ||
@@ -18,6 +18,11 @@ namespace Marble
         if (m_Type != obj.m_Type)
         {
             return false;
+        }
+
+        if (this->IsPrimitive() && obj.IsPrimitive())
+        {
+            return true;
         }
 
         if (m_Type == Types::Pointer)

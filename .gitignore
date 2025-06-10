@@ -2,3 +2,4 @@ build
 .vscode
 .cache
 .fleet
+cmake-build-debug

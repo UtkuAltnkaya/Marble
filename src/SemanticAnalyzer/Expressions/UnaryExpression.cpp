@@ -1,5 +1,4 @@
 #include "Ast/Expressions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
 #include "Utils/Macros.hpp"
 
 namespace Marble
@@ -13,13 +12,13 @@ namespace Marble
         case UnaryExpressionType::Prefix:
             return AnalyzePrefix();
         }
-        UNREACHABLE;
+        UNREACHABLE();
     }
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzePostFix()
     {
 
-        switch (m_ExpressionType)
+        switch (m_Value->ExpressionType())
         {
         case ExpressionType::Identifier:
         case ExpressionType::MemberAccess:
@@ -53,12 +52,12 @@ namespace Marble
         case UnaryOperators::BitwiseNot:
             return AnalyzeNot();
         }
-        UNREACHABLE;
+        UNREACHABLE();
     }
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzeArithmetic()
     {
-        switch (m_ExpressionType)
+        switch (m_Value->ExpressionType())
         {
         case ExpressionType::ObjectInit:
         case ExpressionType::ArrayInit:
@@ -73,7 +72,7 @@ namespace Marble
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzeAddress()
     {
-        switch (m_ExpressionType)
+        switch (m_Value->ExpressionType())
         {
         case ExpressionType::Identifier:
         case ExpressionType::MemberAccess:
@@ -90,7 +89,7 @@ namespace Marble
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzePointer()
     {
-        switch (m_ExpressionType)
+        switch (m_Value->ExpressionType())
         {
         case ExpressionType::Identifier:
         case ExpressionType::MemberAccess:
@@ -113,7 +112,7 @@ namespace Marble
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzeNot()
     {
-        switch (m_ExpressionType)
+        switch (m_Value->ExpressionType())
         {
         case ExpressionType::ObjectInit:
         case ExpressionType::ArrayInit:
@@ -142,7 +141,7 @@ namespace Marble
             }
             throw "Type not supported for the operation";
         }
-        UNREACHABLE;
+        UNREACHABLE();
     }
 
     void UnaryExpression::CheckType(Ref<TypeSpecifier> expressionType)

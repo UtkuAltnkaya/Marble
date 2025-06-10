@@ -1,6 +1,7 @@
 #include "Ast/Definitions.hpp"
 #include "Ast/AccessSpecifier.hpp"
 #include "Parser/Parser.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -30,13 +31,12 @@ namespace Marble
         case TokenType::Impl:
             if (accessSpecifier == AccessSpecifier::Public)
             {
-                throw "Unexpected access specifier";
-                // throw SyntacticError(parser, "Unexpected access specifier");
+                ErrorSystem::AddError(parser, "Unexpected access specifier");
             }
             return ImplDefinition::Parse(parser);
         default:
-            // return SyntacticError(parser, "Unknown definition");
-            throw "Unknown definition";
+            ErrorSystem::AddError(parser, "Unexpected definition");
         }
+        return nullptr;
     }
 } // namespace Marble

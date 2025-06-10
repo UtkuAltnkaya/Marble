@@ -1,8 +1,10 @@
 #pragma once
 
 #include <functional>
-#include "Parser/Parser.hpp"
 #include <vector>
+
+#include "Parser/Parser.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -23,8 +25,7 @@ namespace Marble
                 }
                 if (parser.Current().TokenType() == TokenType::Eof)
                 {
-                    throw std::string("Missing") + TokenTypeToString(closeToken);
-                    // throw SyntacticError(parser, std::string("Missing") + token_type_to_str(close));
+                    ErrorSystem::AddError(parser, std::string("Missing") + TokenTypeToString(closeToken));
                 }
                 vec.push_back(callback(parser));
 
@@ -38,8 +39,8 @@ namespace Marble
                 {
                     break;
                 }
-                throw std::string("Expect Comma or ") + TokenTypeToString(closeToken) + " but found " + TokenTypeToString(parser.Current().TokenType());
-                // throw SyntacticError(parser, std::string("Expect Comma or ") + token_type_to_str(close) + " but found " + token_type_to_str(parser.get_current().get_token_type()));
+                std::string errMessage = std::string("Expect Comma or ") + TokenTypeToString(closeToken) + " but found " + TokenTypeToString(parser.Current().TokenType());
+                ErrorSystem::AddError(parser, errMessage);
             }
         }
 

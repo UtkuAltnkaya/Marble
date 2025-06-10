@@ -1,16 +1,19 @@
 #include "Marble/Compiler.hpp"
 #include <iostream>
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
     Compiler::Compiler(int argc, char const *argv[]) : m_ArgParserBuilder{argc, argv}
     {
         AddArgs();
+        ErrorSystem::Init();
         SymbolTable::Init();
     }
 
     Compiler::~Compiler()
     {
+        ErrorSystem::Shutdown();
         SymbolTable::ShutDown();
     }
 
@@ -29,9 +32,8 @@ namespace Marble
 
         if (!optionalFileName.has_value())
         {
-            throw "Filename required";
+            ErrorSystem::AddError("Filename required");
         }
-
         File file{optionalFileName.value()};
         Ref<Program> program = nullptr;
         {

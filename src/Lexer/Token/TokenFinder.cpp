@@ -1,6 +1,7 @@
 #include <cctype>
 #include "Lexer/Token/TokenFinder.hpp"
 #include "TokenFinder.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -58,8 +59,7 @@ namespace Marble
 
             if (count > 1)
             {
-                throw "'.' occurs more than once!";
-                // throw LexicalError(lexer, "'.' occurs more than once!");
+                ErrorSystem::AddError(lexer, "'.' occurs more than once!");
             }
 
             return MakeBox<Token>(lexer, TokenType::Number);
@@ -74,14 +74,12 @@ namespace Marble
             {
                 if (lexer.Cursor() >= lexer.File().Content().length())
                 {
-                    throw "\" not closed";
-                    // throw LexicalError(lexer, "\" not closed");
+                    ErrorSystem::AddError(lexer, "\" not closed");
                 }
                 IsEscapeChar(lexer);
                 if (lexer.CurrentChar() == '\n')
                 {
-                    throw "String should not contain new line";
-                    // throw LexicalError(lexer, "String should not contain new line");
+                    ErrorSystem::AddError(lexer, "String should not contain new line");
                 }
                 lexer.NextChar();
             }
@@ -99,7 +97,7 @@ namespace Marble
             lexer.NextChar();
             Box<Token> token = MakeBox<Token>(lexer, TokenType::Char);
             lexer.NextChar();
-            return Box<Token>();
+            return token;
         }
 
         Box<Token> Deliminator(Lexer &lexer)
@@ -246,8 +244,7 @@ namespace Marble
             lexer.NextChar();
             if (!CheckEscape(lexer.CurrentChar()))
             {
-                throw "Unknown escape sequence";
-                // throw LexicalError(lexer, "Unknown escape sequence");
+                ErrorSystem::AddError(lexer, "Unknown escape sequence");
             }
         }
 

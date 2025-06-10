@@ -1,6 +1,4 @@
-
 #include "Ast/Statements.hpp"
-#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {

@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "Parser/Parser.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -32,8 +33,7 @@ namespace Marble
         case Precedence::NameSpace:
             return NamespaceExpression::Parse(parser, precedence);
         case Precedence::END:
-            throw "Unknown Expression";
-            // throw SyntacticError(parser, "Unknown Expression");
+            ErrorSystem::AddError(parser, "Unknown Expression");
         default:
             return nullptr;
         }

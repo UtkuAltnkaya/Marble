@@ -1,6 +1,8 @@
+#include "Utils/Macros.hpp"
 #include "Ast/TypeSpecifier.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -39,7 +41,8 @@ namespace Marble
         {
             return std::get<Identifier>(m_Variants);
         }
-        throw "Cannot get the user define type";
+        ErrorSystem::AddError("Cannot get the user define type");
+        UNREACHABLE();
     }
 
     const ArrayType &TypeSpecifier::Array()
@@ -48,7 +51,8 @@ namespace Marble
         {
             return std::get<ArrayType>(m_Variants);
         }
-        throw "Cannot get the array type";
+        ErrorSystem::AddError("Cannot get the array type");
+        UNREACHABLE();
     }
 
     const PointerType &TypeSpecifier::Pointer()
@@ -57,7 +61,8 @@ namespace Marble
         {
             return std::get<PointerType>(m_Variants);
         }
-        throw "Cannot get the pointer type";
+        ErrorSystem::AddError("Cannot get the pointer type");
+        UNREACHABLE();
     }
 
     const GenericType &TypeSpecifier::Generic()
@@ -66,7 +71,8 @@ namespace Marble
         {
             return std::get<GenericType>(m_Variants);
         }
-        throw "Cannot get the generic type";
+        ErrorSystem::AddError("Cannot get the generic type");
+        UNREACHABLE();
     }
 
     Ref<TypeSpecifier> TypeSpecifier::Parse(Parser &parser)
@@ -125,7 +131,7 @@ namespace Marble
         int size = std::stoi(parser.Current().Text());
         if (size <= 0)
         {
-            throw "Array sizes cannot be negative or zero!";
+            ErrorSystem::AddError(parser, "Array sizes cannot be negative or zero!");
         }
         parser.NextTokenAndExpect(TokenType::CloseBracket);
 
@@ -147,8 +153,7 @@ namespace Marble
         const ArrayType &arrayType = array->Array();
         if (arrayType.TypeSpecifier->m_Type == Types::ArrayType)
         {
-            // throw SyntacticError(parser, "Arrays can only be 1 or 2 dimensional");
-            throw "Arrays can only be 1 or 2 dimensional";
+            ErrorSystem::AddError(parser, "Arrays can only be 1 or 2 dimensional");
         }
         Span span{Span{array->GetSpan().Start, end.Start}};
         return MakeRef<TypeSpecifier>(ArrayType{array, size}, span);
@@ -174,7 +179,7 @@ namespace Marble
                                                 Ref<TypeSpecifier> genericType = TypeSpecifier::Parse(parser);
                                                 if (genericType->m_Type == Types::ArrayType)
                                                 {
-                                                    throw "Array cannot be argument for generics";
+                                                    ErrorSystem::AddError(parser, "Array cannot be argument for generics");
                                                 }
                                                 return genericType; });
 
@@ -204,9 +209,9 @@ namespace Marble
         case TokenType::Void:
             return Types::Void;
         default:
-            // throw SyntacticError(parser, "Unknown TypeSpecifier");
-            throw "Unknown TypeSpecifier";
+            ErrorSystem::AddError(parser, "Unknown TypeSpecifier");
         }
+        return Types::END;
     }
 
 } // namespace Marble

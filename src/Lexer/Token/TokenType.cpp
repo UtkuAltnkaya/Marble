@@ -1,4 +1,5 @@
 #include "TokenType.hpp"
+#include "Utils/Macros.hpp"
 
 namespace Marble
 {
@@ -149,7 +150,7 @@ namespace Marble
         case TokenType::Eof:
             return "Eof";
         default:
-            return "UNREACHABLE";
+            UNREACHABLE();
         }
     }
 

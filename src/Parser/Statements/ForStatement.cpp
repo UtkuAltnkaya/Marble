@@ -1,3 +1,4 @@
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "Ast/Statements.hpp"
 #include "Parser/Parser.hpp"
 
@@ -28,7 +29,7 @@ namespace Marble
             assignmentExpression = std::move(Expression::Parse(parser));
             if (assignmentExpression->ExpressionType() != ExpressionType::Assignment)
             {
-                throw "Expect assignment expression";
+                ErrorSystem::AddError(parser, "Expect assignment expression");
             }
             parser.NextToken();
         }

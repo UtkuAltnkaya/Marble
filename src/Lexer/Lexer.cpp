@@ -1,5 +1,6 @@
 #include "Lexer/Lexer.hpp"
 #include "Lexer/Token/TokenFinder.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 #include <cctype>
 
 namespace Marble
@@ -49,8 +50,8 @@ namespace Marble
             return token;
         }
 
-        // throw LexicalError(*this, "Unkown Token!");
-        throw "Unkown Token!";
+        ErrorSystem::AddError(*this, "Unkown Token!");
+        return nullptr;
     }
 
     LexerStates Lexer::GetLexerState()

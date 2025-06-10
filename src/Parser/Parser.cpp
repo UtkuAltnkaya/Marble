@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "Parser.hpp"
 #include "Lexer/Token/TokenType.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -20,8 +21,8 @@ namespace Marble
     {
         if (m_Current->TokenType() != tokenType)
         {
-            // throw SyntacticError(*this, std::string("Expect ") + token_type_to_str(token_type) + " but found " + token_type_to_str(this->current->get_token_type()));
-            throw std::string("Expect ") + TokenTypeToString(tokenType) + " but found " + TokenTypeToString(m_Current->TokenType());
+            std::string errMessage = std::string("Expect ") + TokenTypeToString(tokenType) + " but found " + TokenTypeToString(m_Current->TokenType());
+            ErrorSystem::AddError(*this, errMessage);
         }
 
         return *m_Current.get();

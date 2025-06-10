@@ -1,4 +1,5 @@
 #include "Ast/Statements.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "Parser/Parser.hpp"
 
 namespace Marble
@@ -29,8 +30,8 @@ namespace Marble
         case TokenType::If:
             return IfStatement::Parse(parser);
         default:
-            //  throw SyntacticError(parser, "Unknown Statement!");
-            throw "Unknown Statement!";
+            ErrorSystem::AddError(parser, "Unknown Statement!");
         }
+        return nullptr;
     }
 } // namespace Marble

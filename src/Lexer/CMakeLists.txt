@@ -7,3 +7,5 @@ target_include_directories(lexer
     PUBLIC
         ${PROJECT_DIR}
 )
+
+target_link_libraries(lexer PRIVATE errorSystem)

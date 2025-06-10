@@ -31,9 +31,9 @@ namespace Marble
         T *TryInto()
         {
             static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
-            if (T::StaticType != m_ExpressionType)
+            if (T::StaticType != m_SymbolData.NodeType())
             {
-                throw "Expression types are not matched";
+                return nullptr;
             }
             return static_cast<T *>(this);
         }
@@ -42,7 +42,7 @@ namespace Marble
         T *Into()
         {
             static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
-            assert(m_ExpressionType == T::StaticType && "Invalid cast in SymbolNode::Into");
+            assert(m_SymbolData.NodeType() == T::StaticType && "Invalid cast in SymbolNode::Into");
             return static_cast<T *>(this);
         }
 
@@ -50,9 +50,9 @@ namespace Marble
         const T *TryInto() const
         {
             static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
-            if (T::StaticType != m_ExpressionType)
+            if (T::StaticType != m_SymbolData.NodeType())
             {
-                throw "Expression types are not matched";
+                return nullptr;
             }
             return static_cast<const T *>(this);
         }
@@ -61,7 +61,7 @@ namespace Marble
         const T *Into() const
         {
             static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
-            assert(m_ExpressionType == T::StaticType && "Invalid cast in SymbolNode::Into");
+            assert(m_SymbolData.NodeType() == T::StaticType && "Invalid cast in SymbolNode::Into");
             return static_cast<const T *>(this);
         }
 
@@ -74,6 +74,8 @@ namespace Marble
     class FunctionSymbolNode : public SymbolNode
     {
     public:
+        static constexpr SymbolNodeTypes StaticType = SymbolNodeTypes::Function;
+
         FunctionSymbolNode(const FunctionDefinition &fnDefinition, SymbolNode *parent);
         FunctionSymbolNode(const MemberFunctionDefinition &memberFunction, SymbolNode *parent);
         ~FunctionSymbolNode() = default;
@@ -89,6 +91,8 @@ namespace Marble
     class VariableSymbolNode : public SymbolNode
     {
     public:
+        static constexpr SymbolNodeTypes StaticType = SymbolNodeTypes::Variable;
+
         VariableSymbolNode(SymbolAccess access, SymbolNode *parent, Ref<TypeSpecifier> typeSpecifier);
         VariableSymbolNode(const VariableType &variableType, SymbolNode *parent);
         VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent);

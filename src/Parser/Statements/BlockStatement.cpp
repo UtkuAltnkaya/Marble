@@ -1,4 +1,4 @@
-
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "Ast/Statements.hpp"
 #include "Parser/Parser.hpp"
 
@@ -30,10 +30,8 @@ namespace Marble
             }
             if (parser.Current().TokenType() == TokenType::Eof)
             {
-                // throw SyntacticError(parser, "Missing close curly brace '}'");
-                throw "Missing close curly brace '}'";
+                ErrorSystem::AddError(parser, "Missing close curly brace '}'");
             }
-
             if (IsStatement(parser.Current().TokenType()))
             {
                 statements.push_back(Statement::Parse(parser));

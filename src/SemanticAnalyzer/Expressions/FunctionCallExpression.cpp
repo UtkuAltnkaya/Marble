@@ -8,6 +8,10 @@ namespace Marble
     Ref<TypeSpecifier> FunctionCallExpression::Analyze()
     {
         IdentifierExpression *identifierExpression = m_FnName->TryInto<IdentifierExpression>();
+        if (!identifierExpression)
+        {
+            throw "Function name must be an identifier expression";
+        }
         SymbolNode *node = GetFunctionNode();
         FunctionSymbolNode *fnNode = node->Iter()
                                          .Function(identifierExpression->GetIdentifier().Id())

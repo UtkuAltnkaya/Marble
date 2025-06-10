@@ -67,7 +67,7 @@ namespace Marble
         const GenericType &Generic();
         inline const Types GetType() { return m_Type; }
         inline void SetType(Types type) { m_Type = type; }
-        bool IsPrimitive();
+        bool IsPrimitive() const;
         bool operator==(const TypeSpecifier &obj) const;
         bool operator!=(const TypeSpecifier &obj) const;
 
