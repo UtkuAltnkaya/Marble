@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <string>
 #include <string_view>
 
@@ -24,16 +25,9 @@ namespace Marble
         SymbolIterator &Variable(std::string_view name);
         SymbolIterator &StructField(std::string_view name);
         size_t Count(SymbolNodeTypes filter);
+        inline bool IsFound() const { return !m_Flag; }
+        SymbolIterator &Reset();
         // TODO:SymbolIterator &EnumField(std::string_view name);
-
-        SymbolIterator &Ok()
-        {
-            if (!m_Flag)
-            {
-                return *this;
-            }
-            throw "Cannot find " + std::to_string((int)m_NodeType) + " node in this scope";
-        }
 
     private:
         SymbolNode *const Find(std::string_view name, SymbolNodeTypes nodeType);
@@ -41,6 +35,7 @@ namespace Marble
 
     private:
         SymbolNode *m_Node;
+        SymbolNode *m_StartNode;
         SymbolNodeTypes m_NodeType;
         bool m_Flag;
     };

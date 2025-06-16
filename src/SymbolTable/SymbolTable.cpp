@@ -1,3 +1,4 @@
+#include <iostream>
 #include <assert.h>
 #include "SymbolTable/SymbolTable.hpp"
 #include "SymbolTable.hpp"
@@ -8,7 +9,8 @@ namespace Marble
 
     SymbolTable::SymbolTable()
     {
-        m_Root = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Global}, nullptr};
+        m_Root = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Global, SymbolNodeBaseTypes::None}, nullptr};
+        m_CurrentScope.push(m_Root);
     }
 
     SymbolTable::~SymbolTable()

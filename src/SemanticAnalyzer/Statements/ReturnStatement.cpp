@@ -10,11 +10,19 @@ namespace Marble
 
         while (parent && parent->GetSymbolData().NodeType() != SymbolNodeTypes::Function)
         {
-            parent = parent->Iter().Parent().Ok().Find();
+            if (auto node = parent->Iter().Parent().Find(); node)
+            {
+                parent = node;
+            }
+            else
+            {
+                throw "Cannot find any parent of this symbol";
+            }
         }
 
         FunctionSymbolNode *fnNode = parent->Into<FunctionSymbolNode>();
 
+        // TODO: Warn if local addresses returns
         if (m_Expression)
         {
             Ref<TypeSpecifier> ts = m_Expression->Analyze();

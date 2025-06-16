@@ -9,7 +9,6 @@ namespace Marble
                m_Type == Types::Float ||
                m_Type == Types::Double ||
                m_Type == Types::Char ||
-               m_Type == Types::Str ||
                m_Type == Types::Bool;
     }
 

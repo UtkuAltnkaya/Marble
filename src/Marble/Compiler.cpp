@@ -42,11 +42,7 @@ namespace Marble
             program = parser.Parse();
         }
 
-        int x = 10;
-        x = 1;
-
         program->Analyze();
-        std::cout << x << std::endl;
     }
 
     void Compiler::AddArgs()

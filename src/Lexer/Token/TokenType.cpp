@@ -147,6 +147,8 @@ namespace Marble
             return "Dot";
         case TokenType::Arrow:
             return "Arrow";
+        case TokenType::Null:
+            return "Null";
         case TokenType::Eof:
             return "Eof";
         default:

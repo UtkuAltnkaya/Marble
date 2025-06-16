@@ -3,8 +3,8 @@
 
 namespace Marble
 {
+    static SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name);
 
-    static SymbolNode *GetFunctionNode();
     Ref<TypeSpecifier> FunctionCallExpression::Analyze()
     {
         IdentifierExpression *identifierExpression = m_FnName->TryInto<IdentifierExpression>();
@@ -12,12 +12,21 @@ namespace Marble
         {
             throw "Function name must be an identifier expression";
         }
-        SymbolNode *node = GetFunctionNode();
-        FunctionSymbolNode *fnNode = node->Iter()
-                                         .Function(identifierExpression->GetIdentifier().Id())
-                                         .Ok()
-                                         .Find()
-                                         ->Into<FunctionSymbolNode>();
+        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolNode *scope = table.CurrentScope();
+        SymbolNode *node = GetFunctionNode(scope, identifierExpression->GetIdentifier().Id());
+
+        if (!node)
+        {
+            node = GetFunctionNode(table.Root(), identifierExpression->GetIdentifier().Id());
+            if (!node)
+            {
+                throw "Cannot find the function";
+            }
+        }
+
+        FunctionSymbolNode *fnNode = node->Into<FunctionSymbolNode>();
+
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();
 
         if (params.size() < m_Args.size())
@@ -39,17 +48,9 @@ namespace Marble
         return fnNode->ReturnType();
     }
 
-    SymbolNode *GetFunctionNode()
+    SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *scope = table.CurrentScope();
-        SymbolNodeTypes nodeType = scope->GetSymbolData().NodeType();
-        if (nodeType != SymbolNodeTypes::Enum && nodeType != SymbolNodeTypes::Struct)
-        {
-            return table.Root();
-        }
-        // Leave enum or struct scope
-        table.LeaveScope();
-        return scope;
+        return scope->Iter().Function(name).Find();
     }
+
 } // namespace Marble

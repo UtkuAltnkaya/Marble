@@ -26,6 +26,7 @@ namespace Marble
         Pointer,
         ArrayType,
         GenericType,
+        Null,
         END
     };
 

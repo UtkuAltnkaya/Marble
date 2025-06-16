@@ -73,6 +73,7 @@ namespace Marble
         False,
         Defer,
         As,
+        Null,
         // KEYWORDS END
 
         Number,

@@ -112,6 +112,7 @@ namespace Marble
         m_Keywords.insert({std::string_view("pub"), TokenType::Pub});
         m_Keywords.insert({std::string_view("true"), TokenType::True});
         m_Keywords.insert({std::string_view("false"), TokenType::False});
+        m_Keywords.insert({std::string_view("null"), TokenType::Null});
         m_Keywords.insert({std::string_view("defer"), TokenType::Defer});
         m_Keywords.insert({std::string_view("as"), TokenType::As});
     }

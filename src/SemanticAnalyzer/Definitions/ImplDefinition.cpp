@@ -30,8 +30,12 @@ namespace Marble
         const SymbolNode *node = table.CurrentScope();
         SymbolNode *fnNode = node->Iter()
                                  .Function(m_Prototype->GetName().Id())
-                                 .Ok()
                                  .Find();
+        if (!fnNode)
+        {
+            throw "Cannot find function in this scope";
+        }
+
         table.EnterScope(fnNode);
         m_Block->Analyze();
         table.LeaveScope();
@@ -62,7 +66,7 @@ namespace Marble
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *node = table.Root();
 
-        if (m_ImplName->IsPrimitive())
+        if (!m_ImplName->IsPrimitive())
         {
             node = HandleRoot(node);
         }
@@ -82,6 +86,10 @@ namespace Marble
         {
             return symbolNode;
         }
-        return iter.Enum(name).Ok().Find();
+        if (auto symbolNode = iter.Reset().Enum(name).Find(); node)
+        {
+            return symbolNode;
+        }
+        throw "No such struct or enum";
     }
 } // namespace Marble

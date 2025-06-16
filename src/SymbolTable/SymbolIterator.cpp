@@ -6,12 +6,12 @@
 namespace Marble
 {
     SymbolIterator::SymbolIterator(SymbolNode *node)
-        : m_Node{node}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
+        : m_Node{node}, m_StartNode{node}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
     {
     }
 
     SymbolIterator::SymbolIterator(const SymbolNode *node)
-        : m_Node{const_cast<SymbolNode *>(node)}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
+        : m_Node{const_cast<SymbolNode *>(node)}, m_StartNode{const_cast<SymbolNode *>(node)}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
     {
     }
 
@@ -94,11 +94,18 @@ namespace Marble
         SetNode(node);
         return *this;
     }
+    SymbolIterator &SymbolIterator::Reset()
+    {
+        SetNode(m_StartNode);
+        m_NodeType = m_StartNode->GetSymbolData().NodeType();
+        m_Flag = false;
+        return *this;
+    }
 
     size_t SymbolIterator::Count(SymbolNodeTypes filter)
     {
         size_t i = 0;
-        for (auto &&[key, value] : m_Node->m_Children)
+        for (auto &[key, value] : m_Node->m_Children)
         {
             if (filter == value->m_SymbolData.NodeType())
             {

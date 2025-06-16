@@ -10,16 +10,16 @@ namespace Marble
     }
 
     SymbolNode::SymbolNode(const EnumDefinition &enumDefinition, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()), SymbolNodeTypes::Enum}, parent}
+        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()), SymbolNodeTypes::Enum, SymbolNodeBaseTypes::None}, parent}
     {
         for (auto &enumField : enumDefinition.GetFields())
         {
-            Insert(enumField->Id(), new SymbolNode{SymbolData{SymbolAccess::Public, SymbolNodeTypes::EnumField}, this});
+            Insert(enumField->Id(), new SymbolNode{SymbolData{SymbolAccess::Public, SymbolNodeTypes::EnumField, SymbolNodeBaseTypes::None}, this});
         }
     }
 
     SymbolNode::SymbolNode(const StructDefinition &structDefinition, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()), SymbolNodeTypes::Struct}, parent}
+        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()), SymbolNodeTypes::Struct, SymbolNodeBaseTypes::None}, parent}
     {
         for (auto &structField : structDefinition.GetFields())
         {
@@ -42,12 +42,19 @@ namespace Marble
 
     void SymbolNode::Insert(const std::string &name, SymbolNode *node)
     {
-        // TODO Check node with same name
-        m_Children[name] = node;
+        if (m_Children.find(name) == m_Children.end())
+        {
+            m_Children.insert({name, node});
+            return;
+        }
+        throw "Duplicate identifier";
     }
 
     FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()), SymbolNodeTypes::Function}, parent}
+        : SymbolNode{
+              SymbolData{SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()),
+                         SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function},
+              parent}
     {
         m_ReturnType = fnDefinition.GetReturnType();
         const std::vector<Box<VariableType>> &params = fnDefinition.GetParams();
@@ -55,13 +62,14 @@ namespace Marble
         for (auto &param : params)
         {
             m_Params.push_back(param->GetTypeSpecifier());
+            Insert(param->GetIdentifier().Id(), new VariableSymbolNode{*param, this});
         }
     }
 
     FunctionSymbolNode::FunctionSymbolNode(const MemberFunctionDefinition &memberFunction, SymbolNode *parent)
         : SymbolNode{SymbolData{
                          SymbolData::FromAccessSpecifier(memberFunction.GetPrototype().GetAccessSpecifier()),
-                         SymbolNodeTypes::Function},
+                         SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function},
                      parent}
     {
         const MemberFunctionPrototypeDefinition &prototype = memberFunction.GetPrototype();
@@ -81,26 +89,27 @@ namespace Marble
     }
 
     VariableSymbolNode::VariableSymbolNode(SymbolAccess access, SymbolNode *parent, Ref<TypeSpecifier> typeSpecifier)
-        : SymbolNode{SymbolData{access, SymbolNodeTypes::Variable}, parent}, m_TypeSpecifier{typeSpecifier}
+        : SymbolNode{SymbolData{access, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}, m_TypeSpecifier{typeSpecifier}
     {
     }
 
     VariableSymbolNode::VariableSymbolNode(const VariableType &variableType, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable}, parent}
+        : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}
     {
         m_TypeSpecifier = variableType.GetTypeSpecifier();
     }
 
     VariableSymbolNode::VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent)
         : SymbolNode{
-              SymbolData{SymbolData::FromAccessSpecifier(structField.GetAccessSpecifier()), SymbolNodeTypes::StructField},
+              SymbolData{SymbolData::FromAccessSpecifier(structField.GetAccessSpecifier()),
+                         SymbolNodeTypes::StructField, SymbolNodeBaseTypes::Variable},
               parent}
     {
         m_TypeSpecifier = structField.GetField().GetTypeSpecifier();
     }
 
     VariableSymbolNode::VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable}, parent}
+        : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}
     {
         m_TypeSpecifier = letStmt.GetTypeSpecifier();
     }

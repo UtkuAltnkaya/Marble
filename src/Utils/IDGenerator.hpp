@@ -1,3 +1,5 @@
+#pragma once
+
 #include <random>
 #include <string>
 #include <sstream>
@@ -5,10 +7,9 @@
 
 namespace Marble
 {
-    class IDGenerator
+    namespace IDGenerator
     {
-    public:
-        static std::string Generate()
+        inline std::string Generate()
         {
             static std::random_device s_RandomDevice;
             static std::mt19937 s_Generator(s_RandomDevice());
@@ -22,6 +23,6 @@ namespace Marble
 
             return ss.str();
         }
-    };
+    } // namespace IDGenerator
 
 } // namespace Marble

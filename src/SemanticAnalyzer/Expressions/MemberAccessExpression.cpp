@@ -37,27 +37,35 @@ namespace Marble
         }
 
         SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *iter = table.Iter().Struct(identifier->Id()).Ok().Find();
+        SymbolNode *iter = table.Iter().Struct(identifier->Id()).Find();
+
+        if (!iter)
+        {
+            throw "Cannot find struct in this scope";
+        }
 
         table.EnterScope(iter);
         Ref<TypeSpecifier> typeSpecifier;
+        bool isPublic = false;
         switch (m_Property->ExpressionType())
         {
         case ExpressionType::Identifier:
         {
             IdentifierExpression *identifierExpression = m_Property->Into<IdentifierExpression>();
-            typeSpecifier = AnalyzeIdentifier(identifierExpression);
+            typeSpecifier = AnalyzeIdentifier(identifierExpression, isPublic);
             break;
         }
         case ExpressionType::FunctionCall:
         {
             FunctionCallExpression *fnCallExpression = m_Property->Into<FunctionCallExpression>();
-            typeSpecifier = AnalyzeMethod(fnCallExpression);
+            typeSpecifier = AnalyzeMethod(fnCallExpression, isPublic);
             break;
         }
         case ExpressionType::MemberAccess:
+        case ExpressionType::ArrayIndex:
         {
-            typeSpecifier = m_Property->Analyze();
+            table.LeaveScope();
+            return m_Property->Analyze();
         }
         default:
         {
@@ -66,7 +74,19 @@ namespace Marble
         }
         }
         table.LeaveScope();
-        return TypeSpecifierOk;
+        if (isPublic)
+        {
+            return typeSpecifier;
+        }
+
+        if (auto parentNode = table.CurrentScope()->Iter().Parent().Find(); parentNode)
+        {
+            if (parentNode != iter)
+            {
+                throw "Property is private";
+            }
+        }
+        return typeSpecifier;
     }
 
     void MemberAccessExpression::CheckObjectExpressionType()
@@ -88,42 +108,46 @@ namespace Marble
         }
     }
 
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(FunctionCallExpression *fnCallExpression)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(FunctionCallExpression *fnCallExpression, bool &isPublic)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
         const IdentifierExpression *identifierExpression = fnCallExpression->FnName().TryInto<IdentifierExpression>();
-        if (identifierExpression)
+        if (!identifierExpression)
         {
             throw "Function name must be identifier expression";
         }
         SymbolNode *fnNode = structSymbol->Iter()
                                  .Function(identifierExpression->GetIdentifier().Id())
-                                 .Ok()
                                  .Find();
-        CheckAccessSpecifier(fnNode->GetSymbolData().Access());
+        if (!fnNode)
+        {
+            throw "Cannot find method";
+        }
+
+        isPublic = CheckAccessSpecifier(fnNode->GetSymbolData().Access());
         return fnCallExpression->Analyze();
     }
 
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(IdentifierExpression *identifierExpression)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(IdentifierExpression *identifierExpression, bool &isPublic)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
         SymbolNode *fieldNode = structSymbol->Iter()
                                     .StructField(identifierExpression->GetIdentifier().Id())
-                                    .Ok()
                                     .Find();
-        CheckAccessSpecifier(fieldNode->GetSymbolData().Access());
-        return identifierExpression->Analyze();
+        if (!fieldNode)
+        {
+            throw "Cannot find member";
+        }
+        isPublic = CheckAccessSpecifier(fieldNode->GetSymbolData().Access());
+        VariableSymbolNode *variableNode = fieldNode->Into<VariableSymbolNode>();
+        return variableNode->GetTypeSpecifier();
     }
 
-    void MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)
+    bool MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)
     {
-        if (access == SymbolAccess::Public)
-        {
-            return;
-        }
-        throw "Property is private";
+        return access == SymbolAccess::Public;
     }
 
 } // namespace Marble

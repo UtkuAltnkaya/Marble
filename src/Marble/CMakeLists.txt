@@ -9,3 +9,5 @@ target_link_libraries(marble PUBLIC errorSystem lexer parser symbolTable semanti
 
 target_include_directories(marble PUBLIC ${PROJECT_DIR}/Utils)
 
+# target_compile_options(marble PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+# target_link_options(marble PRIVATE -fsanitize=address)

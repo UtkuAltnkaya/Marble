@@ -239,15 +239,7 @@ namespace Marble
     ~CastExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override
-    {
-      Ref<TypeSpecifier> ts = m_Expression->Analyze();
-      if (!ts->IsPrimitive())
-      {
-        throw "Cannot cast the complex type";
-      }
-      return ts;
-    }
+    Ref<TypeSpecifier> Analyze() override;
 
   private:
     Ref<TypeSpecifier> m_TypeSpecifier;
@@ -308,9 +300,10 @@ namespace Marble
 
   private:
     void CheckObjectExpressionType();
-    Ref<TypeSpecifier> AnalyzeMethod(FunctionCallExpression *fnCallExpression);
-    Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression);
-    void CheckAccessSpecifier(SymbolAccess access);
+    Ref<TypeSpecifier> AnalyzeMethod(FunctionCallExpression *fnCallExpression, bool &isPublic);
+    Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression, bool &isPublic);
+
+    bool CheckAccessSpecifier(SymbolAccess access);
 
   private:
     Box<Expression> m_Object;
@@ -347,8 +340,12 @@ namespace Marble
 
     ArrayIndexExpression(Box<Expression> array, Box<Expression> index, Box<Expression> secondIndex, const Span &span);
     ~ArrayIndexExpression() = default;
+    Ref<TypeSpecifier> Analyze() override;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
+
+  private:
+    void AnalyzeIndex(Expression *indexExpression);
 
   private:
     Box<Expression> m_Array;
@@ -365,6 +362,7 @@ namespace Marble
     ~NamespaceExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
 
   private:
     Box<Expression> m_Namespace;
@@ -380,6 +378,7 @@ namespace Marble
     ~ArrayInitExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
 
   private:
     std::vector<Box<Expression>> m_Array;
@@ -395,6 +394,7 @@ namespace Marble
     ~ObjectInitExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze() override;
 
   private:
     Box<Expression> m_Object;
@@ -410,6 +410,7 @@ namespace Marble
     ~FieldExpression() = default;
 
     static Box<Expression> Parse(Parser &parser);
+    Ref<TypeSpecifier> Analyze() override;
 
   private:
     Identifier m_Name;
@@ -426,6 +427,7 @@ namespace Marble
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
     inline const Identifier &GetIdentifier() const { return m_Identifier; }
+    Ref<TypeSpecifier> Analyze() override;
 
   private:
     Identifier m_Identifier;

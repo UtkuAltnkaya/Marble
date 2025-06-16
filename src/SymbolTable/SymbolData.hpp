@@ -22,11 +22,18 @@ namespace Marble
         Variable,
     };
 
+    enum class SymbolNodeBaseTypes
+    {
+        Variable,
+        Function,
+        None,
+    };
+
     class SymbolData
     {
     public:
-        SymbolData(SymbolAccess access, SymbolNodeTypes nodeType)
-            : m_Access{access}, m_NodeType{nodeType}
+        SymbolData(SymbolAccess access, SymbolNodeTypes nodeType, SymbolNodeBaseTypes baseType = SymbolNodeBaseTypes::None)
+            : m_Access{access}, m_NodeType{nodeType}, m_BaseType{baseType}
         {
         }
         ~SymbolData() = default;
@@ -51,11 +58,13 @@ namespace Marble
 
         inline SymbolAccess Access() const { return m_Access; }
         inline SymbolNodeTypes NodeType() const { return m_NodeType; }
+        inline SymbolNodeBaseTypes BaseType() const { return m_BaseType; }
         inline void SetAccess(SymbolAccess access) { m_Access = access; }
 
     private:
         SymbolAccess m_Access;
         SymbolNodeTypes m_NodeType;
+        SymbolNodeBaseTypes m_BaseType;
     };
 
 } // namespace Marble

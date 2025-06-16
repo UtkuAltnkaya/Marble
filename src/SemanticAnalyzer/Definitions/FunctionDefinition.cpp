@@ -9,8 +9,11 @@ namespace Marble
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *iter = table.Iter()
                                .Function(m_FunctionName->Id())
-                               .Ok()
                                .Find();
+        if (!iter)
+        {
+            throw "Cannot find function in this scope";
+        }
 
         table.EnterScope(iter);
         m_Block->Analyze();
