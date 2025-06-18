@@ -8,6 +8,13 @@ namespace Marble
     {
     }
 
+    MemberAccessExpression::MemberAccessExpression(const MemberAccessExpression &obj) : Expression{obj.m_Span, ExpressionType::MemberAccess}
+    {
+        m_Object = obj.m_Object->Clone();
+        m_AccessType = obj.m_AccessType;
+        m_Property = obj.m_Property->Clone();
+    }
+
     Box<Expression> MemberAccessExpression::Parse(Parser &parser, Precedence precedence)
     {
 

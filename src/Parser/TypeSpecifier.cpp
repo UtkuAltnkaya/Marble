@@ -9,9 +9,16 @@ namespace Marble
     TypeSpecifier::TypeSpecifier(Types type) : Ast{Span{}, AstType::TypeSpecifier}, m_Type{type}
     {
     }
+
     TypeSpecifier::TypeSpecifier(Types type, const Span &span) : Ast{span, AstType::TypeSpecifier}, m_Type{type}
     {
     }
+
+    TypeSpecifier::TypeSpecifier(const TypeSpecifier &obj)
+        : Ast{obj.m_Span, AstType::TypeSpecifier}, m_Type{obj.m_Type}, m_Variants{obj.m_Variants}
+    {
+    }
+
     TypeSpecifier::TypeSpecifier(TypeSpecifier &&obj)
         : Ast{std::move(obj.m_Span), AstType::TypeSpecifier}, m_Type{obj.m_Type}, m_Variants{std::move(obj.m_Variants)}
     {

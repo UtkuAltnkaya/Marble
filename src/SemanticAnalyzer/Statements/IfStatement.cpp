@@ -1,55 +1,55 @@
 #include "Ast/Statements.hpp"
 #include "Utils/IDGenerator.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
 
-    static void InsertAndAnalyzeBlock(const std::string &name, Statement &blockStatement);
+    static void InsertAndAnalyzeBlock(SemanticAnalyzer &semanticAnalyzer, const std::string &name, Statement &blockStatement);
 
-    Ref<TypeSpecifier> IfStatement::Analyze()
+    Ref<TypeSpecifier> IfStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        Ref<TypeSpecifier> condition = m_Condition->Analyze();
+        Ref<TypeSpecifier> condition = m_Condition->Analyze(semanticAnalyzer);
 
         if (condition->GetType() != Types::Bool)
         {
             throw "Condition type must be boolean";
         }
 
-        InsertAndAnalyzeBlock("if-", *m_Block.get());
+        InsertAndAnalyzeBlock(semanticAnalyzer, "if-", *m_Block.get());
 
         for (auto &elseIfStatement : m_ElseIfStatements)
         {
-            elseIfStatement->Analyze();
+            elseIfStatement->Analyze(semanticAnalyzer);
         }
 
         if (m_ElseStatement)
         {
-            m_ElseStatement->Analyze();
+            m_ElseStatement->Analyze(semanticAnalyzer);
         }
         return TypeSpecifierOk;
     }
 
-    Ref<TypeSpecifier> ElseIfStatement::Analyze()
+    Ref<TypeSpecifier> ElseIfStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        Ref<TypeSpecifier> condition = m_Condition->Analyze();
+        Ref<TypeSpecifier> condition = m_Condition->Analyze(semanticAnalyzer);
 
         if (condition->GetType() != Types::Bool)
         {
             throw "Condition type must be boolean";
         }
 
-        InsertAndAnalyzeBlock("else-if-", *m_Block.get());
+        InsertAndAnalyzeBlock(semanticAnalyzer, "else-if-", *m_Block.get());
         return TypeSpecifierOk;
     }
 
-    Ref<TypeSpecifier> ElseStatement::Analyze()
+    Ref<TypeSpecifier> ElseStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        InsertAndAnalyzeBlock("else-", *m_Block.get());
+        InsertAndAnalyzeBlock(semanticAnalyzer, "else-", *m_Block.get());
         return TypeSpecifierOk;
     }
 
-    void InsertAndAnalyzeBlock(const std::string &name, Statement &blockStatement)
+    void InsertAndAnalyzeBlock(SemanticAnalyzer &semanticAnalyzer, const std::string &name, Statement &blockStatement)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *parent = table.CurrentScope();
@@ -57,7 +57,23 @@ namespace Marble
         parent->Insert(name + IDGenerator::Generate(), ifNode);
 
         table.EnterScope(ifNode);
-        blockStatement.Analyze();
+        blockStatement.Analyze(semanticAnalyzer);
         table.LeaveScope();
     }
+
+    Box<Statement> IfStatement::Clone()
+    {
+        return MakeBox<IfStatement>(*this);
+    }
+
+    Box<Statement> ElseIfStatement::Clone()
+    {
+        return MakeBox<ElseIfStatement>(*this);
+    }
+
+    Box<Statement> ElseStatement::Clone()
+    {
+        return MakeBox<ElseStatement>(*this);
+    }
+
 } // namespace Marble

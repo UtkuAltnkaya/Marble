@@ -1,9 +1,9 @@
 #include "Ast/Expressions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> ObjectInitExpression::Analyze()
+    Ref<TypeSpecifier> ObjectInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         const IdentifierExpression *structName = m_Object->TryInto<IdentifierExpression>();
         if (!structName)
@@ -29,13 +29,13 @@ namespace Marble
         table.EnterScope(structNode);
         for (auto &field : m_Fields)
         {
-            field->Analyze();
+            field->Analyze(semanticAnalyzer);
         }
         table.LeaveScope();
         return MakeRef<TypeSpecifier>(structName->GetIdentifier(), Span{});
     }
 
-    Ref<TypeSpecifier> FieldExpression::Analyze()
+    Ref<TypeSpecifier> FieldExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *currentScope = table.CurrentScope();
@@ -45,7 +45,7 @@ namespace Marble
         {
             throw "Cannot find the struct field named {}";
         }
-        Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze();
+        Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze(semanticAnalyzer);
 
         VariableSymbolNode *variableNode = fieldNode->Into<VariableSymbolNode>();
 
@@ -55,5 +55,15 @@ namespace Marble
         }
 
         return typeSpecifier;
+    }
+
+    Box<Expression> ObjectInitExpression::Clone()
+    {
+        return MakeBox<ObjectInitExpression>(*this);
+    }
+
+    Box<Expression> FieldExpression::Clone()
+    {
+        return MakeBox<FieldExpression>(*this);
     }
 } // namespace Marble

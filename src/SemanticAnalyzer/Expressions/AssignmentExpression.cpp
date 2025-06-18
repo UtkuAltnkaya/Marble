@@ -1,18 +1,18 @@
 #include "Ast/Expressions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
 
-    Ref<TypeSpecifier> AssignmentExpression::Analyze()
+    Ref<TypeSpecifier> AssignmentExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         CheckVariableExpressionTypes();
-        Ref<TypeSpecifier> left = m_Variable->Analyze();
+        Ref<TypeSpecifier> left = m_Variable->Analyze(semanticAnalyzer);
         if (left->GetType() == Types::ArrayType)
         {
             throw "Cannot assign to array";
         }
-        Ref<TypeSpecifier> right = m_Value->Analyze();
+        Ref<TypeSpecifier> right = m_Value->Analyze(semanticAnalyzer);
 
         if (*right != *left)
         {
@@ -43,5 +43,10 @@ namespace Marble
         default:
             break;
         }
+    }
+
+    Box<Expression> AssignmentExpression::Clone()
+    {
+        return MakeBox<AssignmentExpression>(*this);
     }
 } // namespace Marble

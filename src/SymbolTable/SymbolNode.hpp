@@ -83,10 +83,12 @@ namespace Marble
 
         inline const Ref<TypeSpecifier> ReturnType() const { return m_ReturnType; }
         inline const std::vector<Ref<TypeSpecifier>> &Params() const { return m_Params; }
+        inline bool IsGeneric() const { return m_IsGeneric; }
 
     private:
         Ref<TypeSpecifier> m_ReturnType;
         std::vector<Ref<TypeSpecifier>> m_Params;
+        bool m_IsGeneric;
     };
 
     class VariableSymbolNode : public SymbolNode

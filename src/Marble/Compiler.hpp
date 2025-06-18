@@ -4,7 +4,7 @@
 #include "Marble/ArgParser.hpp"
 #include "Lexer/Lexer.hpp"
 #include "Parser/Parser.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {

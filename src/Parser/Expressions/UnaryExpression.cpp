@@ -13,6 +13,13 @@ namespace Marble
     {
     }
 
+    UnaryExpression::UnaryExpression(const UnaryExpression &obj) : Expression{obj.m_Span, ExpressionType::Unary}
+    {
+        m_UnaryOperator = obj.m_UnaryOperator;
+        m_Value = obj.m_Value->Clone();
+        m_UnaryExpressionType = obj.m_UnaryExpressionType;
+    }
+
     Box<Expression> UnaryExpression::Parse(Parser &parser, Precedence precedence)
     {
         if (auto prefix = UnaryExpression::ParsePrefix(parser, precedence); prefix)

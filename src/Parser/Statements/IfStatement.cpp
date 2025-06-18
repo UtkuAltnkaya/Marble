@@ -9,6 +9,24 @@ namespace Marble
     {
     }
 
+    IfStatement::IfStatement(const IfStatement &obj) : Statement{obj.m_Span, StatementType::If}
+    {
+        m_Condition = obj.m_Condition->Clone();
+        m_Block = obj.m_Block->Clone();
+        for (auto &elseIf : obj.m_ElseIfStatements)
+        {
+            m_ElseIfStatements.push_back(elseIf->Clone());
+        }
+        if (obj.m_ElseStatement)
+        {
+            m_ElseStatement = obj.m_ElseStatement->Clone();
+        }
+        else
+        {
+            m_ElseStatement = nullptr;
+        }
+    }
+
     Box<Statement> IfStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();
@@ -39,6 +57,12 @@ namespace Marble
     ElseIfStatement::ElseIfStatement(Box<Expression> condition, Box<Statement> block, const Span &span)
         : Statement{span, StatementType::ElseIf}, m_Condition{std::move(condition)}, m_Block{std::move(block)}
     {
+    }
+
+    ElseIfStatement::ElseIfStatement(const ElseIfStatement &obj) : Statement{obj.m_Span, StatementType::ElseIf}
+    {
+        m_Condition = obj.m_Condition->Clone();
+        m_Block = obj.m_Block->Clone();
     }
 
     void ElseIfStatement::Parse(Parser &parser, std::vector<Box<Statement>> &elseIfStatements)
@@ -74,6 +98,11 @@ namespace Marble
     ElseStatement::ElseStatement(Box<Statement> block, const Span &span)
         : Statement{span, StatementType::Else}, m_Block{std::move(block)}
     {
+    }
+
+    ElseStatement::ElseStatement(const ElseStatement &obj) : Statement{obj.m_Span, StatementType::Else}
+    {
+        m_Block = obj.m_Block->Clone();
     }
 
     Box<Statement> ElseStatement::Parse(Parser &parser)

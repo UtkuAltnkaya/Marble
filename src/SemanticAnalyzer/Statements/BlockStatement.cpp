@@ -1,10 +1,10 @@
 #include "Ast/Statements.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "Utils/IDGenerator.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> BlockStatement::Analyze()
+    Ref<TypeSpecifier> BlockStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         for (auto &statement : m_Statements)
@@ -15,15 +15,21 @@ namespace Marble
                 SymbolNode *newScope = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, currentScope};
                 currentScope->Insert("block-" + IDGenerator::Generate(), newScope);
                 table.EnterScope(newScope);
-                statement->Analyze();
+                statement->Analyze(semanticAnalyzer);
                 table.LeaveScope();
             }
             else
             {
-                statement->Analyze();
+                statement->Analyze(semanticAnalyzer);
             }
         }
 
         return TypeSpecifierOk;
     }
+
+    Box<Statement> BlockStatement::Clone()
+    {
+        return MakeBox<BlockStatement>(*this);
+    }
+
 } // namespace Marble

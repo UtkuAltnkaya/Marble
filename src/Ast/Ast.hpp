@@ -7,6 +7,7 @@ namespace Marble
 {
     class Parser;
     class TypeSpecifier;
+    class SemanticAnalyzer;
 
     enum class AstType
     {
@@ -26,7 +27,7 @@ namespace Marble
         Ast(const Span &span, AstType type) : m_Span{span}, m_Type{type} {}
         Ast(Span &&span, AstType type) : m_Span{std::move(span)}, m_Type{type} {}
         virtual ~Ast() = default;
-        virtual Ref<TypeSpecifier> Analyze() { return nullptr; }
+        virtual Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) { return nullptr; }
 
         inline const Span &GetSpan() const { return m_Span; }
         inline AstType GetAstType() const { return m_Type; }

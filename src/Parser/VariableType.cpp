@@ -8,6 +8,12 @@ namespace Marble
     {
     }
 
+    VariableType::VariableType(const VariableType &obj) : Ast{obj.m_Span, AstType::VariableType}
+    {
+        m_Identifier = MakeBox<Identifier>(*obj.m_Identifier.get());
+        m_TypeSpecifier = MakeRef<TypeSpecifier>(*obj.m_TypeSpecifier.get());
+        }
+
     Box<VariableType> VariableType::Parse(Parser &parser)
     {
         Box<Identifier> identifier = MakeBox<Identifier>(parser.Expect(TokenType::Identifier));

@@ -113,8 +113,8 @@ namespace Marble
         : Ast{std::move(span), AstType::Expression}, m_ExpressionType{expressionType} {};
 
     virtual ~Expression() = default;
+    virtual Box<Expression> Clone() = 0;
 
-  public:
     static Box<Expression> Parse(Parser &parser, Precedence precedence = DefaultPrecedence());
     static Precedence NextPrecedence(Precedence precedence);
     inline Marble::ExpressionType ExpressionType() const { return m_ExpressionType; }
@@ -168,12 +168,13 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Binary;
 
     BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, const Span &span);
+    BinaryExpression(const BinaryExpression &obj);
     BinaryExpression(Box<Expression> left, BinaryOperators binaryOperator, Box<Expression> right, Span &&span);
     ~BinaryExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence,
                                  BinaryPrecedence binaryPrecedence = DefaultPrecedence());
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
     static BinaryPrecedence NextPrecedence(BinaryPrecedence binaryPrecedence);
     static BinaryOperators StrToOperator(const char *text);
@@ -182,6 +183,8 @@ namespace Marble
     inline const Expression &Left() const { return *m_Left.get(); }
     inline BinaryOperators Operator() const { return m_Operator; }
     inline const Expression &Right() const { return *m_Right.get(); }
+
+    virtual Box<Expression> Clone() override;
 
   private:
     static Box<Expression> ParseOr(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence);
@@ -203,24 +206,26 @@ namespace Marble
                     const Span &span);
     UnaryExpression(UnaryOperators unaryOperator, Box<Expression> value, UnaryExpressionType expressionType,
                     Span &&span);
+    UnaryExpression(const UnaryExpression &obj);
     ~UnaryExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
     inline UnaryOperators Operator() const { return m_UnaryOperator; }
     inline const Expression &Value() const { return *m_Value.get(); }
     inline UnaryExpressionType GetUnaryExpressionType() const { return m_UnaryExpressionType; }
+    virtual Box<Expression> Clone() override;
 
   private:
     static Box<Expression> ParsePrefix(Parser &parser, Precedence precedence);
     static std::optional<UnaryOperators> TokenTypeToOperator(TokenType tokenType);
-    Ref<TypeSpecifier> AnalyzePostFix();
-    Ref<TypeSpecifier> AnalyzePrefix();
-    Ref<TypeSpecifier> AnalyzeArithmetic();
-    Ref<TypeSpecifier> AnalyzeAddress();
-    Ref<TypeSpecifier> AnalyzePointer();
-    Ref<TypeSpecifier> AnalyzeNot();
+    Ref<TypeSpecifier> AnalyzePostFix(SemanticAnalyzer &semanticAnalyzer);
+    Ref<TypeSpecifier> AnalyzePrefix(SemanticAnalyzer &semanticAnalyzer);
+    Ref<TypeSpecifier> AnalyzeArithmetic(SemanticAnalyzer &semanticAnalyzer);
+    Ref<TypeSpecifier> AnalyzeAddress(SemanticAnalyzer &semanticAnalyzer);
+    Ref<TypeSpecifier> AnalyzePointer(SemanticAnalyzer &semanticAnalyzer);
+    Ref<TypeSpecifier> AnalyzeNot(SemanticAnalyzer &semanticAnalyzer);
     void CheckType(Ref<TypeSpecifier> expressionType);
 
   private:
@@ -235,11 +240,13 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Cast;
 
     CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, const Span &span);
+    CastExpression(const CastExpression &obj);
     CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, Span &&span);
     ~CastExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     Ref<TypeSpecifier> m_TypeSpecifier;
@@ -252,13 +259,15 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Primitive;
 
     PrimitiveExpression(Ref<TypeSpecifier> typeSpecifier, const std::string &value, const Span &span);
+    PrimitiveExpression(const PrimitiveExpression &obj);
     PrimitiveExpression(Ref<TypeSpecifier> typeSpecifier, std::string &&value, Span &&span);
     ~PrimitiveExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override { return m_TypeSpecifier; }
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override { return m_TypeSpecifier; }
     inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
     inline const std::string &GetValue() const { return m_Value; }
+    virtual Box<Expression> Clone() override;
 
   private:
     static Box<Expression> ParseParenthesis(Parser &parser);
@@ -274,10 +283,12 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Assignment;
 
     AssignmentExpression(Box<Expression> variable, Box<Expression> value, const Span &span);
+    AssignmentExpression(const AssignmentExpression &obj);
     ~AssignmentExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     void CheckVariableExpressionTypes() const;
@@ -293,14 +304,16 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::MemberAccess;
 
     MemberAccessExpression(Box<Expression> objs, TokenType accessType, Box<Expression> property, const Span &span);
+    MemberAccessExpression(const MemberAccessExpression &obj);
     ~MemberAccessExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     void CheckObjectExpressionType();
-    Ref<TypeSpecifier> AnalyzeMethod(FunctionCallExpression *fnCallExpression, bool &isPublic);
+    Ref<TypeSpecifier> AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, bool &isPublic);
     Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression, bool &isPublic);
 
     bool CheckAccessSpecifier(SymbolAccess access);
@@ -318,10 +331,12 @@ namespace Marble
 
     FunctionCallExpression(Box<Expression> fnName, Box<Generics> generics, std::vector<Box<Expression>> &&args,
                            const Span &span);
+    FunctionCallExpression(const FunctionCallExpression &obj);
     ~FunctionCallExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
     inline const Expression &FnName() const { return *m_FnName.get(); }
     inline const Generics *const GetGenerics() { return m_Generics.get(); }
@@ -339,13 +354,15 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ArrayIndex;
 
     ArrayIndexExpression(Box<Expression> array, Box<Expression> index, Box<Expression> secondIndex, const Span &span);
+    ArrayIndexExpression(const ArrayIndexExpression &obj);
     ~ArrayIndexExpression() = default;
-    Ref<TypeSpecifier> Analyze() override;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
-    void AnalyzeIndex(Expression *indexExpression);
+    void AnalyzeIndex(SemanticAnalyzer &semanticAnalyzer, Expression *indexExpression);
 
   private:
     Box<Expression> m_Array;
@@ -359,10 +376,12 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::NameSpace;
 
     NamespaceExpression(Box<Expression> namespaceExpr, Box<Expression> value, const Span &span);
+    NamespaceExpression(const NamespaceExpression &obj);
     ~NamespaceExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     Box<Expression> m_Namespace;
@@ -375,10 +394,12 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ArrayInit;
 
     ArrayInitExpression(std::vector<Box<Expression>> &&array, size_t size, const Span &span);
+    ArrayInitExpression(const ArrayInitExpression &obj);
     ~ArrayInitExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     std::vector<Box<Expression>> m_Array;
@@ -391,10 +412,12 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ObjectInit;
 
     ObjectInitExpression(Box<Expression> object, std::vector<Box<Expression>> &&fields, const Span &span);
+    ObjectInitExpression(const ObjectInitExpression &obj);
     ~ObjectInitExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     Box<Expression> m_Object;
@@ -407,10 +430,12 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::ObjectField;
 
     FieldExpression(Identifier &&name, Box<Expression> value, const Span &span);
+    FieldExpression(const FieldExpression &obj);
     ~FieldExpression() = default;
 
     static Box<Expression> Parse(Parser &parser);
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     Identifier m_Name;
@@ -423,11 +448,13 @@ namespace Marble
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Identifier;
 
     IdentifierExpression(Identifier &&identifier, const Span &span);
+    IdentifierExpression(const IdentifierExpression &obj);
     ~IdentifierExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
     inline const Identifier &GetIdentifier() const { return m_Identifier; }
-    Ref<TypeSpecifier> Analyze() override;
+    Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+    virtual Box<Expression> Clone() override;
 
   private:
     Identifier m_Identifier;

@@ -59,6 +59,7 @@ namespace Marble
         m_ReturnType = fnDefinition.GetReturnType();
         const std::vector<Box<VariableType>> &params = fnDefinition.GetParams();
         m_Params.reserve(params.size());
+        m_IsGeneric = fnDefinition.GetGenerics() != nullptr;
         for (auto &param : params)
         {
             m_Params.push_back(param->GetTypeSpecifier());
@@ -76,6 +77,7 @@ namespace Marble
         m_ReturnType = prototype.GetReturnType();
         const std::vector<Box<VariableType>> &params = prototype.GetParams();
         m_Params.reserve(params.size());
+        m_IsGeneric = prototype.GetGenerics() != nullptr;
         if (auto method = prototype.GetMethod(); method)
         {
             Insert(method->GetIdentifier().Id(), new VariableSymbolNode{*method, this});

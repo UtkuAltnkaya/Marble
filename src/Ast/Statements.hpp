@@ -30,6 +30,7 @@ namespace Marble
 
         static Box<Statement> Parse(Parser &parser);
         inline Marble::StatementType StatementType() const { return m_StatementType; }
+        virtual Box<Statement> Clone() = 0;
 
     protected:
         Marble::StatementType m_StatementType;
@@ -39,14 +40,16 @@ namespace Marble
     {
     public:
         LetStatement(Box<Identifier> identifier, Ref<TypeSpecifier> typeSpecifier, Box<Expression> value, const Span &span);
+        LetStatement(const LetStatement &obj);
         ~LetStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
         inline const Identifier &GetIdentifier() const { return *m_Identifier.get(); }
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
         inline const Expression &GetValue() const { return *m_Value.get(); }
+        virtual Box<Statement> Clone() override;
 
     private:
         static Ref<TypeSpecifier> HandleTypeSpecifier(Parser &parser);
@@ -61,11 +64,13 @@ namespace Marble
     {
     public:
         ReturnStatement(Box<Expression> expression, const Span &span);
+        ReturnStatement(const ReturnStatement &obj);
         ~ReturnStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         inline const Expression *const GetExpression() const { return m_Expression.get(); }
+        virtual Box<Statement> Clone() override;
 
     private:
         Box<Expression> m_Expression;
@@ -75,11 +80,13 @@ namespace Marble
     {
     public:
         DeferStatement(Box<Expression> expression, const Span &span);
+        DeferStatement(const DeferStatement &obj);
         ~DeferStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         inline const Expression &GetExpression() const { return *m_Expression.get(); }
+        virtual Box<Statement> Clone() override;
 
     private:
         Box<Expression> m_Expression;
@@ -89,10 +96,12 @@ namespace Marble
     {
     public:
         BlockStatement(std::vector<Box<Statement>> statements, const Span &span);
+        BlockStatement(const BlockStatement &obj);
         ~BlockStatement() = default;
 
         static Box<Statement> Parse(Parser &parser, bool passTokenCheck = false);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        virtual Box<Statement> Clone() override;
 
         inline const std::vector<Box<Statement>> &Statements() const { return m_Statements; }
 
@@ -105,10 +114,12 @@ namespace Marble
     public:
         ForStatement(Box<Statement> letStatement, Box<Expression> condition, Box<Expression> increment, Box<Statement> block, const Span &span);
         ForStatement(Box<Expression> assignmentExpression, Box<Expression> condition, Box<Expression> increment, Box<Statement> block, const Span &span);
+        ForStatement(const ForStatement &obj);
         ~ForStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        virtual Box<Statement> Clone() override;
 
         inline const Statement *const GetLetStatement() const { return m_LetStatement.get(); }
         inline const Expression *const GetAssignmentExpression() const { return m_AssignmentExpression.get(); }
@@ -128,9 +139,12 @@ namespace Marble
     {
     public:
         WhileStatement(Box<Expression> condition, Box<Statement> block, const Span &span);
+        WhileStatement(const WhileStatement &obj);
         ~WhileStatement() = default;
+
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        virtual Box<Statement> Clone() override;
 
         inline const Expression &GetCondition() const { return *m_Condition.get(); }
         inline const Statement &GetBlock() const { return *m_Block.get(); }
@@ -144,10 +158,13 @@ namespace Marble
     {
     public:
         ElseStatement(Box<Statement> block, const Span &span);
+        ElseStatement(const ElseStatement &obj);
         ~ElseStatement() = default;
+
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         inline const Statement &GetBlock() const { return *m_Block.get(); };
+        virtual Box<Statement> Clone() override;
 
     private:
         Box<Statement> m_Block;
@@ -157,9 +174,12 @@ namespace Marble
     {
     public:
         ElseIfStatement(Box<Expression> condition, Box<Statement> block, const Span &span);
+        ElseIfStatement(const ElseIfStatement &obj);
         ~ElseIfStatement() = default;
+
         static void Parse(Parser &parser, std::vector<Box<Statement>> &elseIfStatements);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        virtual Box<Statement> Clone() override;
 
         inline const Expression &GetCondition() const { return *m_Condition.get(); };
         inline const Statement &GetBlock() const { return *m_Block.get(); };
@@ -174,10 +194,12 @@ namespace Marble
 
     public:
         IfStatement(Box<Expression> condition, Box<Statement> block, std::vector<Box<Statement>> &&elseIfStatements, Box<Statement> elseStatement, const Span &span);
+        IfStatement(const IfStatement &obj);
         ~IfStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        virtual Box<Statement> Clone() override;
 
         inline const Expression &GetCondition() const { return *m_Condition.get(); };
         inline const Statement &GetBlock() const { return *m_Block.get(); }
@@ -196,6 +218,8 @@ namespace Marble
     public:
         ExpressionStatement(Box<Expression> expression)
             : Statement{expression->GetSpan(), StatementType::Expression}, m_Expression{std::move(expression)} {}
+        ExpressionStatement(const ExpressionStatement &obj)
+            : Statement{obj.m_Span, StatementType::Expression}, m_Expression{obj.m_Expression->Clone()} {}
         ~ExpressionStatement() = default;
 
         static Box<Statement> Parse(Parser &parser)
@@ -203,10 +227,15 @@ namespace Marble
             return MakeBox<ExpressionStatement>(Expression::Parse(parser));
         }
 
-        Ref<TypeSpecifier> Analyze()
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override
         {
-            m_Expression->Analyze();
+            m_Expression->Analyze(semanticAnalyzer);
             return TypeSpecifierOk;
+        }
+
+        virtual Box<Statement> Clone() override
+        {
+            return MakeBox<ExpressionStatement>(*this);
         }
 
         inline const Expression &GetExpression() const { return *m_Expression.get(); }

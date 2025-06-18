@@ -1,21 +1,22 @@
 #include "Ast/Expressions.hpp"
 #include "Utils/Macros.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> UnaryExpression::Analyze()
+    Ref<TypeSpecifier> UnaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_UnaryExpressionType)
         {
         case UnaryExpressionType::PostFix:
-            return AnalyzePostFix();
+            return AnalyzePostFix(semanticAnalyzer);
         case UnaryExpressionType::Prefix:
-            return AnalyzePrefix();
+            return AnalyzePrefix(semanticAnalyzer);
         }
         UNREACHABLE();
     }
 
-    Ref<TypeSpecifier> UnaryExpression::AnalyzePostFix()
+    Ref<TypeSpecifier> UnaryExpression::AnalyzePostFix(SemanticAnalyzer &semanticAnalyzer)
     {
 
         switch (m_Value->ExpressionType())
@@ -29,33 +30,33 @@ namespace Marble
             throw "Unexpected expression";
         }
 
-        Ref<TypeSpecifier> expressionType = m_Value->Analyze();
+        Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
         CheckType(expressionType);
         return expressionType;
     }
 
-    Ref<TypeSpecifier> UnaryExpression::AnalyzePrefix()
+    Ref<TypeSpecifier> UnaryExpression::AnalyzePrefix(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_UnaryOperator)
         {
         case UnaryOperators::Address:
-            return AnalyzeAddress();
+            return AnalyzeAddress(semanticAnalyzer);
         case UnaryOperators::Indirection:
-            return AnalyzePointer();
+            return AnalyzePointer(semanticAnalyzer);
         case UnaryOperators::Plus:
         case UnaryOperators::Minus:
-            return AnalyzeArithmetic();
+            return AnalyzeArithmetic(semanticAnalyzer);
         case UnaryOperators::Increment:
         case UnaryOperators::Decrement:
-            return AnalyzePostFix();
+            return AnalyzePostFix(semanticAnalyzer);
         case UnaryOperators::LogicalNot:
         case UnaryOperators::BitwiseNot:
-            return AnalyzeNot();
+            return AnalyzeNot(semanticAnalyzer);
         }
         UNREACHABLE();
     }
 
-    Ref<TypeSpecifier> UnaryExpression::AnalyzeArithmetic()
+    Ref<TypeSpecifier> UnaryExpression::AnalyzeArithmetic(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_Value->ExpressionType())
         {
@@ -65,12 +66,12 @@ namespace Marble
         default:
             break;
         }
-        Ref<TypeSpecifier> expressionType = m_Value->Analyze();
+        Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
         CheckType(expressionType);
         return expressionType;
     }
 
-    Ref<TypeSpecifier> UnaryExpression::AnalyzeAddress()
+    Ref<TypeSpecifier> UnaryExpression::AnalyzeAddress(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_Value->ExpressionType())
         {
@@ -83,11 +84,11 @@ namespace Marble
             throw "Unexpected expression";
         }
 
-        Ref<TypeSpecifier> expressionType = m_Value->Analyze();
+        Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
         return MakeRef<TypeSpecifier>(PointerType{expressionType}, Span{});
     }
 
-    Ref<TypeSpecifier> UnaryExpression::AnalyzePointer()
+    Ref<TypeSpecifier> UnaryExpression::AnalyzePointer(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_Value->ExpressionType())
         {
@@ -100,7 +101,7 @@ namespace Marble
             throw "Unexpected expression";
         }
 
-        Ref<TypeSpecifier> expressionType = m_Value->Analyze();
+        Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
         Types type = expressionType->GetType();
         if (type != Types::Pointer)
         {
@@ -110,7 +111,7 @@ namespace Marble
         return pointerType.TypeSpecifier;
     }
 
-    Ref<TypeSpecifier> UnaryExpression::AnalyzeNot()
+    Ref<TypeSpecifier> UnaryExpression::AnalyzeNot(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_Value->ExpressionType())
         {
@@ -121,7 +122,7 @@ namespace Marble
             break;
         }
 
-        Ref<TypeSpecifier> expressionType = m_Value->Analyze();
+        Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
         Types type = expressionType->GetType();
 
         if (m_UnaryOperator == UnaryOperators::BitwiseNot)
@@ -158,5 +159,10 @@ namespace Marble
         default:
             throw "Value is not supported for the operator";
         }
+    }
+
+    Box<Expression> UnaryExpression::Clone()
+    {
+        return MakeBox<UnaryExpression>(*this);
     }
 } // namespace Marble

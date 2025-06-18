@@ -1,10 +1,10 @@
 #include "Ast/Definitions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
 
-    Ref<TypeSpecifier> ImplDefinition::Analyze()
+    Ref<TypeSpecifier> ImplDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *node = table.Root();
@@ -17,19 +17,20 @@ namespace Marble
         table.EnterScope(node);
         for (auto &memberFunction : m_MemberFunctions)
         {
-            memberFunction->Analyze();
+            memberFunction->Analyze(semanticAnalyzer);
+            ;
         }
         table.LeaveScope();
 
         return TypeSpecifierOk;
     }
 
-    Ref<TypeSpecifier> MemberFunctionDefinition::Analyze()
+    Ref<TypeSpecifier> MemberFunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         const SymbolNode *node = table.CurrentScope();
         SymbolNode *fnNode = node->Iter()
-                                 .Function(m_Prototype->GetName().Id())
+                                 .Function(m_Prototype->GetName())
                                  .Find();
         if (!fnNode)
         {
@@ -37,7 +38,8 @@ namespace Marble
         }
 
         table.EnterScope(fnNode);
-        m_Block->Analyze();
+        m_Block->Analyze(semanticAnalyzer);
+        ;
         table.LeaveScope();
 
         if (m_Prototype->GetReturnType()->GetType() == Types::Void)
@@ -73,7 +75,7 @@ namespace Marble
 
         for (auto &memberFunction : m_MemberFunctions)
         {
-            node->Insert(memberFunction->GetPrototype().GetName().Id(), new FunctionSymbolNode{*memberFunction.get(), node});
+            node->Insert(memberFunction->GetPrototype().GetName(), new FunctionSymbolNode{*memberFunction.get(), node});
         }
     }
 

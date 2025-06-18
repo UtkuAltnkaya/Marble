@@ -8,6 +8,11 @@ namespace Marble
     {
     }
 
+    DeferStatement::DeferStatement(const DeferStatement &obj) : Statement{obj.m_Span, StatementType::Defer}
+    {
+        m_Expression = obj.m_Expression->Clone();
+    }
+
     Box<Statement> DeferStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();

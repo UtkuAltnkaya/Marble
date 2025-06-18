@@ -1,11 +1,11 @@
 #include "Ast/Expressions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
     static SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name);
 
-    Ref<TypeSpecifier> FunctionCallExpression::Analyze()
+    Ref<TypeSpecifier> FunctionCallExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         IdentifierExpression *identifierExpression = m_FnName->TryInto<IdentifierExpression>();
         if (!identifierExpression)
@@ -27,6 +27,11 @@ namespace Marble
 
         FunctionSymbolNode *fnNode = node->Into<FunctionSymbolNode>();
 
+        if (fnNode->IsGeneric())
+        {
+            semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
+        }
+
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();
 
         if (params.size() < m_Args.size())
@@ -39,7 +44,7 @@ namespace Marble
         }
         for (size_t i = 1; i < m_Args.size(); i++)
         {
-            Ref<TypeSpecifier> argType = m_Args.at(i)->Analyze();
+            Ref<TypeSpecifier> argType = m_Args.at(i)->Analyze(semanticAnalyzer);
             if (*argType != *params.at(i))
             {
                 throw "Parameter expression type does not match";
@@ -53,4 +58,8 @@ namespace Marble
         return scope->Iter().Function(name).Find();
     }
 
+    Box<Expression> FunctionCallExpression::Clone()
+    {
+        return MakeBox<FunctionCallExpression>(*this);
+    }
 } // namespace Marble

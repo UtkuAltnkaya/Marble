@@ -9,6 +9,16 @@ namespace Marble
     {
     }
 
+    FunctionCallExpression::FunctionCallExpression(const FunctionCallExpression &obj) : Expression{obj.m_Span, ExpressionType::FunctionCall}
+    {
+        m_FnName = obj.m_FnName->Clone();
+        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+        for (auto &arg : obj.m_Args)
+        {
+            m_Args.push_back(arg->Clone());
+        }
+    }
+
     Box<Expression> FunctionCallExpression::Parse(Parser &parser, Precedence precedence)
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));

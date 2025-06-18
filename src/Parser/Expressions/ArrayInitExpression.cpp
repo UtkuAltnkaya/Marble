@@ -9,6 +9,15 @@ namespace Marble
     {
     }
 
+    ArrayInitExpression::ArrayInitExpression(const ArrayInitExpression &obj) : Expression{obj.m_Span, ExpressionType::ArrayInit}
+    {
+        for (auto &array : obj.m_Array)
+        {
+            m_Array.push_back(array->Clone());
+        }
+        m_Size = obj.m_Size;
+    }
+
     Box<Expression> ArrayInitExpression::Parse(Parser &parser, Precedence precedence)
     {
         if (parser.Current().TokenType() != TokenType::OpenBracket)

@@ -9,6 +9,12 @@ namespace Marble
     {
     }
 
+    WhileStatement::WhileStatement(const WhileStatement &obj) : Statement{obj.m_Span, StatementType::While}
+    {
+        m_Condition = obj.m_Condition->Clone();
+        m_Block = obj.m_Block->Clone();
+    }
+
     Box<Statement> WhileStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();

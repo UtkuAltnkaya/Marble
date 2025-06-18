@@ -8,6 +8,18 @@ namespace Marble
     {
     }
 
+    ReturnStatement::ReturnStatement(const ReturnStatement &obj) : Statement{obj.m_Span, StatementType::Return}
+    {
+        if (obj.m_Expression)
+        {
+            m_Expression = obj.m_Expression->Clone();
+        }
+        else
+        {
+            m_Expression = nullptr;
+        }
+    }
+
     Box<Statement> ReturnStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();

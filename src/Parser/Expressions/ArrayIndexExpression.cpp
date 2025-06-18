@@ -8,6 +8,20 @@ namespace Marble
     {
     }
 
+    ArrayIndexExpression::ArrayIndexExpression(const ArrayIndexExpression &obj) : Expression{obj.m_Span, ExpressionType::ArrayIndex}
+    {
+        m_Array = obj.m_Array->Clone();
+        m_Index = obj.m_Index->Clone();
+        if (obj.m_SecondIndex)
+        {
+            m_SecondIndex = obj.m_SecondIndex->Clone();
+        }
+        else
+        {
+            m_SecondIndex = nullptr;
+        }
+    }
+
     Box<Expression> ArrayIndexExpression::Parse(Parser &parser, Precedence precedence)
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));

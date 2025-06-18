@@ -15,6 +15,24 @@ namespace Marble
     {
     }
 
+    ForStatement::ForStatement(const ForStatement &obj) : Statement{obj.m_Span, StatementType::For}
+    {
+        if (m_LetStatement)
+        {
+            m_LetStatement = obj.m_LetStatement->Clone();
+            m_AssignmentExpression = nullptr;
+        }
+        else
+        {
+            m_AssignmentExpression = obj.m_AssignmentExpression->Clone();
+            m_LetStatement = nullptr;
+        }
+
+        m_Condition = obj.m_Condition->Clone();
+        m_Increment = obj.m_Increment->Clone();
+        m_Block = obj.m_Block->Clone();
+    }
+
     Box<Statement> ForStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();

@@ -1,9 +1,9 @@
 #include "Ast/Expressions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> IdentifierExpression::Analyze()
+    Ref<TypeSpecifier> IdentifierExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *node = nullptr;
@@ -30,5 +30,10 @@ namespace Marble
         } while (node == nullptr);
         VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
         return variableNode->GetTypeSpecifier();
+    }
+
+    Box<Expression> IdentifierExpression::Clone()
+    {
+        return MakeBox<IdentifierExpression>(*this);
     }
 } // namespace Marble

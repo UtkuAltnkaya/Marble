@@ -12,6 +12,12 @@ namespace Marble
     {
     }
 
+    PrimitiveExpression::PrimitiveExpression(const PrimitiveExpression &obj) : Expression{obj.m_Span, ExpressionType::Primitive}
+    {
+        m_TypeSpecifier = MakeRef<TypeSpecifier>(*obj.m_TypeSpecifier.get());
+        m_Value = obj.m_Value;
+    }
+
     Box<Expression> PrimitiveExpression::Parse(Parser &parser, Precedence precedence)
     {
         if (auto expr = PrimitiveExpression::ParseParenthesis(parser); expr)
@@ -64,5 +70,10 @@ namespace Marble
         Box<Expression> expr = Expression::Parse(parser);
         parser.NextTokenAndExpect(TokenType::CloseParen);
         return expr;
+    }
+
+    Box<Expression> PrimitiveExpression::Clone()
+    {
+        return MakeBox<PrimitiveExpression>(*this);
     }
 } // namespace Marble

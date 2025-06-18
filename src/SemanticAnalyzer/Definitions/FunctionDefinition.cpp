@@ -1,10 +1,10 @@
 #include "Ast/Definitions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
 #include <iostream>
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> FunctionDefinition::Analyze()
+    Ref<TypeSpecifier> FunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *iter = table.Iter()
@@ -16,7 +16,7 @@ namespace Marble
         }
 
         table.EnterScope(iter);
-        m_Block->Analyze();
+        m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
 
         if (m_ReturnType->GetType() == Types::Void)
@@ -38,6 +38,17 @@ namespace Marble
         }
 
         throw "Return statement expected";
+    }
+
+    Box<Definition> FunctionDefinition::InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    {
+        Box<Definition> clonedFnDef = MakeBox<FunctionDefinition>(*this);
+        FunctionDefinition *castFnDef = clonedFnDef->Into<FunctionDefinition>();
+        castFnDef->SubstituteGenerics(typeArgs);
+    }
+
+    void FunctionDefinition::SubstituteGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    {
     }
 
     bool FunctionDefinition::operator==(const FunctionDefinition &obj) const

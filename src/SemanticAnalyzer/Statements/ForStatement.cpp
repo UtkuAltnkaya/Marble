@@ -1,10 +1,10 @@
 #include "Ast/Statements.hpp"
 #include "Utils/IDGenerator.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> ForStatement::Analyze()
+    Ref<TypeSpecifier> ForStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *parent = table.CurrentScope();
@@ -14,14 +14,14 @@ namespace Marble
         table.EnterScope(forNode);
         if (m_LetStatement)
         {
-            m_LetStatement->Analyze();
+            m_LetStatement->Analyze(semanticAnalyzer);
         }
         else
         {
-            m_AssignmentExpression->Analyze();
+            m_AssignmentExpression->Analyze(semanticAnalyzer);
         }
 
-        Ref<TypeSpecifier> condition = m_Condition->Analyze();
+        Ref<TypeSpecifier> condition = m_Condition->Analyze(semanticAnalyzer);
 
         if (condition->GetType() != Types::Bool)
         {
@@ -29,9 +29,14 @@ namespace Marble
             throw "Condition type must be boolean";
         }
 
-        m_Increment->Analyze();
-        m_Block->Analyze();
+        m_Increment->Analyze(semanticAnalyzer);
+        m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
         return TypeSpecifierOk;
+    }
+
+    Box<Statement> ForStatement::Clone()
+    {
+        return MakeBox<ForStatement>(*this);
     }
 } // namespace Marble

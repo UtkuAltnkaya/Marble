@@ -9,6 +9,15 @@ namespace Marble
     {
     }
 
+    ObjectInitExpression::ObjectInitExpression(const ObjectInitExpression &obj) : Expression{obj.m_Span, ExpressionType::ObjectInit}
+    {
+        m_Object = obj.m_Object->Clone();
+        for (auto &field : obj.m_Fields)
+        {
+            m_Fields.push_back(field->Clone());
+        }
+    }
+
     Box<Expression> ObjectInitExpression::Parse(Parser &parser, Precedence precedence)
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));
@@ -33,6 +42,12 @@ namespace Marble
     FieldExpression::FieldExpression(Identifier &&name, Box<Expression> value, const Span &span)
         : Expression{span, ExpressionType::ObjectField}, m_Name{std::move(name)}, m_Value{std::move(value)}
     {
+    }
+
+    FieldExpression::FieldExpression(const FieldExpression &obj)
+        : Expression{obj.m_Span, ExpressionType::ObjectField}, m_Name{obj.m_Name}
+    {
+        m_Value = obj.m_Value->Clone();
     }
 
     Box<Expression> FieldExpression::Parse(Parser &parser)

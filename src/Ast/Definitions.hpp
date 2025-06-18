@@ -32,14 +32,67 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser);
         inline Marble::DefinitionType DefinitionType() const { return m_DefinitionType; }
+        inline virtual bool IsGeneric() const { return false; }
+        inline virtual const std::string &GetName() const = 0;
+
+        template <typename T>
+        T *TryInto()
+        {
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
+            if (T::StaticType != m_DefinitionType)
+            {
+                return nullptr;
+            }
+            return static_cast<T *>(this);
+        }
+
+        template <typename T>
+        T *Into()
+        {
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
+            assert(m_DefinitionType == T::StaticType && "Invalid cast in Expression::Into");
+            return static_cast<T *>(this);
+        }
+
+        template <typename T>
+        const T *TryInto() const
+        {
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
+            if (T::StaticType != m_DefinitionType)
+            {
+                return nullptr;
+            }
+            return static_cast<const T *>(this);
+        }
+
+        template <typename T>
+        const T *Into() const
+        {
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
+            assert(m_DefinitionType == T::StaticType && "Invalid cast in Expression::Into");
+            return static_cast<const T *>(this);
+        }
 
     protected:
         Marble::DefinitionType m_DefinitionType;
     };
 
-    class FunctionDefinition : public Definition
+    class GenericDefinition
     {
     public:
+        virtual ~GenericDefinition() = default;
+        inline virtual const std::string &GetName() const = 0;
+        virtual Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
+
+    protected:
+        virtual void SubstituteGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
+    };
+
+    class FunctionDefinition : public Definition, public GenericDefinition
+    {
+    public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Function;
+
         FunctionDefinition(
             AccessSpecifier accessSpecifier,
             Box<Identifier> functionName,
@@ -50,17 +103,24 @@ namespace Marble
             const Span &span);
         ~FunctionDefinition() = default;
 
+        FunctionDefinition(const FunctionDefinition &obj);
+
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
-        inline const Identifier &GetName() const { return *m_FunctionName.get(); }
+        inline const std::string &GetName() const override { return m_FunctionName->Id(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
         inline const Statement &GetBody() const { return *m_Block.get(); }
-
         bool operator==(const FunctionDefinition &obj) const;
+
+        inline bool IsGeneric() const override { return m_Generics != nullptr; }
+        Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+
+    private:
+        void SubstituteGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -74,6 +134,8 @@ namespace Marble
     class StructFieldDefinition : public Definition
     {
     public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::StructField;
+
         StructFieldDefinition(AccessSpecifier accessSpecifier, Box<VariableType> field, const Span &span);
         ~StructFieldDefinition() = default;
 
@@ -81,6 +143,7 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType &GetField() const { return *m_Field.get(); }
+        inline const std::string &GetName() const override { return m_Field->GetIdentifier().Id(); }
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -90,15 +153,18 @@ namespace Marble
     class StructDefinition : public Definition
     {
     public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Struct;
+
         StructDefinition(AccessSpecifier accessSpecifier, Box<Identifier> structName, Box<Generics> generics, std::vector<Box<StructFieldDefinition>> &&field, const Span &span);
         ~StructDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
-        inline const std::string &GetName() const { return m_StructName->Id(); }
+        inline const std::string &GetName() const override { return m_StructName->Id(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<StructFieldDefinition>> &GetFields() const { return m_Field; }
+        inline bool IsGeneric() const override { return m_Generics != nullptr; }
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -110,13 +176,15 @@ namespace Marble
     class EnumDefinition : public Definition
     {
     public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Enum;
+
         EnumDefinition(AccessSpecifier accessSpecifier, Box<Identifier> enumName, std::vector<Box<Identifier>> &&fields, const Span &span);
         ~EnumDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
-        inline const std::string &GetName() const { return m_EnumName->Id(); }
+        inline const std::string &GetName() const override { return m_EnumName->Id(); }
         inline const std::vector<Box<Identifier>> &GetFields() const { return m_Fields; }
 
     private:
@@ -128,6 +196,8 @@ namespace Marble
     class MemberFunctionPrototypeDefinition : public Definition
     {
     public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunctionPrototype;
+
         MemberFunctionPrototypeDefinition(
             AccessSpecifier accessSpecifier,
             Box<VariableType> method,
@@ -142,10 +212,11 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType *GetMethod() const { return m_Method.get(); }
-        inline const Identifier &GetName() const { return *m_Name.get(); }
-        inline const Generics &GetGenerics() const { return *m_Generics.get(); }
+        inline const std::string &GetName() const override { return m_Name->Id(); }
+        inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
+        inline bool IsGeneric() const override { return m_Generics != nullptr; }
 
     private:
         static Box<VariableType> ParseMethod(Parser &parser);
@@ -162,13 +233,16 @@ namespace Marble
     class MemberFunctionDefinition : public Definition
     {
     public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunction;
+
         MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span);
         ~MemberFunctionDefinition() = default;
         static Box<MemberFunctionDefinition> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
         inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
         inline const Statement &GetBody() const { return *m_Block.get(); }
+        inline const std::string &GetName() const override { return m_Prototype->GetName(); }
 
     private:
         Box<MemberFunctionPrototypeDefinition> m_Prototype;
@@ -178,14 +252,18 @@ namespace Marble
     class ImplDefinition : public Definition
     {
     public:
+        static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Impl;
+
         ImplDefinition(Ref<TypeSpecifier> implName, Box<Generics> generics, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span);
         ~ImplDefinition() = default;
         static Box<Definition> Parse(Parser &parser);
-        Ref<TypeSpecifier> Analyze() override;
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
-        inline Ref<TypeSpecifier> GetName() const { return m_ImplName; }
+        inline const std::string &GetName() const override { return m_ImplName->ToString(); }
+        inline const Ref<TypeSpecifier> GetImplName() const { return m_ImplName; }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<MemberFunctionDefinition>> &GetMemberFunctions() const { return m_MemberFunctions; }
+        inline bool IsGeneric() const override { return m_Generics != nullptr; }
 
     private:
         void CreateSymbol();

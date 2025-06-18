@@ -54,6 +54,7 @@ namespace Marble
     public:
         TypeSpecifier(Types type);
         TypeSpecifier(Types type, const Span &span);
+        TypeSpecifier(const TypeSpecifier &obj);
         TypeSpecifier(TypeSpecifier &&obj);
         TypeSpecifier(ArrayType array, const Span &span);
         TypeSpecifier(const Identifier &identifier, const Span &span);
@@ -71,6 +72,7 @@ namespace Marble
         bool IsPrimitive() const;
         bool operator==(const TypeSpecifier &obj) const;
         bool operator!=(const TypeSpecifier &obj) const;
+        const std::string &ToString();
 
     public:
         static Ref<TypeSpecifier> Parse(Parser &parser);
@@ -87,6 +89,7 @@ namespace Marble
         static Types GetPrimitive(Parser &parser);
 
     private:
+        std::string m_TypeName = "";
         Types m_Type;
         std::variant<PointerType, Identifier, ArrayType, GenericType> m_Variants;
     };

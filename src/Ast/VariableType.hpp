@@ -9,6 +9,7 @@ namespace Marble
     {
     public:
         VariableType(Box<Identifier> identifier, Ref<TypeSpecifier> typeSpecifier, const Span &span);
+        VariableType(const VariableType &obj);
         ~VariableType() = default;
         static Box<VariableType> Parse(Parser &parser);
 

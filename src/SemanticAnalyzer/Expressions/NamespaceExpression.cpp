@@ -1,10 +1,10 @@
 #include "Ast/Expressions.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "Ast/Identifier.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> NamespaceExpression::Analyze()
+    Ref<TypeSpecifier> NamespaceExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         if (m_Namespace->ExpressionType() != ExpressionType::Identifier)
         {
@@ -27,17 +27,22 @@ namespace Marble
         if (auto node = iter.Struct(identifier.Id()).Find(); node)
         {
             table.EnterScope(node);
-            Ref<TypeSpecifier> ts = m_Value->Analyze();
+            Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
             table.LeaveScope();
             return ts;
         }
         if (auto node = iter.Enum(identifier.Id()).Find(); node)
         {
             table.EnterScope(node);
-            Ref<TypeSpecifier> ts = m_Value->Analyze();
+            Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
             table.LeaveScope();
             return ts;
         }
         throw "Cannot find the {} namespace";
+    }
+
+    Box<Expression> NamespaceExpression::Clone()
+    {
+        return MakeBox<NamespaceExpression>(*this);
     }
 } // namespace Marble

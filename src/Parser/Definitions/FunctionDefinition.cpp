@@ -10,9 +10,22 @@ namespace Marble
                                          std::vector<Box<VariableType>> &&params, Ref<TypeSpecifier> returnType,
                                          Box<Statement> block, const Span &span)
       : Definition{span, DefinitionType::Function}, m_AccessSpecifier{accessSpecifier}, m_FunctionName{std::move(functionName)},
-        m_Generics{std::move(generics)}, m_Params{std::move(params)}, m_ReturnType{std::move(returnType)}, m_Block{std::move(block)}
+        m_Generics{std::move(generics)}, m_Params{std::move(params)}, m_ReturnType{returnType}, m_Block{std::move(block)}
 
   {
+  }
+
+  FunctionDefinition::FunctionDefinition(const FunctionDefinition &obj) : Definition{obj.m_Span, DefinitionType::Function}
+  {
+    m_AccessSpecifier = obj.m_AccessSpecifier;
+    m_FunctionName = MakeBox<Identifier>(*obj.m_FunctionName.get());
+    m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+    for (auto &param : obj.m_Params)
+    {
+      m_Params.push_back(MakeBox<VariableType>(*param.get()));
+    }
+    m_ReturnType = MakeRef<TypeSpecifier>(*obj.m_ReturnType.get());
+    m_Block = obj.m_Block->Clone();
   }
 
   Box<Definition> FunctionDefinition::Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span)
@@ -48,4 +61,5 @@ namespace Marble
 
     return fnDefinition;
   }
+
 } // namespace Marble

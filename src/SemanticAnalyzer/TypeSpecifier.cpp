@@ -1,7 +1,9 @@
 #include "Ast/TypeSpecifier.hpp"
+#include "Utils/Macros.hpp"
 
 namespace Marble
 {
+
     bool TypeSpecifier::IsPrimitive() const
     {
         return m_Type == Types::Int ||
@@ -76,6 +78,80 @@ namespace Marble
     bool TypeSpecifier::operator!=(const TypeSpecifier &obj) const
     {
         return !this->operator==(obj);
+    }
+
+    const std::string &TypeSpecifier::ToString()
+    {
+        if (m_TypeName != "")
+        {
+            return m_TypeName;
+        }
+
+        switch (m_Type)
+        {
+        case Types::Int:
+            m_TypeName = "int";
+            break;
+        case Types::Usize:
+            m_TypeName = "usize";
+            break;
+        case Types::Float:
+            m_TypeName = "float";
+            break;
+        case Types::Double:
+            m_TypeName = "double";
+            break;
+        case Types::Char:
+            m_TypeName = "char";
+            break;
+        case Types::Str:
+            m_TypeName = "str";
+            break;
+        case Types::Bool:
+            m_TypeName = "bool";
+            break;
+        case Types::Void:
+            m_TypeName = "void";
+            break;
+        case Types::Pointer:
+        {
+            const auto &ptr = std::get<PointerType>(m_Variants);
+            m_TypeName = "*" + ptr.TypeSpecifier->ToString();
+            break;
+        }
+        case Types::ArrayType:
+        {
+            const auto &arr = std::get<ArrayType>(m_Variants);
+            m_TypeName = "[" + arr.TypeSpecifier->ToString() + ";" + std::to_string(arr.Size) + "]";
+            break;
+        }
+        case Types::UserDefine:
+        {
+            const auto &id = std::get<Identifier>(m_Variants);
+            m_TypeName = id.Id();
+            break;
+        }
+        case Types::GenericType:
+        {
+            const auto &gen = std::get<GenericType>(m_Variants);
+            std::string result = gen.OuterType.Id() + "<";
+            for (size_t i = 0; i < gen.InnerType.size(); ++i)
+            {
+                result += gen.InnerType[i]->ToString();
+                if (i + 1 < gen.InnerType.size())
+                    result += ",";
+            }
+            result += ">";
+            m_TypeName = result;
+            break;
+        }
+        case Types::Null:
+            m_TypeName = "null";
+            break;
+        default:
+            UNREACHABLE();
+        }
+        return m_TypeName;
     }
 
 } // namespace Marble

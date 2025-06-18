@@ -8,6 +8,12 @@ namespace Marble
     {
     }
 
+    NamespaceExpression::NamespaceExpression(const NamespaceExpression &obj) : Expression{obj.m_Span, ExpressionType::NameSpace}
+    {
+        m_Namespace = obj.m_Namespace->Clone();
+        m_Value = obj.m_Value->Clone();
+    }
+
     Box<Expression> NamespaceExpression::Parse(Parser &parser, Precedence precedence)
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));

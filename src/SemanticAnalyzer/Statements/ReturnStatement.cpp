@@ -1,9 +1,9 @@
 #include "Ast/Statements.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> ReturnStatement::Analyze()
+    Ref<TypeSpecifier> ReturnStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *parent = table.CurrentScope();
@@ -25,7 +25,7 @@ namespace Marble
         // TODO: Warn if local addresses returns
         if (m_Expression)
         {
-            Ref<TypeSpecifier> ts = m_Expression->Analyze();
+            Ref<TypeSpecifier> ts = m_Expression->Analyze(semanticAnalyzer);
             if (*ts == *fnNode->ReturnType())
             {
                 return TypeSpecifierOk;
@@ -37,5 +37,10 @@ namespace Marble
         }
 
         throw "Return value and return type of function does not match";
+    }
+
+    Box<Statement> ReturnStatement::Clone()
+    {
+        return MakeBox<ReturnStatement>(*this);
     }
 } // namespace Marble

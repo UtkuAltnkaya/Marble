@@ -9,6 +9,14 @@ namespace Marble
     {
     }
 
+    Generics::Generics(const Generics &obj) : Ast{obj.m_Span, AstType::Generics}
+    {
+        for (auto &type : obj.m_Types)
+        {
+            m_Types.push_back(type);
+        }
+        }
+
     // To prevent ambiguity between '<' operator and '<' generic greedy parsing strategy used
     // TODO: Search for better parsing strategy
     Box<Generics> Generics::Parse(Parser &parser)

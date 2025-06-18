@@ -1,13 +1,13 @@
 #include "Ast/Statements.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> LetStatement::Analyze()
+    Ref<TypeSpecifier> LetStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         if (m_Value)
         {
-            Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze();
+            Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze(semanticAnalyzer);
             if (!m_TypeSpecifier)
             {
                 m_TypeSpecifier = typeSpecifier;
@@ -23,5 +23,10 @@ namespace Marble
                                              node,
                                          });
         return TypeSpecifierOk;
+    }
+
+    Box<Statement> LetStatement::Clone()
+    {
+        return MakeBox<LetStatement>(*this);
     }
 } // namespace Marble

@@ -16,6 +16,13 @@ namespace Marble
     {
     }
 
+    BinaryExpression::BinaryExpression(const BinaryExpression &obj) : Expression{obj.m_Span, ExpressionType::Binary}
+    {
+        m_Operator = obj.m_Operator;
+        m_Left = obj.m_Left->Clone();
+        m_Right = obj.m_Right->Clone();
+    }
+
     Box<Expression> BinaryExpression::Parse(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence)
     {
 

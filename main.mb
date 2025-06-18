@@ -1,22 +1,7 @@
-fn calculate_factorial(x:int) -> int { 
-    let r = 1;
-    for (let i = x; i > 0; i--) 
-    {
-        r = r * i;
-    }
-
-    return r;
+fn main () -> void {
+    let x = add<int>(1,2);
 }
 
-
-fn main() -> int {
-    let exit_code = 0;
-
-    if (calculate_factorial(1) != 1)
-    {
-        exit_code = 1;
-    }
-
-    
-    return exit_code;
+fn add<T>(x:T, y:T) -> int {
+    return x + y;
 }

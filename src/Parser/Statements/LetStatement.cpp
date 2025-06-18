@@ -10,6 +10,29 @@ namespace Marble
     {
     }
 
+    LetStatement::LetStatement(const LetStatement &obj) : Statement{obj.m_Span, StatementType::Let}
+    {
+        m_Identifier = MakeBox<Identifier>(*obj.m_Identifier.get());
+
+        if (obj.m_TypeSpecifier)
+        {
+            m_TypeSpecifier = MakeRef<TypeSpecifier>(*obj.m_TypeSpecifier.get());
+        }
+        else
+        {
+            m_TypeSpecifier = nullptr;
+        }
+
+        if (obj.m_Value)
+        {
+            m_Value = obj.m_Value->Clone();
+        }
+        else
+        {
+            m_Value = nullptr;
+        }
+    }
+
     Box<Statement> LetStatement::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();

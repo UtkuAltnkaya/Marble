@@ -11,6 +11,14 @@ namespace Marble
     {
     }
 
+    BlockStatement::BlockStatement(const BlockStatement &obj) : Statement{obj.m_Span, StatementType::Block}
+    {
+        for (auto &stmt : obj.m_Statements)
+        {
+            m_Statements.push_back(stmt->Clone());
+        }
+    }
+
     Box<Statement> BlockStatement::Parse(Parser &parser, bool passTokenCheck)
     {
         Span start = parser.Current().Span();

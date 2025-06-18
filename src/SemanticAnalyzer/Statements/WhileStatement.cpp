@@ -1,12 +1,12 @@
 #include "Ast/Statements.hpp"
 #include "Utils/IDGenerator.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> WhileStatement::Analyze()
+    Ref<TypeSpecifier> WhileStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        Ref<TypeSpecifier> condition = m_Condition->Analyze();
+        Ref<TypeSpecifier> condition = m_Condition->Analyze(semanticAnalyzer);
 
         // TODO: Decide whether conditions must be bool or bool and int
         if (condition->GetType() != Types::Bool /*&& condition->GetType() != Types::Int*/)
@@ -20,8 +20,13 @@ namespace Marble
         parent->Insert("while-" + IDGenerator::Generate(), whileNode);
 
         table.EnterScope(whileNode);
-        m_Block->Analyze();
+        m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
         return TypeSpecifierOk;
+    }
+
+    Box<Statement> WhileStatement::Clone()
+    {
+        return MakeBox<WhileStatement>(*this);
     }
 } // namespace Marble

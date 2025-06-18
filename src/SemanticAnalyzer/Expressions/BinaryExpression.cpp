@@ -1,11 +1,13 @@
 #include "Ast/Expressions.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
-    Ref<TypeSpecifier> BinaryExpression::Analyze()
+    Ref<TypeSpecifier> BinaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        Ref<TypeSpecifier> leftType = m_Left->Analyze();
-        Ref<TypeSpecifier> rightType = m_Right->Analyze();
+        Ref<TypeSpecifier> leftType = m_Left->Analyze(semanticAnalyzer);
+        Ref<TypeSpecifier>
+            rightType = m_Right->Analyze(semanticAnalyzer);
 
         if (*leftType != *rightType)
         {
@@ -28,5 +30,10 @@ namespace Marble
         }
 
         return leftType;
+    }
+
+    Box<Expression> BinaryExpression::Clone()
+    {
+        return MakeBox<BinaryExpression>(*this);
     }
 } // namespace Marble

@@ -9,6 +9,7 @@ set(PROJECT_DIR ${CMAKE_SOURCE_DIR}/src)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(FetchGoogleTest)
+# include(FindLLVM)
 enable_testing()
 
 add_subdirectory(src)

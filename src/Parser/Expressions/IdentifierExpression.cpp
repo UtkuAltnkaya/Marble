@@ -9,6 +9,11 @@ namespace Marble
     {
     }
 
+    IdentifierExpression::IdentifierExpression(const IdentifierExpression &obj)
+        : Expression{obj.m_Span, ExpressionType::Identifier}, m_Identifier{obj.m_Identifier}
+    {
+    }
+
     Box<Expression> IdentifierExpression::Parse(Parser &parser, Precedence precedence)
     {
         const Token &token = parser.Current();

@@ -8,6 +8,12 @@ namespace Marble
     {
     }
 
+    AssignmentExpression::AssignmentExpression(const AssignmentExpression &obj) : Expression{obj.m_Span, ExpressionType::Assignment}
+    {
+        m_Variable = obj.m_Variable->Clone();
+        m_Value = obj.m_Value->Clone();
+    }
+
     Box<Expression> AssignmentExpression::Parse(Parser &parser, Precedence precedence)
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));

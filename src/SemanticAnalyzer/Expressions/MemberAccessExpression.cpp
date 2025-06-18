@@ -3,12 +3,13 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> MemberAccessExpression::Analyze()
+    Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         CheckObjectExpressionType();
-        Ref<TypeSpecifier> objectType = m_Object->Analyze();
+        Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
 
-        const Identifier *identifier;
+        const Identifier *
+            identifier;
         if (objectType->GetType() == Types::UserDefine)
         {
             if (m_AccessType != TokenType::Dot)
@@ -58,14 +59,14 @@ namespace Marble
         case ExpressionType::FunctionCall:
         {
             FunctionCallExpression *fnCallExpression = m_Property->Into<FunctionCallExpression>();
-            typeSpecifier = AnalyzeMethod(fnCallExpression, isPublic);
+            typeSpecifier = AnalyzeMethod(semanticAnalyzer, fnCallExpression, isPublic);
             break;
         }
         case ExpressionType::MemberAccess:
         case ExpressionType::ArrayIndex:
         {
             table.LeaveScope();
-            return m_Property->Analyze();
+            return m_Property->Analyze(semanticAnalyzer);
         }
         default:
         {
@@ -108,7 +109,7 @@ namespace Marble
         }
     }
 
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(FunctionCallExpression *fnCallExpression, bool &isPublic)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, bool &isPublic)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
@@ -126,7 +127,7 @@ namespace Marble
         }
 
         isPublic = CheckAccessSpecifier(fnNode->GetSymbolData().Access());
-        return fnCallExpression->Analyze();
+        return fnCallExpression->Analyze(semanticAnalyzer);
     }
 
     Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(IdentifierExpression *identifierExpression, bool &isPublic)
@@ -150,4 +151,8 @@ namespace Marble
         return access == SymbolAccess::Public;
     }
 
+    Box<Expression> MemberAccessExpression::Clone()
+    {
+        return MakeBox<MemberAccessExpression>(*this);
+    }
 } // namespace Marble
