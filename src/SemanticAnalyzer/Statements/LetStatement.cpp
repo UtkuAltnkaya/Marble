@@ -25,6 +25,15 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
+    void LetStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        if (m_TypeSpecifier)
+        {
+            m_TypeSpecifier->SubstituteGenerics(map);
+        }
+        m_Value->SubstituteGenerics(map);
+    }
+
     Box<Statement> LetStatement::Clone()
     {
         return MakeBox<LetStatement>(*this);

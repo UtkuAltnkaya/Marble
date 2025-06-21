@@ -23,6 +23,14 @@ namespace Marble
         return MakeRef<TypeSpecifier>(ArrayType{expressionType, m_Array.size()}, Span{});
     }
 
+    void ArrayInitExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        for (auto &item : m_Array)
+        {
+            item->SubstituteGenerics(map);
+        }
+    }
+
     Box<Expression> ArrayInitExpression::Clone()
     {
         return MakeBox<ArrayInitExpression>(*this);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <variant>
 #include <vector>
 #include "Ast/Identifier.hpp"
@@ -45,6 +46,9 @@ namespace Marble
 
     struct GenericType
     {
+        GenericType(const Identifier &outerType, std::vector<Ref<TypeSpecifier>> &&innerType);
+        GenericType(const GenericType &obj);
+        GenericType &operator=(const GenericType &obj);
         Identifier OuterType;
         std::vector<Ref<TypeSpecifier>> InnerType;
     };
@@ -63,6 +67,8 @@ namespace Marble
         ~TypeSpecifier() = default;
 
     public:
+        static Ref<TypeSpecifier> Parse(Parser &parser);
+
         const Identifier &UserDefine();
         const ArrayType &Array();
         const PointerType &Pointer();
@@ -73,9 +79,7 @@ namespace Marble
         bool operator==(const TypeSpecifier &obj) const;
         bool operator!=(const TypeSpecifier &obj) const;
         const std::string &ToString();
-
-    public:
-        static Ref<TypeSpecifier> Parse(Parser &parser);
+        void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
 
     private:
         static Ref<TypeSpecifier> Primitive(Parser &parser);

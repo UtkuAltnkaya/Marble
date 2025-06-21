@@ -45,6 +45,12 @@ namespace Marble
         }
     }
 
+    void AssignmentExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Value->SubstituteGenerics(map);
+        m_Variable->SubstituteGenerics(map);
+    }
+
     Box<Expression> AssignmentExpression::Clone()
     {
         return MakeBox<AssignmentExpression>(*this);

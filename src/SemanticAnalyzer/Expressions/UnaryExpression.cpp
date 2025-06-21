@@ -161,6 +161,11 @@ namespace Marble
         }
     }
 
+    void UnaryExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Value->SubstituteGenerics(map);
+    }
+
     Box<Expression> UnaryExpression::Clone()
     {
         return MakeBox<UnaryExpression>(*this);

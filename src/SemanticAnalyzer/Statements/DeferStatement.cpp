@@ -8,6 +8,10 @@ namespace Marble
         m_Expression->Analyze(semanticAnalyzer);
         return TypeSpecifierOk;
     }
+    void DeferStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Expression->SubstituteGenerics(map);
+    }
 
     Box<Statement> DeferStatement::Clone()
     {

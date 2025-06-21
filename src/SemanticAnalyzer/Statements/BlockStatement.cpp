@@ -27,6 +27,14 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
+    void BlockStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        for (auto &statement : m_Statements)
+        {
+            statement->SubstituteGenerics(map);
+        }
+    }
+
     Box<Statement> BlockStatement::Clone()
     {
         return MakeBox<BlockStatement>(*this);

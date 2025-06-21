@@ -1,7 +1,6 @@
 #include <iostream>
-#include <assert.h>
 #include "SymbolTable/SymbolTable.hpp"
-#include "SymbolTable.hpp"
+#include "Utils/Macros.hpp"
 
 namespace Marble
 {
@@ -23,19 +22,19 @@ namespace Marble
 
     void SymbolTable::Init()
     {
-        assert(!s_Instance);
+        ASSERT_A(!s_Instance, "Singleton instance is already initalized");
         s_Instance = new SymbolTable();
     }
 
     void SymbolTable::ShutDown()
     {
-        assert(s_Instance);
+        ASSERT_A(s_Instance, "Singleton instance is not initalized");
         delete s_Instance;
     }
 
     SymbolTable &SymbolTable::GetInstance()
     {
-        assert(s_Instance);
+        ASSERT_A(s_Instance, "Singleton instance is not initalized");
         return *s_Instance;
     }
 

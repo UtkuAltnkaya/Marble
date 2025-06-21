@@ -35,6 +35,7 @@ namespace Marble
         }
 
         definition->InstantiateWith(generics->Types());
+        return nullptr;
     }
 
     GenericDefinition *SemanticAnalyzer::Find(const std::string &name)
@@ -46,6 +47,7 @@ namespace Marble
                 return (GenericDefinition *)def.get();
             }
         }
+        return nullptr;
     }
 
 } // namespace Marble

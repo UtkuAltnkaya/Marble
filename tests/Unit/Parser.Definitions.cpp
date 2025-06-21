@@ -183,15 +183,15 @@ TEST_P(ParserImpl, Impl)
     auto castedImplDef = dynamic_cast<ImplDefinition *>(implDefinition.get());
     ASSERT_NE(castedImplDef, nullptr);
 
-    EXPECT_EQ(castedImplDef->GetName()->GetType(), Types::UserDefine);
-    EXPECT_EQ(castedImplDef->GetName()->UserDefine().Id(), "Person");
+    EXPECT_EQ(castedImplDef->GetImplName()->GetType(), Types::UserDefine);
+    EXPECT_EQ(castedImplDef->GetImplName()->UserDefine().Id(), "Person");
     EXPECT_EQ(castedImplDef->GetMemberFunctions().size(), 1);
     ASSERT_EQ(castedImplDef->GetGenerics(), nullptr);
 
     auto &memberFunction = castedImplDef->GetMemberFunctions().at(0);
     auto &prototype = memberFunction->GetPrototype();
     ASSERT_EQ(prototype.GetMethod(), nullptr);
-    EXPECT_EQ(prototype.GetName().Id(), "new");
+    EXPECT_EQ(prototype.GetName(), "new");
     EXPECT_EQ(prototype.GetParams().size(), 0);
     EXPECT_EQ(prototype.GetReturnType()->GetType(), Types::UserDefine);
     EXPECT_EQ(prototype.GetReturnType()->UserDefine().Id(), "Person");
@@ -205,8 +205,8 @@ TEST_P(ParserImplWithGenerics, ImplWithGenerics)
     auto castedImplDef = dynamic_cast<ImplDefinition *>(implDefinition.get());
     ASSERT_NE(castedImplDef, nullptr);
 
-    EXPECT_EQ(castedImplDef->GetName()->GetType(), Types::UserDefine);
-    EXPECT_EQ(castedImplDef->GetName()->UserDefine().Id(), "Stack");
+    EXPECT_EQ(castedImplDef->GetImplName()->GetType(), Types::UserDefine);
+    EXPECT_EQ(castedImplDef->GetImplName()->UserDefine().Id(), "Stack");
 
     ASSERT_NE(castedImplDef->GetGenerics(), nullptr);
     EXPECT_EQ(castedImplDef->GetGenerics()->Types().size(), 1);

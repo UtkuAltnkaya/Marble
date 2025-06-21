@@ -146,6 +146,12 @@ namespace Marble
         return variableNode->GetTypeSpecifier();
     }
 
+    void MemberAccessExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Object->SubstituteGenerics(map);
+        m_Property->SubstituteGenerics(map);
+    }
+
     bool MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)
     {
         return access == SymbolAccess::Public;

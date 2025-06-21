@@ -41,6 +41,12 @@ namespace Marble
         throw "Cannot find the {} namespace";
     }
 
+    void NamespaceExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Namespace->SubstituteGenerics(map);
+        m_Value->SubstituteGenerics(map);
+    }
+
     Box<Expression> NamespaceExpression::Clone()
     {
         return MakeBox<NamespaceExpression>(*this);

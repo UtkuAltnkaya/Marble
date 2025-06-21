@@ -4,6 +4,7 @@
 
 namespace Marble
 {
+
     Ref<TypeSpecifier> FunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::GetInstance();
@@ -44,11 +45,26 @@ namespace Marble
     {
         Box<Definition> clonedFnDef = MakeBox<FunctionDefinition>(*this);
         FunctionDefinition *castFnDef = clonedFnDef->Into<FunctionDefinition>();
-        castFnDef->SubstituteGenerics(typeArgs);
+        auto map = m_Generics->ToMap(typeArgs);
+        castFnDef->SubstituteGenerics(map);
+
+        std::string name = castFnDef->GetName();
+        for (auto &type : typeArgs)
+        {
+            name += "_" + type->ToString();
+        }
+        castFnDef->m_FunctionName = MakeBox<Identifier>(name, castFnDef->m_FunctionName->GetSpan());
+        return clonedFnDef;
     }
 
-    void FunctionDefinition::SubstituteGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    void FunctionDefinition::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
+        for (auto &param : m_Params)
+        {
+            param->GetTypeSpecifier()->SubstituteGenerics(map);
+        }
+        m_ReturnType->SubstituteGenerics(map);
+        m_Block->SubstituteGenerics(map);
     }
 
     bool FunctionDefinition::operator==(const FunctionDefinition &obj) const

@@ -25,6 +25,12 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
+    void WhileStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Condition->SubstituteGenerics(map);
+        m_Block->SubstituteGenerics(map);
+    }
+
     Box<Statement> WhileStatement::Clone()
     {
         return MakeBox<WhileStatement>(*this);

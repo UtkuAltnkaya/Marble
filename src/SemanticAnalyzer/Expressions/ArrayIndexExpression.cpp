@@ -53,6 +53,16 @@ namespace Marble
         throw "Array index must be usize";
     }
 
+    void ArrayIndexExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Array->SubstituteGenerics(map);
+        m_Index->SubstituteGenerics(map);
+        if (m_SecondIndex)
+        {
+            m_SecondIndex->SubstituteGenerics(map);
+        }
+    }
+
     Box<Expression> ArrayIndexExpression::Clone()
     {
         return MakeBox<ArrayIndexExpression>(*this);

@@ -39,6 +39,14 @@ namespace Marble
         throw "Return value and return type of function does not match";
     }
 
+    void ReturnStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        if (m_Expression)
+        {
+            m_Expression->SubstituteGenerics(map);
+        }
+    }
+
     Box<Statement> ReturnStatement::Clone()
     {
         return MakeBox<ReturnStatement>(*this);

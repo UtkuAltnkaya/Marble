@@ -15,7 +15,7 @@ namespace Marble
         {
             m_Types.push_back(type);
         }
-        }
+    }
 
     // To prevent ambiguity between '<' operator and '<' generic greedy parsing strategy used
     // TODO: Search for better parsing strategy
@@ -50,4 +50,23 @@ namespace Marble
         return MakeBox<Generics>(std::move(types), span);
     }
 
+    std::unordered_map<std::string, Ref<TypeSpecifier>> Generics::ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    {
+        if (m_Types.size() != typeArgs.size())
+        {
+            throw "Generic types does not matches";
+        }
+
+        std::unordered_map<std::string, Ref<TypeSpecifier>> map;
+
+        for (size_t i = 0; i < m_Types.size(); i++)
+        {
+            if (m_Types[i]->GetType() != Types::UserDefine)
+            {
+                throw "Type arguments must be user define type";
+            }
+            map[m_Types[i]->ToString()] = typeArgs[i];
+        }
+        return map;
+    }
 } // namespace Marble

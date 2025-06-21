@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "Parser.hpp"
+#include "Utils/Macros.hpp"
 #include "Lexer/Token/TokenType.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
 
@@ -44,7 +45,7 @@ namespace Marble
 
     void Parser::RollBack()
     {
-        assert(!m_CheckPoints.empty());
+        ASSERT_A(!m_CheckPoints.empty(), "No checkpoint to rollback");
 
         ParserCheckpoint checkPoint = std::move(m_CheckPoints.top());
         m_CheckPoints.pop();

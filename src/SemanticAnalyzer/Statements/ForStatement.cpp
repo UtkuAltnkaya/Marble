@@ -35,6 +35,22 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
+    void ForStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        if (m_LetStatement)
+        {
+            m_LetStatement->SubstituteGenerics(map);
+        }
+        else
+        {
+            m_AssignmentExpression->SubstituteGenerics(map);
+        }
+
+        m_Condition->SubstituteGenerics(map);
+        m_Increment->SubstituteGenerics(map);
+        m_Block->SubstituteGenerics(map);
+    }
+
     Box<Statement> ForStatement::Clone()
     {
         return MakeBox<ForStatement>(*this);

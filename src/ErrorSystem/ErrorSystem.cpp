@@ -11,19 +11,19 @@ namespace Marble
 
     void ErrorSystem::Init()
     {
-        assert(!s_Instance);
+        ASSERT_A(!s_Instance, "Singleton instance is already initalized");
         s_Instance = new ErrorSystem;
     }
 
     void ErrorSystem::Shutdown()
     {
-        assert(s_Instance);
+        ASSERT_A(s_Instance, "Singleton instance is not initalized");
         delete s_Instance;
     }
 
     ErrorSystem &ErrorSystem::GetInstance()
     {
-        assert(s_Instance);
+        ASSERT_A(s_Instance, "Singleton instance is not initalized");
         return *s_Instance;
     }
 

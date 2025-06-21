@@ -3,6 +3,20 @@
 
 namespace Marble
 {
+    void TypeSpecifier::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        const std::string &typeName = ToString();
+        auto iter = map.find(typeName);
+        if (iter == map.end())
+        {
+            return;
+        }
+        Ref<TypeSpecifier> argType = iter->second;
+        m_Span = argType->m_Span;
+        m_Type = argType->m_Type;
+        m_TypeName = argType->m_TypeName;
+        m_Variants = argType->m_Variants;
+    }
 
     bool TypeSpecifier::IsPrimitive() const
     {

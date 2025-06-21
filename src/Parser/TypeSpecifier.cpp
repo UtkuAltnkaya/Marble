@@ -42,6 +42,32 @@ namespace Marble
     {
     }
 
+    GenericType::GenericType(const Identifier &outerType, std::vector<Ref<TypeSpecifier>> &&innerType)
+        : OuterType{outerType}, InnerType{std::move(innerType)}
+    {
+    }
+
+    GenericType::GenericType(const GenericType &obj) : OuterType{obj.OuterType}
+    {
+        for (auto &inner : obj.InnerType)
+        {
+            InnerType.push_back(MakeRef<TypeSpecifier>(*inner));
+        }
+    }
+
+    GenericType &GenericType::operator=(const GenericType &obj)
+    {
+        if (this == &obj)
+        {
+            return *this;
+        }
+        OuterType = obj.OuterType;
+        for (auto &inner : obj.InnerType)
+        {
+            InnerType.push_back(MakeRef<TypeSpecifier>(*inner));
+        }
+    }
+
     const Identifier &TypeSpecifier::UserDefine()
     {
         if (std::holds_alternative<Identifier>(m_Variants))
@@ -192,7 +218,7 @@ namespace Marble
 
         Span span{typeSpecifier->m_Span.Start, parser.Current().Span().End};
 
-        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine(), genericTypes}, span);
+        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine(), std::move(genericTypes)}, span);
     }
 
     Types TypeSpecifier::GetPrimitive(Parser &parser)

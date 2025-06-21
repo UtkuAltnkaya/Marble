@@ -4,14 +4,15 @@
 
 namespace Marble
 {
-    ObjectInitExpression::ObjectInitExpression(Box<Expression> object, std::vector<Box<Expression>> &&fields, const Span &span)
-        : Expression{span, ExpressionType::ObjectInit}, m_Object{std::move(object)}, m_Fields{std::move(fields)}
+    ObjectInitExpression::ObjectInitExpression(Box<Expression> object, Box<Generics> generics, std::vector<Box<Expression>> &&fields, const Span &span)
+        : Expression{span, ExpressionType::ObjectInit}, m_Object{std::move(object)}, m_Generics{std::move(generics)}, m_Fields{std::move(fields)}
     {
     }
 
     ObjectInitExpression::ObjectInitExpression(const ObjectInitExpression &obj) : Expression{obj.m_Span, ExpressionType::ObjectInit}
     {
         m_Object = obj.m_Object->Clone();
+        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
         for (auto &field : obj.m_Fields)
         {
             m_Fields.push_back(field->Clone());
@@ -21,6 +22,9 @@ namespace Marble
     Box<Expression> ObjectInitExpression::Parse(Parser &parser, Precedence precedence)
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));
+
+        Box<Generics> generics = Generics::Parse(parser);
+
         if (parser.Next().TokenType() != TokenType::OpenCurlyBrace)
         {
             return left;
@@ -36,7 +40,7 @@ namespace Marble
 
         const Span &end = parser.Current().Span();
         Span span{start.Start, end.End};
-        return MakeBox<ObjectInitExpression>(std::move(left), std::move(fields), span);
+        return MakeBox<ObjectInitExpression>(std::move(left), std::move(generics), std::move(fields), span);
     }
 
     FieldExpression::FieldExpression(Identifier &&name, Box<Expression> value, const Span &span)

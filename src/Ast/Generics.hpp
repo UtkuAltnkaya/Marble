@@ -6,6 +6,7 @@
 
 namespace Marble
 {
+
     class Generics : public Ast
     {
     public:
@@ -15,6 +16,7 @@ namespace Marble
 
         static Box<Generics> Parse(Parser &parser);
         inline const std::vector<Ref<TypeSpecifier>> &Types() const { return m_Types; }
+        std::unordered_map<std::string, Ref<TypeSpecifier>> ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs);
 
         bool operator==(const Generics &obj) const
         {

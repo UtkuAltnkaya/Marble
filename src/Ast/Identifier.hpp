@@ -23,6 +23,8 @@ namespace Marble
 
         ~Identifier() = default;
 
+        Identifier &operator=(const Identifier &obj);
+
         static Box<Identifier> Parse(Parser &parser);
         inline const std::string &Id() const { return m_Id; }
 

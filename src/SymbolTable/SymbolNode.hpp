@@ -10,6 +10,7 @@
 #include "Ast/VariableType.hpp"
 #include "SymbolTable/SymbolData.hpp"
 #include "SymbolTable/SymbolIterator.hpp"
+#include "Utils/Macros.hpp"
 
 namespace Marble
 {
@@ -43,7 +44,7 @@ namespace Marble
         T *Into()
         {
             static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
-            assert(m_SymbolData.BaseType() == T::StaticType && "Invalid cast in SymbolNode::Into");
+            ASSERT_D(m_SymbolData.BaseType() == T::StaticType, "Invalid cast in SymbolNode::Into");
             return static_cast<T *>(this);
         }
 
@@ -62,7 +63,7 @@ namespace Marble
         const T *Into() const
         {
             static_assert(std::is_base_of<SymbolNode, T>::value, "It must be base of a SymbolNode");
-            assert(m_SymbolData.BaseType() == T::StaticType && "Invalid cast in SymbolNode::Into");
+            ASSERT_D(m_SymbolData.BaseType() == T::StaticType, "Invalid cast in SymbolNode::Into");
             return static_cast<const T *>(this);
         }
 

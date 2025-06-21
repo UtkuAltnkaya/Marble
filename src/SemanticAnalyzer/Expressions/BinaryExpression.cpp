@@ -32,6 +32,12 @@ namespace Marble
         return leftType;
     }
 
+    void BinaryExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Left->SubstituteGenerics(map);
+        m_Right->SubstituteGenerics(map);
+    }
+
     Box<Expression> BinaryExpression::Clone()
     {
         return MakeBox<BinaryExpression>(*this);

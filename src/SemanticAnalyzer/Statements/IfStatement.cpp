@@ -61,6 +61,31 @@ namespace Marble
         table.LeaveScope();
     }
 
+    void IfStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Condition->SubstituteGenerics(map);
+        m_Block->SubstituteGenerics(map);
+        for (auto &elseIf : m_ElseIfStatements)
+        {
+            elseIf->SubstituteGenerics(map);
+        }
+        if (m_ElseStatement)
+        {
+            m_ElseStatement->SubstituteGenerics(map);
+        }
+    }
+
+    void ElseIfStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Condition->SubstituteGenerics(map);
+        m_Block->SubstituteGenerics(map);
+    }
+
+    void ElseStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Block->SubstituteGenerics(map);
+    }
+
     Box<Statement> IfStatement::Clone()
     {
         return MakeBox<IfStatement>(*this);

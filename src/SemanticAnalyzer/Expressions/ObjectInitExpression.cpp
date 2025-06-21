@@ -57,6 +57,20 @@ namespace Marble
         return typeSpecifier;
     }
 
+    void ObjectInitExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Object->SubstituteGenerics(map);
+        for (auto &field : m_Fields)
+        {
+            field->SubstituteGenerics(map);
+        }
+    }
+
+    void FieldExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Value->SubstituteGenerics(map);
+    }
+
     Box<Expression> ObjectInitExpression::Clone()
     {
         return MakeBox<ObjectInitExpression>(*this);

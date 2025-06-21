@@ -36,6 +36,18 @@ namespace Marble
     {
     }
 
+    Identifier &Identifier::operator=(const Identifier &obj)
+    {
+        if (this == &obj)
+        {
+            return *this;
+        }
+        m_Span = obj.m_Span;
+        m_Type = obj.m_Type;
+        m_Id = obj.m_Id;
+        return *this;
+    }
+
     Box<Identifier> Identifier::Parse(Parser &parser)
     {
         const Token &token = parser.NextTokenAndExpect(TokenType::Identifier);

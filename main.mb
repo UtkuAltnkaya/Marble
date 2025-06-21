@@ -2,6 +2,6 @@ fn main () -> void {
     let x = add<int>(1,2);
 }
 
-fn add<T>(x:T, y:T) -> int {
+fn add<int>(x:T, y:T) -> int {
     return x + y;
 }

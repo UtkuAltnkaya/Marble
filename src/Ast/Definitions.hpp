@@ -5,6 +5,7 @@
 #include "Ast/Statements.hpp"
 #include "Ast/VariableType.hpp"
 #include "Ast/Generics.hpp"
+#include "Utils/Macros.hpp"
 #include <vector>
 
 // TODO: Add interface or trait definition
@@ -38,7 +39,7 @@ namespace Marble
         template <typename T>
         T *TryInto()
         {
-            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be definition");
             if (T::StaticType != m_DefinitionType)
             {
                 return nullptr;
@@ -49,15 +50,15 @@ namespace Marble
         template <typename T>
         T *Into()
         {
-            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
-            assert(m_DefinitionType == T::StaticType && "Invalid cast in Expression::Into");
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be definition");
+            ASSERT_D(m_DefinitionType == T::StaticType, "Invalid cast in Definition::Into");
             return static_cast<T *>(this);
         }
 
         template <typename T>
         const T *TryInto() const
         {
-            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be definition");
             if (T::StaticType != m_DefinitionType)
             {
                 return nullptr;
@@ -68,8 +69,8 @@ namespace Marble
         template <typename T>
         const T *Into() const
         {
-            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be expression");
-            assert(m_DefinitionType == T::StaticType && "Invalid cast in Expression::Into");
+            static_assert(std::is_base_of<Definition, T>::value, "Type of paramater must be definition");
+            ASSERT_D(m_DefinitionType == T::StaticType, "Invalid cast in Definition::Into");
             return static_cast<const T *>(this);
         }
 
@@ -85,7 +86,7 @@ namespace Marble
         virtual Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
 
     protected:
-        virtual void SubstituteGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
+        virtual void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
     };
 
     class FunctionDefinition : public Definition, public GenericDefinition
@@ -120,7 +121,7 @@ namespace Marble
         Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
 
     private:
-        void SubstituteGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;

@@ -53,6 +53,15 @@ namespace Marble
         return fnNode->ReturnType();
     }
 
+    void FunctionCallExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_FnName->SubstituteGenerics(map);
+        for (auto &arg : m_Args)
+        {
+            arg->SubstituteGenerics(map);
+        }
+    }
+
     SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name)
     {
         return scope->Iter().Function(name).Find();

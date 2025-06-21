@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Ast/Ast.hpp"
 #include "Ast/Identifier.hpp"
 #include "Ast/TypeSpecifier.hpp"
