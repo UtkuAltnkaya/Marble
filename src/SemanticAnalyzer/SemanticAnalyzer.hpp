@@ -14,6 +14,7 @@ namespace Marble
 
         void Analyze();
         Definition *InstantiateGenerics(const std::string &name, Generics *generics);
+        void AddExpandedDefinition(Definition *definition);
 
     private:
         GenericDefinition *Find(const std::string &name);

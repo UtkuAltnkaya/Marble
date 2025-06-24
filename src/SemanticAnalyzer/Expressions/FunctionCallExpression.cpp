@@ -3,7 +3,6 @@
 
 namespace Marble
 {
-    static SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name);
 
     Ref<TypeSpecifier> FunctionCallExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
@@ -15,21 +14,14 @@ namespace Marble
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *scope = table.CurrentScope();
         SymbolNode *node = GetFunctionNode(scope, identifierExpression->GetIdentifier().Id());
-
-        if (!node)
-        {
-            node = GetFunctionNode(table.Root(), identifierExpression->GetIdentifier().Id());
-            if (!node)
-            {
-                throw "Cannot find the function";
-            }
-        }
-
         FunctionSymbolNode *fnNode = node->Into<FunctionSymbolNode>();
 
         if (fnNode->IsGeneric())
         {
-            semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
+            Definition *newDefinition = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
+            semanticAnalyzer.AddExpandedDefinition(newDefinition);
+            node = GetFunctionNode(scope, newDefinition->GetName());
+            fnNode = node->Into<FunctionSymbolNode>();
         }
 
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();
@@ -62,9 +54,19 @@ namespace Marble
         }
     }
 
-    SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name)
+    SymbolNode *FunctionCallExpression::GetFunctionNode(SymbolNode *scope, const std::string &name)
     {
-        return scope->Iter().Function(name).Find();
+        SymbolNode *node = scope->Iter().Function(name).Find();
+        if (!node)
+        {
+            SymbolTable &table = SymbolTable::GetInstance();
+            node = table.Root()->Iter().Function(name).Find();
+            if (!node)
+            {
+                throw "Cannot find the function";
+            }
+        }
+        return node;
     }
 
     Box<Expression> FunctionCallExpression::Clone()

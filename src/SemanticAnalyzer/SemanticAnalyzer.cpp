@@ -9,11 +9,11 @@ namespace Marble
 
     void SemanticAnalyzer::Analyze()
     {
-        std::vector<Definition *> genericsFunctions;
-
-        for (auto &definition : m_Program->Definitions())
+        for (size_t i = 0; i < m_Program->Definitions().size(); i++)
         {
-            if (!definition->IsGeneric())
+            auto &definition = m_Program->Definitions()[i];
+            std::cout << definition->GetName() << std::endl;
+            if (!definition->IsGeneric() && !definition->IsAnalyzed())
             {
                 definition->Analyze(*this);
             }
@@ -34,8 +34,23 @@ namespace Marble
             return m_Generis[key];
         }
 
-        definition->InstantiateWith(generics->Types());
-        return nullptr;
+        Box<Definition> newDefinition = definition->InstantiateWith(generics->Types());
+        Definition *concreate = newDefinition.release();
+        m_Generis[key] = concreate;
+        return concreate;
+    }
+
+    void SemanticAnalyzer::AddExpandedDefinition(Definition *definition)
+    {
+        auto &defs = m_Program->Definitions();
+        for (auto &def : defs)
+        {
+            if (def->GetName() == definition->GetName())
+            {
+                return;
+            }
+        }
+        defs.emplace_back(definition);
     }
 
     GenericDefinition *SemanticAnalyzer::Find(const std::string &name)
@@ -44,7 +59,9 @@ namespace Marble
         {
             if (def->GetName() == name && def->IsGeneric())
             {
-                return (GenericDefinition *)def.get();
+                auto gDef = dynamic_cast<GenericDefinition *>(def.get());
+                ASSERT_D(gDef != nullptr, "Cast failed");
+                return gDef;
             }
         }
         return nullptr;

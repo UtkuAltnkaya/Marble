@@ -35,6 +35,9 @@ namespace Marble
         inline Marble::DefinitionType DefinitionType() const { return m_DefinitionType; }
         inline virtual bool IsGeneric() const { return false; }
         inline virtual const std::string &GetName() const = 0;
+        inline virtual bool IsAnalyzed() const { return m_IsAnalyzed; }
+        // TODO
+        virtual Box<Definition> Clone() { return nullptr; }
 
         template <typename T>
         T *TryInto()
@@ -76,6 +79,7 @@ namespace Marble
 
     protected:
         Marble::DefinitionType m_DefinitionType;
+        bool m_IsAnalyzed = false;
     };
 
     class GenericDefinition
@@ -108,6 +112,8 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const override { return m_FunctionName->Id(); }
@@ -118,7 +124,6 @@ namespace Marble
         bool operator==(const FunctionDefinition &obj) const;
 
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
-        Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
 
     private:
         void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
@@ -138,9 +143,11 @@ namespace Marble
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::StructField;
 
         StructFieldDefinition(AccessSpecifier accessSpecifier, Box<VariableType> field, const Span &span);
+        StructFieldDefinition(const StructFieldDefinition &obj);
         ~StructFieldDefinition() = default;
 
         static Box<StructFieldDefinition> Parse(Parser &parser);
+        Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType &GetField() const { return *m_Field.get(); }
@@ -151,21 +158,28 @@ namespace Marble
         Box<VariableType> m_Field;
     };
 
-    class StructDefinition : public Definition
+    class StructDefinition : public Definition, public GenericDefinition
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Struct;
 
         StructDefinition(AccessSpecifier accessSpecifier, Box<Identifier> structName, Box<Generics> generics, std::vector<Box<StructFieldDefinition>> &&field, const Span &span);
+        StructDefinition(const StructDefinition &obj);
         ~StructDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
+        Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const override { return m_StructName->Id(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<StructFieldDefinition>> &GetFields() const { return m_Field; }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
+
+    private:
+        void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;

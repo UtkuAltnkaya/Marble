@@ -28,6 +28,7 @@ namespace Marble
         void Insert(const std::string &name, SymbolNode *node);
         inline const SymbolData &GetSymbolData() const { return m_SymbolData; }
         inline const std::unordered_map<std::string, SymbolNode *> &GetChildren() const { return m_Children; }
+        inline bool IsGeneric() const { return m_IsGeneric; }
 
         template <typename T>
         T *TryInto()
@@ -71,6 +72,7 @@ namespace Marble
         SymbolData m_SymbolData;
         SymbolNode *m_Parent;
         std::unordered_map<std::string, SymbolNode *> m_Children;
+        bool m_IsGeneric = false;
     };
 
     class FunctionSymbolNode : public SymbolNode
@@ -84,12 +86,10 @@ namespace Marble
 
         inline const Ref<TypeSpecifier> ReturnType() const { return m_ReturnType; }
         inline const std::vector<Ref<TypeSpecifier>> &Params() const { return m_Params; }
-        inline bool IsGeneric() const { return m_IsGeneric; }
 
     private:
         Ref<TypeSpecifier> m_ReturnType;
         std::vector<Ref<TypeSpecifier>> m_Params;
-        bool m_IsGeneric;
     };
 
     class VariableSymbolNode : public SymbolNode

@@ -21,6 +21,7 @@ namespace Marble
     SymbolNode::SymbolNode(const StructDefinition &structDefinition, SymbolNode *parent)
         : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()), SymbolNodeTypes::Struct, SymbolNodeBaseTypes::None}, parent}
     {
+        m_IsGeneric = structDefinition.GetGenerics() != nullptr;
         for (auto &structField : structDefinition.GetFields())
         {
             Insert(structField->GetField().GetIdentifier().Id(), new VariableSymbolNode{*structField.get(), this});

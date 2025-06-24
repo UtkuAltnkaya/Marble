@@ -42,8 +42,8 @@ namespace Marble
             program = parser.Parse();
         }
 
-        // SemanticAnalyzer semanticAnalyzer{program};
-        // semanticAnalyzer.Analyze();
+        SemanticAnalyzer semanticAnalyzer{program};
+        semanticAnalyzer.Analyze();
     }
 
     void Compiler::AddArgs()

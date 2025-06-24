@@ -17,6 +17,18 @@ namespace Marble
         {
             throw "Cannot find the struct";
         }
+
+        if (structNode->IsGeneric())
+        {
+            Definition *newDefinition = semanticAnalyzer.InstantiateGenerics(structName->GetIdentifier().Id(), m_Generics.get());
+            semanticAnalyzer.AddExpandedDefinition(newDefinition);
+            structNode = table.Root()->Iter().Struct(newDefinition->GetName()).Find();
+            if (!structNode)
+            {
+                throw "Cannot find the struct";
+            }
+        }
+
         size_t size = structNode->Iter().Count(SymbolNodeTypes::StructField);
         if (m_Fields.size() > size)
         {

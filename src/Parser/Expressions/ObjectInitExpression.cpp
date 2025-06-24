@@ -23,12 +23,19 @@ namespace Marble
     {
         Box<Expression> left = Expression::Parse(parser, Expression::NextPrecedence(precedence));
 
+        parser.CreateCheckpoint();
         Box<Generics> generics = Generics::Parse(parser);
 
         if (parser.Next().TokenType() != TokenType::OpenCurlyBrace)
         {
+            if (generics)
+            {
+                parser.RollBack();
+            }
+            parser.DiscardCheckpoint();
             return left;
         }
+        parser.DiscardCheckpoint();
 
         const Span &start = left->GetSpan();
 

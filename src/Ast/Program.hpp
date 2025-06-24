@@ -14,6 +14,7 @@ namespace Marble
 
         static Ref<Program> Parse(Parser &parser);
         inline const std::vector<Box<Definition>> &Definitions() const { return m_Definitions; }
+        inline std::vector<Box<Definition>> &Definitions() { return m_Definitions; }
 
     private:
         std::vector<Box<Definition>> m_Definitions;

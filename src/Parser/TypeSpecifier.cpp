@@ -62,10 +62,12 @@ namespace Marble
             return *this;
         }
         OuterType = obj.OuterType;
+        InnerType.clear();
         for (auto &inner : obj.InnerType)
         {
             InnerType.push_back(MakeRef<TypeSpecifier>(*inner));
         }
+        return *this;
     }
 
     const Identifier &TypeSpecifier::UserDefine()

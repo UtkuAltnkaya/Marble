@@ -11,6 +11,7 @@ namespace Marble
 {
   class FunctionCallExpression;
   class IdentifierExpression;
+  class SymbolNode;
   enum class SymbolAccess;
 
   enum class ExpressionType
@@ -349,6 +350,9 @@ namespace Marble
     inline const Generics *const GetGenerics() { return m_Generics.get(); }
     inline const std::vector<Box<Expression>> &GetArgs() const { return m_Args; }
     void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+
+  private:
+    SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name);
 
   private:
     Box<Expression> m_FnName;

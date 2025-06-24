@@ -1,12 +1,14 @@
 #include "Ast/Definitions.hpp"
 #include <iostream>
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "Utils/IDGenerator.hpp"
 
 namespace Marble
 {
 
     Ref<TypeSpecifier> FunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
+        m_IsAnalyzed = true;
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *iter = table.Iter()
                                .Function(m_FunctionName->Id())
@@ -37,13 +39,12 @@ namespace Marble
         {
             return TypeSpecifierOk;
         }
-
         throw "Return statement expected";
     }
 
     Box<Definition> FunctionDefinition::InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
-        Box<Definition> clonedFnDef = MakeBox<FunctionDefinition>(*this);
+        Box<Definition> clonedFnDef = Clone();
         FunctionDefinition *castFnDef = clonedFnDef->Into<FunctionDefinition>();
         auto map = m_Generics->ToMap(typeArgs);
         castFnDef->SubstituteGenerics(map);
@@ -53,7 +54,12 @@ namespace Marble
         {
             name += "_" + type->ToString();
         }
+        name += "_" + IDGenerator::Generate();
         castFnDef->m_FunctionName = MakeBox<Identifier>(name, castFnDef->m_FunctionName->GetSpan());
+        castFnDef->m_Generics.reset();
+
+        SymbolTable &table = SymbolTable::GetInstance();
+        table.Insert(castFnDef->GetName(), new FunctionSymbolNode{*castFnDef, table.Root()});
         return clonedFnDef;
     }
 
@@ -98,5 +104,10 @@ namespace Marble
         }
         // TODO compare block
         return true;
+    }
+
+    Box<Definition> FunctionDefinition::Clone()
+    {
+        return MakeBox<FunctionDefinition>(*this);
     }
 } // namespace Marble

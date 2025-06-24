@@ -1,7 +1,35 @@
-fn main () -> void {
-    let x = add<int>(1,2);
+struct Vec<T>{
+    data: T,
+    size: int,
 }
 
-fn add<int>(x:T, y:T) -> int {
+
+fn main () -> void {
+    let x = add<int>(1,2);
+    let y = add<int>(1,2);
+    let z: int = x+y;
+
+    let vec = Vec<int>{data:0,size:0};
+
+    let a = hello<int,float>(1,2.0);
+}
+
+fn calculate() -> void {
+    let x = add<int>(1,2);
+    let y = add<float>(1.0,2.0);
+
+    let z = y as int;
+    x = x + z;
+}
+
+fn add<T>(x:T, y:T) -> T {
+    let a = hello<float,int>(1.0,2.0 as int);
     return x + y;
+}
+
+fn hello<T,U>(x:T,y:U) -> int {
+    let a = x;
+    let b = y;
+
+    return 1;
 }

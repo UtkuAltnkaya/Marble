@@ -14,6 +14,17 @@ namespace Marble
     {
     }
 
+    StructDefinition::StructDefinition(const StructDefinition &obj) : Definition{obj.m_Span, DefinitionType::Struct}
+    {
+        m_AccessSpecifier = obj.m_AccessSpecifier;
+        m_StructName = MakeBox<Identifier>(*obj.m_StructName.get());
+        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+        for (auto &field : obj.m_Field)
+        {
+            m_Field.push_back(MakeBox<StructFieldDefinition>(*field.get()));
+        }
+    }
+
     Box<Definition> StructDefinition::Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span)
     {
         Span start = accessSpecifier == AccessSpecifier::Public ? span : parser.Current().Span();
@@ -41,6 +52,13 @@ namespace Marble
     StructFieldDefinition::StructFieldDefinition(AccessSpecifier accessSpecifier, Box<VariableType> field, const Span &span)
         : Definition{span, DefinitionType::StructField}, m_AccessSpecifier{accessSpecifier}, m_Field{std::move(field)}
     {
+    }
+
+    StructFieldDefinition::StructFieldDefinition(const StructFieldDefinition &obj)
+        : Definition{obj.m_Span, DefinitionType::StructField}
+    {
+        m_AccessSpecifier = obj.m_AccessSpecifier;
+        m_Field = MakeBox<VariableType>(*obj.m_Field.get());
     }
 
     Box<StructFieldDefinition> StructFieldDefinition::Parse(Parser &parser)
