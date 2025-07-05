@@ -12,6 +12,8 @@
 namespace Marble
 {
     class SymbolNode;
+    class ImplDefinition;
+    class MemberFunctionDefinition;
 
     enum class DefinitionType
     {
@@ -36,6 +38,12 @@ namespace Marble
         inline virtual bool IsGeneric() const { return false; }
         inline virtual const std::string &GetName() const = 0;
         inline virtual bool IsAnalyzed() const { return m_IsAnalyzed; }
+        virtual bool IsExpanded() const { return m_IsExpanded; }
+        virtual Box<Definition> InstantiateWith(
+            SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) { return nullptr; };
+        virtual void SubstituteGenerics(
+            SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) {};
+
         // TODO
         virtual Box<Definition> Clone() { return nullptr; }
 
@@ -79,21 +87,22 @@ namespace Marble
 
     protected:
         Marble::DefinitionType m_DefinitionType;
-        bool m_IsAnalyzed = false;
+        bool m_IsAnalyzed;
+        bool m_IsExpanded;
     };
 
-    class GenericDefinition
-    {
-    public:
-        virtual ~GenericDefinition() = default;
-        inline virtual const std::string &GetName() const = 0;
-        virtual Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
+    // class GenericDefinition
+    // {
+    // public:
+    //     virtual ~GenericDefinition() = default;
+    //     inline virtual const std::string &GetName() const = 0;
+    //     virtual Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer,const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
 
-    protected:
-        virtual void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
-    };
+    // protected:
+    //     virtual void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
+    // };
 
-    class FunctionDefinition : public Definition, public GenericDefinition
+    class FunctionDefinition : public Definition /*, public GenericDefinition*/
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Function;
@@ -112,7 +121,8 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
-        Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> InstantiateWith(
+            SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
@@ -126,7 +136,8 @@ namespace Marble
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
 
     private:
-        void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(
+            SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -158,7 +169,7 @@ namespace Marble
         Box<VariableType> m_Field;
     };
 
-    class StructDefinition : public Definition, public GenericDefinition
+    class StructDefinition : public Definition /*,public GenericDefinition */
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Struct;
@@ -169,23 +180,28 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
-        Box<Definition> InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const override { return m_StructName->Id(); }
+        inline const Identifier &GetStructName() const { return *m_StructName.get(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<StructFieldDefinition>> &GetFields() const { return m_Field; }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
+        inline ImplDefinition *GetImplDefinition() const { return m_ImplDefinition; }
+
+        inline void SetImplDefinition(ImplDefinition *implDefinition) { m_ImplDefinition = implDefinition; }
 
     private:
-        void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<Identifier> m_StructName;
         Box<Generics> m_Generics;
         std::vector<Box<StructFieldDefinition>> m_Field;
+        ImplDefinition *m_ImplDefinition;
     };
 
     class EnumDefinition : public Definition
@@ -208,9 +224,10 @@ namespace Marble
         std::vector<Box<Identifier>> m_Fields;
     };
 
-    class MemberFunctionPrototypeDefinition : public Definition
+    class MemberFunctionPrototypeDefinition : public Definition /* ,public GenericDefinition*/
     {
     public:
+        friend class MemberFunctionDefinition;
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunctionPrototype;
 
         MemberFunctionPrototypeDefinition(
@@ -221,9 +238,13 @@ namespace Marble
             std::vector<Box<VariableType>> &&params,
             Ref<TypeSpecifier> returnType,
             const Span &span);
-
+        MemberFunctionPrototypeDefinition(const MemberFunctionPrototypeDefinition &obj);
         ~MemberFunctionPrototypeDefinition() = default;
+
         static Box<MemberFunctionPrototypeDefinition> Parse(Parser &parser);
+        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType *GetMethod() const { return m_Method.get(); }
@@ -245,15 +266,20 @@ namespace Marble
         Ref<TypeSpecifier> m_ReturnType;
     };
 
-    class MemberFunctionDefinition : public Definition
+    class MemberFunctionDefinition : public Definition /*,public GenericDefinition*/
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunction;
 
         MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span);
+        MemberFunctionDefinition(const MemberFunctionDefinition &obj);
         ~MemberFunctionDefinition() = default;
+
         static Box<MemberFunctionDefinition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        Box<Definition> Clone() override;
 
         inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
         inline const Statement &GetBody() const { return *m_Block.get(); }
@@ -264,25 +290,32 @@ namespace Marble
         Box<Statement> m_Block;
     };
 
-    class ImplDefinition : public Definition
+    class ImplDefinition : public Definition /* ,public GenericDefinition*/
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Impl;
 
         ImplDefinition(Ref<TypeSpecifier> implName, Box<Generics> generics, std::vector<Box<MemberFunctionDefinition>> &&memberFunctions, const Span &span);
+        ImplDefinition(const ImplDefinition &obj);
         ~ImplDefinition() = default;
         static Box<Definition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> Clone() override;
 
         inline const std::string &GetName() const override { return m_ImplName->ToString(); }
         inline const Ref<TypeSpecifier> GetImplName() const { return m_ImplName; }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<MemberFunctionDefinition>> &GetMemberFunctions() const { return m_MemberFunctions; }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
+        inline void SetImplName(Ref<TypeSpecifier> implName) { m_ImplName = implName; }
+
+        void CreateSymbol();
+        void AddMemberFunction(Box<MemberFunctionDefinition> memberFunction);
 
     private:
-        void CreateSymbol();
         SymbolNode *HandleRoot(SymbolNode *node);
+        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         Ref<TypeSpecifier> m_ImplName;

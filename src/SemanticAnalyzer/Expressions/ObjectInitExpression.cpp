@@ -6,13 +6,14 @@ namespace Marble
     Ref<TypeSpecifier> ObjectInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         const IdentifierExpression *structName = m_Object->TryInto<IdentifierExpression>();
+        Identifier name = structName->GetIdentifier();
         if (!structName)
         {
             throw "Object name must be identifier expression";
         }
 
         SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *structNode = table.Root()->Iter().Struct(structName->GetIdentifier().Id()).Find();
+        SymbolNode *structNode = table.Root()->Iter().Struct(name.Id()).Find();
         if (!structNode)
         {
             throw "Cannot find the struct";
@@ -20,13 +21,9 @@ namespace Marble
 
         if (structNode->IsGeneric())
         {
-            Definition *newDefinition = semanticAnalyzer.InstantiateGenerics(structName->GetIdentifier().Id(), m_Generics.get());
-            semanticAnalyzer.AddExpandedDefinition(newDefinition);
-            structNode = table.Root()->Iter().Struct(newDefinition->GetName()).Find();
-            if (!structNode)
-            {
-                throw "Cannot find the struct";
-            }
+            auto &a = semanticAnalyzer.InstantiateGenerics(name.Id(), m_Generics.get());
+            name.Id(a);
+            structNode = table.Root()->Iter().Struct(name.Id()).Find();
         }
 
         size_t size = structNode->Iter().Count(SymbolNodeTypes::StructField);
@@ -44,7 +41,7 @@ namespace Marble
             field->Analyze(semanticAnalyzer);
         }
         table.LeaveScope();
-        return MakeRef<TypeSpecifier>(structName->GetIdentifier(), Span{});
+        return MakeRef<TypeSpecifier>(name, Span{});
     }
 
     Ref<TypeSpecifier> FieldExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
@@ -69,18 +66,23 @@ namespace Marble
         return typeSpecifier;
     }
 
-    void ObjectInitExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ObjectInitExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Object->SubstituteGenerics(map);
+        if (m_Generics)
+        {
+            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+        }
+
+        m_Object->SubstituteGenerics(semanticAnalyzer, map);
         for (auto &field : m_Fields)
         {
-            field->SubstituteGenerics(map);
+            field->SubstituteGenerics(semanticAnalyzer, map);
         }
     }
 
-    void FieldExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void FieldExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Value->SubstituteGenerics(map);
+        m_Value->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     Box<Expression> ObjectInitExpression::Clone()

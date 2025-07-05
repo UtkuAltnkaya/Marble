@@ -26,6 +26,7 @@ namespace Marble
         if (m_Expression)
         {
             Ref<TypeSpecifier> ts = m_Expression->Analyze(semanticAnalyzer);
+
             if (*ts == *fnNode->ReturnType())
             {
                 return TypeSpecifierOk;
@@ -39,11 +40,12 @@ namespace Marble
         throw "Return value and return type of function does not match";
     }
 
-    void ReturnStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ReturnStatement::SubstituteGenerics(
+        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Expression)
         {
-            m_Expression->SubstituteGenerics(map);
+            m_Expression->SubstituteGenerics(semanticAnalyzer, map);
         }
     }
 

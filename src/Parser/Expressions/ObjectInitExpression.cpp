@@ -12,7 +12,7 @@ namespace Marble
     ObjectInitExpression::ObjectInitExpression(const ObjectInitExpression &obj) : Expression{obj.m_Span, ExpressionType::ObjectInit}
     {
         m_Object = obj.m_Object->Clone();
-        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+        m_Generics = obj.m_Generics ? MakeBox<Generics>(*obj.m_Generics.get()) : nullptr;
         for (auto &field : obj.m_Fields)
         {
             m_Fields.push_back(field->Clone());

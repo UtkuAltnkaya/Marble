@@ -32,10 +32,10 @@ namespace Marble
         return leftType;
     }
 
-    void BinaryExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void BinaryExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Left->SubstituteGenerics(map);
-        m_Right->SubstituteGenerics(map);
+        m_Left->SubstituteGenerics(semanticAnalyzer, map);
+        m_Right->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     Box<Expression> BinaryExpression::Clone()

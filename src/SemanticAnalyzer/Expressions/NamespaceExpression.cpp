@@ -26,6 +26,11 @@ namespace Marble
 
         if (auto node = iter.Struct(identifier.Id()).Find(); node)
         {
+            if (node->IsGeneric())
+            {
+                const std::string &name = semanticAnalyzer.InstantiateGenerics(identifier.Id(), m_Generics.get());
+                node = root->Iter().Struct(name).Find();
+            }
             table.EnterScope(node);
             Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
             table.LeaveScope();
@@ -41,10 +46,14 @@ namespace Marble
         throw "Cannot find the {} namespace";
     }
 
-    void NamespaceExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void NamespaceExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Namespace->SubstituteGenerics(map);
-        m_Value->SubstituteGenerics(map);
+        if (m_Generics)
+        {
+            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+        }
+        m_Namespace->SubstituteGenerics(semanticAnalyzer, map);
+        m_Value->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     Box<Expression> NamespaceExpression::Clone()

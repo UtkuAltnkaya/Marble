@@ -13,14 +13,16 @@ namespace Marble
         ~SemanticAnalyzer() = default;
 
         void Analyze();
-        Definition *InstantiateGenerics(const std::string &name, Generics *generics);
-        void AddExpandedDefinition(Definition *definition);
+        const std::string &InstantiateGenerics(const std::string &name, const Generics *generics);
+        const std::string &InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
 
     private:
-        GenericDefinition *Find(const std::string &name);
+        void AddExpandedDefinition(Box<Definition> definition);
+        void GenerateGenericKey(GenericInstanceKey &key, const Definition *definition, const std::vector<Ref<TypeSpecifier>> &typeArgs);
+        Box<Definition> Instantiate(SymbolNode *node, GenericInstanceKey &key, const std::vector<Ref<TypeSpecifier>> &typeArgs);
 
         Ref<Program> m_Program;
-        std::unordered_map<GenericInstanceKey, Definition *, GenericInstanceKeyHasher> m_Generis;
+        std::unordered_map<GenericInstanceKey, std::string, GenericInstanceKeyHasher> m_Generis;
     };
 
 } // namespace Marble

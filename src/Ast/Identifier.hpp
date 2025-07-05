@@ -27,6 +27,7 @@ namespace Marble
 
         static Box<Identifier> Parse(Parser &parser);
         inline const std::string &Id() const { return m_Id; }
+        inline void Id(const std::string &id) { m_Id = id; }
 
         inline bool operator==(const Identifier &obj) const { return m_Id == obj.m_Id; }
         inline bool operator!=(const Identifier &obj) const { return m_Id != obj.m_Id; }

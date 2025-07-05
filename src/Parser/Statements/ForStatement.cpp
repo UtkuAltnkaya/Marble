@@ -17,7 +17,7 @@ namespace Marble
 
     ForStatement::ForStatement(const ForStatement &obj) : Statement{obj.m_Span, StatementType::For}
     {
-        if (m_LetStatement)
+        if (obj.m_LetStatement)
         {
             m_LetStatement = obj.m_LetStatement->Clone();
             m_AssignmentExpression = nullptr;

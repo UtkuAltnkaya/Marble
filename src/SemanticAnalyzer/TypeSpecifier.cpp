@@ -1,21 +1,60 @@
 #include "Ast/TypeSpecifier.hpp"
 #include "Utils/Macros.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include <iostream>
 
 namespace Marble
 {
-    void TypeSpecifier::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void TypeSpecifier::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        const std::string &typeName = ToString();
-        auto iter = map.find(typeName);
-        if (iter == map.end())
+        switch (m_Type)
         {
-            return;
+        case Types::UserDefine:
+        {
+            auto &userDefine = std::get<Identifier>(m_Variants);
+            auto iter = map.find(userDefine.Id());
+            if (iter == map.end())
+            {
+                return;
+            }
+            const Ref<TypeSpecifier> &argType = iter->second;
+            m_Span = argType->m_Span;
+            m_Type = argType->m_Type;
+            m_TypeName = argType->m_TypeName;
+            m_Variants = argType->m_Variants;
+            break;
         }
-        Ref<TypeSpecifier> argType = iter->second;
-        m_Span = argType->m_Span;
-        m_Type = argType->m_Type;
-        m_TypeName = argType->m_TypeName;
-        m_Variants = argType->m_Variants;
+        case Types::Pointer:
+        {
+            auto &ptr = std::get<PointerType>(m_Variants);
+            ptr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            break;
+        }
+        case Types::ArrayType:
+        {
+            auto &arr = std::get<ArrayType>(m_Variants);
+            arr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            break;
+        }
+        case Types::GenericType:
+        {
+            GenericType &gen = std::get<GenericType>(m_Variants);
+            for (auto &arg : gen.InnerType)
+            {
+                arg->SubstituteGenerics(semanticAnalyzer, map);
+            }
+            const std::string &name = semanticAnalyzer.InstantiateGenerics(gen.OuterType.Id(), gen.InnerType);
+            Span span;
+            span.Start = gen.OuterType.GetSpan().Start;
+            span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
+            m_Variants = Identifier(name, span);
+            m_Span = span;
+            m_Type = Types::UserDefine;
+            break;
+        }
+        default:
+            break;
+        }
     }
 
     bool TypeSpecifier::IsPrimitive() const
@@ -130,13 +169,13 @@ namespace Marble
         case Types::Pointer:
         {
             const auto &ptr = std::get<PointerType>(m_Variants);
-            m_TypeName = "*" + ptr.TypeSpecifier->ToString();
+            m_TypeName = ptr.TypeSpecifier->ToString();
             break;
         }
         case Types::ArrayType:
         {
             const auto &arr = std::get<ArrayType>(m_Variants);
-            m_TypeName = "[" + arr.TypeSpecifier->ToString() + ";" + std::to_string(arr.Size) + "]";
+            m_TypeName = arr.TypeSpecifier->ToString();
             break;
         }
         case Types::UserDefine:

@@ -32,6 +32,7 @@ namespace Marble
     };
 
     class TypeSpecifier;
+    class SemanticAnalyzer;
 
     struct ArrayType
     {
@@ -79,7 +80,7 @@ namespace Marble
         bool operator==(const TypeSpecifier &obj) const;
         bool operator!=(const TypeSpecifier &obj) const;
         const std::string &ToString();
-        void SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
+        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
 
     private:
         static Ref<TypeSpecifier> Primitive(Parser &parser);

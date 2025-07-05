@@ -18,9 +18,8 @@ namespace Marble
 
         if (fnNode->IsGeneric())
         {
-            Definition *newDefinition = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
-            semanticAnalyzer.AddExpandedDefinition(newDefinition);
-            node = GetFunctionNode(scope, newDefinition->GetName());
+            const std::string &name = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
+            node = GetFunctionNode(scope, name);
             fnNode = node->Into<FunctionSymbolNode>();
         }
 
@@ -45,12 +44,16 @@ namespace Marble
         return fnNode->ReturnType();
     }
 
-    void FunctionCallExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void FunctionCallExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_FnName->SubstituteGenerics(map);
+        if (m_Generics)
+        {
+            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+        }
+        m_FnName->SubstituteGenerics(semanticAnalyzer, map);
         for (auto &arg : m_Args)
         {
-            arg->SubstituteGenerics(map);
+            arg->SubstituteGenerics(semanticAnalyzer, map);
         }
     }
 

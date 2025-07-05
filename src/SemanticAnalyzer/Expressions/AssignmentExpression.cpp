@@ -45,10 +45,10 @@ namespace Marble
         }
     }
 
-    void AssignmentExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void AssignmentExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Value->SubstituteGenerics(map);
-        m_Variable->SubstituteGenerics(map);
+        m_Value->SubstituteGenerics(semanticAnalyzer, map);
+        m_Variable->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     Box<Expression> AssignmentExpression::Clone()

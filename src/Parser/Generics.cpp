@@ -50,7 +50,7 @@ namespace Marble
         return MakeBox<Generics>(std::move(types), span);
     }
 
-    std::unordered_map<std::string, Ref<TypeSpecifier>> Generics::ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    std::unordered_map<std::string, Ref<TypeSpecifier>> Generics::ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs) const
     {
         if (m_Types.size() != typeArgs.size())
         {
@@ -65,8 +65,17 @@ namespace Marble
             {
                 throw "Type arguments must be user define type";
             }
-            map[m_Types[i]->ToString()] = typeArgs[i];
+            const Identifier &id = m_Types[i]->UserDefine();
+            map[id.Id()] = typeArgs[i];
         }
         return map;
+    }
+
+    void Generics::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        for (auto &type : m_Types)
+        {
+            type->SubstituteGenerics(semanticAnalyzer, map);
+        }
     }
 } // namespace Marble

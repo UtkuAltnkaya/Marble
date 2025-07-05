@@ -11,6 +11,18 @@ namespace Marble
     {
     }
 
+    ImplDefinition::ImplDefinition(const ImplDefinition &obj) : Definition{obj.m_Span, DefinitionType::Impl}
+    {
+        m_ImplName = MakeRef<TypeSpecifier>(*obj.m_ImplName.get());
+        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+        m_MemberFunctions.reserve(obj.m_MemberFunctions.size());
+
+        for (auto &memberFunction : obj.m_MemberFunctions)
+        {
+            m_MemberFunctions.push_back(MakeBox<MemberFunctionDefinition>(*memberFunction.get()));
+        }
+    }
+
     Box<Definition> ImplDefinition::Parse(Parser &parser)
     {
         Span start = parser.Current().Span();
@@ -56,9 +68,20 @@ namespace Marble
         return implDefinition;
     }
 
+    void ImplDefinition::AddMemberFunction(Box<MemberFunctionDefinition> memberFunction)
+    {
+        m_MemberFunctions.push_back(std::move(memberFunction));
+    }
+
     MemberFunctionDefinition::MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span)
         : Definition{span, DefinitionType::MemberFunction}, m_Prototype{std::move(prototype)}, m_Block{std::move(block)}
     {
+    }
+    MemberFunctionDefinition::MemberFunctionDefinition(const MemberFunctionDefinition &obj)
+        : Definition{obj.m_Span, DefinitionType::MemberFunction}
+    {
+        m_Prototype = MakeBox<MemberFunctionPrototypeDefinition>(*obj.m_Prototype.get());
+        m_Block = obj.m_Block->Clone();
     }
 
     Box<MemberFunctionDefinition> MemberFunctionDefinition::Parse(Parser &parser)
@@ -81,6 +104,21 @@ namespace Marble
         : Definition{span, DefinitionType::MemberFunctionPrototype}, m_AccessSpecifier{accessSpecifier}, m_Method{std::move(method)},
           m_Name{std::move(name)}, m_Generics{std::move(generics)}, m_Params{std::move(params)}, m_ReturnType{returnType}
     {
+    }
+
+    MemberFunctionPrototypeDefinition::MemberFunctionPrototypeDefinition(const MemberFunctionPrototypeDefinition &obj)
+        : Definition{obj.m_Span, DefinitionType::MemberFunctionPrototype}
+    {
+        m_AccessSpecifier = obj.m_AccessSpecifier;
+        m_Method = obj.m_Method ? MakeBox<VariableType>(*obj.m_Method.get()) : nullptr;
+        m_Name = MakeBox<Identifier>(*obj.m_Name.get());
+        m_Generics = obj.m_Generics ? MakeBox<Generics>(*obj.m_Generics.get()) : nullptr;
+        m_Params.reserve(obj.m_Params.size());
+        for (auto &param : obj.m_Params)
+        {
+            m_Params.push_back(MakeBox<VariableType>(*param.get()));
+        }
+        m_ReturnType = MakeRef<TypeSpecifier>(*obj.m_ReturnType.get());
     }
 
     Box<MemberFunctionPrototypeDefinition> MemberFunctionPrototypeDefinition::Parse(Parser &parser)

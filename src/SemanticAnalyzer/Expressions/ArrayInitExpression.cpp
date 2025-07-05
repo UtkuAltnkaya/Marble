@@ -23,11 +23,11 @@ namespace Marble
         return MakeRef<TypeSpecifier>(ArrayType{expressionType, m_Array.size()}, Span{});
     }
 
-    void ArrayInitExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ArrayInitExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &item : m_Array)
         {
-            item->SubstituteGenerics(map);
+            item->SubstituteGenerics(semanticAnalyzer, map);
         }
     }
 

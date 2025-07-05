@@ -5,13 +5,16 @@
 namespace Marble
 {
     SymbolNode::SymbolNode(SymbolData symbolData, SymbolNode *parent)
-        : m_SymbolData{symbolData}, m_Parent{parent}
+        : m_SymbolData{symbolData}, m_Parent{parent}, m_AstPtr{nullptr}
     {
     }
 
     SymbolNode::SymbolNode(const EnumDefinition &enumDefinition, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()), SymbolNodeTypes::Enum, SymbolNodeBaseTypes::None}, parent}
+        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()),
+                                SymbolNodeTypes::Enum, SymbolNodeBaseTypes::None},
+                     parent}
     {
+        m_AstPtr = &enumDefinition;
         for (auto &enumField : enumDefinition.GetFields())
         {
             Insert(enumField->Id(), new SymbolNode{SymbolData{SymbolAccess::Public, SymbolNodeTypes::EnumField, SymbolNodeBaseTypes::None}, this});
@@ -21,6 +24,7 @@ namespace Marble
     SymbolNode::SymbolNode(const StructDefinition &structDefinition, SymbolNode *parent)
         : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()), SymbolNodeTypes::Struct, SymbolNodeBaseTypes::None}, parent}
     {
+        m_AstPtr = &structDefinition;
         m_IsGeneric = structDefinition.GetGenerics() != nullptr;
         for (auto &structField : structDefinition.GetFields())
         {
@@ -30,7 +34,7 @@ namespace Marble
 
     SymbolNode::~SymbolNode()
     {
-        for (auto &&[key, value] : m_Children)
+        for (auto &[key, value] : m_Children)
         {
             delete value;
         }
@@ -57,6 +61,7 @@ namespace Marble
                          SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function},
               parent}
     {
+        m_AstPtr = &fnDefinition;
         m_ReturnType = fnDefinition.GetReturnType();
         const std::vector<Box<VariableType>> &params = fnDefinition.GetParams();
         m_Params.reserve(params.size());
@@ -74,6 +79,7 @@ namespace Marble
                          SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function},
                      parent}
     {
+        m_AstPtr = &memberFunction;
         const MemberFunctionPrototypeDefinition &prototype = memberFunction.GetPrototype();
         m_ReturnType = prototype.GetReturnType();
         const std::vector<Box<VariableType>> &params = prototype.GetParams();
@@ -99,6 +105,7 @@ namespace Marble
     VariableSymbolNode::VariableSymbolNode(const VariableType &variableType, SymbolNode *parent)
         : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}
     {
+        m_AstPtr = &variableType;
         m_TypeSpecifier = variableType.GetTypeSpecifier();
     }
 
@@ -108,12 +115,14 @@ namespace Marble
                          SymbolNodeTypes::StructField, SymbolNodeBaseTypes::Variable},
               parent}
     {
+        m_AstPtr = &structField;
         m_TypeSpecifier = structField.GetField().GetTypeSpecifier();
     }
 
     VariableSymbolNode::VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent)
         : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}
     {
+        m_AstPtr = &letStmt;
         m_TypeSpecifier = letStmt.GetTypeSpecifier();
     }
 

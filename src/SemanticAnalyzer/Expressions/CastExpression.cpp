@@ -13,10 +13,10 @@ namespace Marble
         return m_TypeSpecifier;
     }
 
-    void CastExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void CastExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_TypeSpecifier->SubstituteGenerics(map);
-        m_Expression->SubstituteGenerics(map);
+        m_TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+        m_Expression->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     Box<Expression> CastExpression::Clone()

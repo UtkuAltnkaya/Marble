@@ -19,7 +19,7 @@ namespace Marble
   {
     m_AccessSpecifier = obj.m_AccessSpecifier;
     m_FunctionName = MakeBox<Identifier>(*obj.m_FunctionName.get());
-    m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+    m_Generics = obj.m_Generics ? MakeBox<Generics>(*obj.m_Generics.get()) : nullptr;
     for (auto &param : obj.m_Params)
     {
       m_Params.push_back(MakeBox<VariableType>(*param.get()));

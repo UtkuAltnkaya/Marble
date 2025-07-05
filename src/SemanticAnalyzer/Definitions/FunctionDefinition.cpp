@@ -19,6 +19,7 @@ namespace Marble
         }
 
         table.EnterScope(iter);
+
         m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
 
@@ -42,12 +43,12 @@ namespace Marble
         throw "Return statement expected";
     }
 
-    Box<Definition> FunctionDefinition::InstantiateWith(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    Box<Definition> FunctionDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
         Box<Definition> clonedFnDef = Clone();
         FunctionDefinition *castFnDef = clonedFnDef->Into<FunctionDefinition>();
         auto map = m_Generics->ToMap(typeArgs);
-        castFnDef->SubstituteGenerics(map);
+        castFnDef->SubstituteGenerics(semanticAnalyzer, map);
 
         std::string name = castFnDef->GetName();
         for (auto &type : typeArgs)
@@ -57,20 +58,19 @@ namespace Marble
         name += "_" + IDGenerator::Generate();
         castFnDef->m_FunctionName = MakeBox<Identifier>(name, castFnDef->m_FunctionName->GetSpan());
         castFnDef->m_Generics.reset();
-
-        SymbolTable &table = SymbolTable::GetInstance();
-        table.Insert(castFnDef->GetName(), new FunctionSymbolNode{*castFnDef, table.Root()});
+        m_IsExpanded = true;
         return clonedFnDef;
     }
 
-    void FunctionDefinition::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void FunctionDefinition::SubstituteGenerics(
+        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &param : m_Params)
         {
-            param->GetTypeSpecifier()->SubstituteGenerics(map);
+            param->GetTypeSpecifier()->SubstituteGenerics(semanticAnalyzer, map);
         }
-        m_ReturnType->SubstituteGenerics(map);
-        m_Block->SubstituteGenerics(map);
+        m_ReturnType->SubstituteGenerics(semanticAnalyzer, map);
+        m_Block->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     bool FunctionDefinition::operator==(const FunctionDefinition &obj) const

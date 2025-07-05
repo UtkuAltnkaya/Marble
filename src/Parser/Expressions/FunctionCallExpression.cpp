@@ -12,7 +12,7 @@ namespace Marble
     FunctionCallExpression::FunctionCallExpression(const FunctionCallExpression &obj) : Expression{obj.m_Span, ExpressionType::FunctionCall}
     {
         m_FnName = obj.m_FnName->Clone();
-        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+        m_Generics = obj.m_Generics ? MakeBox<Generics>(*obj.m_Generics.get()) : nullptr;
         for (auto &arg : obj.m_Args)
         {
             m_Args.push_back(arg->Clone());

@@ -6,6 +6,7 @@
 
 namespace Marble
 {
+    enum class DefinitionType : int;
 
     class Generics : public Ast
     {
@@ -16,7 +17,8 @@ namespace Marble
 
         static Box<Generics> Parse(Parser &parser);
         inline const std::vector<Ref<TypeSpecifier>> &Types() const { return m_Types; }
-        std::unordered_map<std::string, Ref<TypeSpecifier>> ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs);
+        std::unordered_map<std::string, Ref<TypeSpecifier>> ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs) const;
+        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
 
         bool operator==(const Generics &obj) const
         {
@@ -37,14 +39,43 @@ namespace Marble
     private:
         std::vector<Ref<TypeSpecifier>> m_Types;
     };
+
+    enum class GenericInstanceKeyType
+    {
+        Struct,
+        Function,
+        Impl,
+    };
+
     struct GenericInstanceKey
     {
         std::string Name;
         std::vector<std::string> TypeArgumentNames;
+        GenericInstanceKeyType KeyType;
+
+        static GenericInstanceKeyType FromDefinitionType(int definitionType)
+        {
+            switch (definitionType)
+            {
+            case 0: // Function
+                return GenericInstanceKeyType::Function;
+            case 1: // Struct
+                return GenericInstanceKeyType::Struct;
+            case 4: // Impl
+                return GenericInstanceKeyType::Impl;
+            default:
+                return GenericInstanceKeyType::Function;
+            }
+        }
 
         bool operator==(const GenericInstanceKey &obj) const
         {
             if (Name != obj.Name)
+            {
+                return false;
+            }
+
+            if (KeyType != obj.KeyType)
             {
                 return false;
             }
@@ -73,6 +104,9 @@ namespace Marble
             {
                 h ^= std::hash<std::string>{}(arg) + 0x9e3779b9 + (h << 6) + (h >> 2);
             }
+            h ^= std::hash<std::underlying_type_t<GenericInstanceKeyType>>{}(
+                     static_cast<std::underlying_type_t<GenericInstanceKeyType>>(key.KeyType)) +
+                 0x9e3779b9 + (h << 6) + (h >> 2);
             return h;
         }
     };

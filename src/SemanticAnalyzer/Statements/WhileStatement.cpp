@@ -25,10 +25,11 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
-    void WhileStatement::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void WhileStatement::SubstituteGenerics(
+        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Condition->SubstituteGenerics(map);
-        m_Block->SubstituteGenerics(map);
+        m_Condition->SubstituteGenerics(semanticAnalyzer, map);
+        m_Block->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     Box<Statement> WhileStatement::Clone()

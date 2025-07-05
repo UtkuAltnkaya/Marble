@@ -9,7 +9,8 @@ namespace Marble
     StructDefinition::StructDefinition(
         AccessSpecifier accessSpecifier, Box<Identifier> structName, Box<Generics> generics, std::vector<Box<StructFieldDefinition>> &&field, const Span &span)
         : Definition{span, DefinitionType::Struct},
-          m_AccessSpecifier{accessSpecifier}, m_StructName{std::move(structName)}, m_Generics{std::move(generics)}, m_Field{std::move(field)}
+          m_AccessSpecifier{accessSpecifier}, m_StructName{std::move(structName)},
+          m_Generics{std::move(generics)}, m_Field{std::move(field)}, m_ImplDefinition{nullptr}
 
     {
     }
@@ -18,7 +19,8 @@ namespace Marble
     {
         m_AccessSpecifier = obj.m_AccessSpecifier;
         m_StructName = MakeBox<Identifier>(*obj.m_StructName.get());
-        m_Generics = MakeBox<Generics>(*obj.m_Generics.get());
+        m_Generics = obj.m_Generics ? MakeBox<Generics>(*obj.m_Generics.get()) : nullptr;
+        m_ImplDefinition = obj.m_ImplDefinition;
         for (auto &field : obj.m_Field)
         {
             m_Field.push_back(MakeBox<StructFieldDefinition>(*field.get()));

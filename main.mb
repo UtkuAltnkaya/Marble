@@ -1,35 +1,66 @@
-struct Vec<T>{
-    data: T,
+struct std{}
+
+impl std {
+    pub fn allocate<T>(size:usize) -> T* {
+        let x: T;
+        return &x;
+    }
+
+    pub fn deallocate<T>(ptr:T*) -> void {
+
+    }
+}
+
+struct Vec<T> {
+    data: T*,
     size: int,
+    capacity: int,
+}
+
+impl Vec<T> {
+
+    pub fn init() -> Vec<T> {
+        let capacity = 1;
+        let size = 0;
+        let obj =  Vec<T> {
+            capacity,
+            size,
+            data: std::allocate<T>(capacity) 
+        };
+        return obj;
+    }
+
+    pub fn (v:Vec<T>*) deinit() -> void {
+        std::deallocate<T>(v->data);
+        v->size = 0; 
+        v->capacity = 0;
+    }
+
+    pub fn (v:Vec<T>*) push(element:T) -> void {
+        if (v->capacity == v->size) {
+            v->resize(v->capacity * 2);
+        }
+        v->data[(v->size++) as usize] = element;
+    }
+
+    pub fn (v:Vec<T>*) resize(new_capacity: usize) -> void {
+        let new_data = std::allocate<T>(new_capacity);
+        for (let i = 0; i < v->size; i++)
+        {   
+            let j = i as usize;
+            new_data[j] = v->data[j];
+        }
+        std::deallocate<T>(v->data);
+        v->capacity = new_capacity as int;
+        v->data = new_data;
+    }
 }
 
 
-fn main () -> void {
-    let x = add<int>(1,2);
-    let y = add<int>(1,2);
-    let z: int = x+y;
-
-    let vec = Vec<int>{data:0,size:0};
-
-    let a = hello<int,float>(1,2.0);
-}
-
-fn calculate() -> void {
-    let x = add<int>(1,2);
-    let y = add<float>(1.0,2.0);
-
-    let z = y as int;
-    x = x + z;
-}
-
-fn add<T>(x:T, y:T) -> T {
-    let a = hello<float,int>(1.0,2.0 as int);
-    return x + y;
-}
-
-fn hello<T,U>(x:T,y:U) -> int {
-    let a = x;
-    let b = y;
-
-    return 1;
+fn main() -> int {
+    let vec = Vec<int>::init();
+    defer vec.deinit();
+    
+    vec.push(1);
+    return 0;
 }

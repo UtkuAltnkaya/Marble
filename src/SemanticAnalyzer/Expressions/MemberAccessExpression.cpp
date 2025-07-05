@@ -8,8 +8,7 @@ namespace Marble
         CheckObjectExpressionType();
         Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
 
-        const Identifier *
-            identifier;
+        const Identifier *identifier = nullptr;
         if (objectType->GetType() == Types::UserDefine)
         {
             if (m_AccessType != TokenType::Dot)
@@ -46,7 +45,7 @@ namespace Marble
         }
 
         table.EnterScope(iter);
-        Ref<TypeSpecifier> typeSpecifier;
+        Ref<TypeSpecifier> typeSpecifier = nullptr;
         bool isPublic = false;
         switch (m_Property->ExpressionType())
         {
@@ -80,14 +79,17 @@ namespace Marble
             return typeSpecifier;
         }
 
-        if (auto parentNode = table.CurrentScope()->Iter().Parent().Find(); parentNode)
+        auto parentNode = table.CurrentScope()->Iter().Parent().Find();
+        while (parentNode)
         {
-            if (parentNode != iter)
+            if (parentNode == iter)
             {
-                throw "Property is private";
+                return typeSpecifier;
             }
+            parentNode = parentNode->Iter().Parent().Find();
         }
-        return typeSpecifier;
+
+        throw "Property is private";
     }
 
     void MemberAccessExpression::CheckObjectExpressionType()
@@ -146,10 +148,10 @@ namespace Marble
         return variableNode->GetTypeSpecifier();
     }
 
-    void MemberAccessExpression::SubstituteGenerics(const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void MemberAccessExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Object->SubstituteGenerics(map);
-        m_Property->SubstituteGenerics(map);
+        m_Object->SubstituteGenerics(semanticAnalyzer, map);
+        m_Property->SubstituteGenerics(semanticAnalyzer, map);
     }
 
     bool MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)
