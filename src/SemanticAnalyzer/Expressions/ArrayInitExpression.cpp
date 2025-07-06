@@ -1,4 +1,5 @@
 #include "Ast/Expressions.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
@@ -7,7 +8,7 @@ namespace Marble
     {
         if (m_Array.size() == 0)
         {
-            throw "Cannot create empty array";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot create empty array", true);
         }
 
         Ref<TypeSpecifier> expressionType = m_Array.at(0)->Analyze(semanticAnalyzer);
@@ -17,7 +18,7 @@ namespace Marble
             Ref<TypeSpecifier> ts = m_Array.at(i)->Analyze(semanticAnalyzer);
             if (*expressionType != *ts)
             {
-                throw "Array item type must be same";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Array item type must be same");
             }
         }
         return MakeRef<TypeSpecifier>(ArrayType{expressionType, m_Array.size()}, Span{});

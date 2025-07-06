@@ -14,8 +14,9 @@ namespace Marble
         using CallbackType = std::function<T(Parser &parser)>;
 
         template <class T>
-        void Parse(std::vector<T> &vec, Parser &parser, TokenType closeToken, CallbackType<T> callback)
+        bool Parse(std::vector<T> &vec, Parser &parser, TokenType closeToken, CallbackType<T> callback)
         {
+            bool result = true;
             while (parser.Current().TokenType() != closeToken)
             {
                 parser.NextToken();
@@ -39,9 +40,12 @@ namespace Marble
                 {
                     break;
                 }
+                result = false;
                 std::string errMessage = std::string("Expect Comma or ") + TokenTypeToString(closeToken) + " but found " + TokenTypeToString(parser.Current().TokenType());
-                ErrorSystem::AddError(parser, errMessage);
+                ErrorSystem::AddError(parser, errMessage, closeToken != TokenType::GreaterThan);
+                break;
             }
+            return result;
         }
 
     } // namespace Parenthesis

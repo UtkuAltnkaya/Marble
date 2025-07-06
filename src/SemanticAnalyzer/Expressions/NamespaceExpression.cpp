@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/CompilerError.hpp"
 #include "Ast/Identifier.hpp"
 
 namespace Marble
@@ -8,11 +9,11 @@ namespace Marble
     {
         if (m_Namespace->ExpressionType() != ExpressionType::Identifier)
         {
-            throw "Identifier expression expected";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Identifier expression expected", true);
         }
         if (m_Value->ExpressionType() != ExpressionType::Identifier && m_Value->ExpressionType() != ExpressionType::FunctionCall)
         {
-            throw "Value either can be identifier or function call expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Value either can be identifier or function call expression", true);
         }
 
         IdentifierExpression *identifierExpression = m_Namespace->Into<IdentifierExpression>();
@@ -33,17 +34,20 @@ namespace Marble
             }
             table.EnterScope(node);
             Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
-            table.LeaveScope();
             return ts;
         }
         if (auto node = iter.Enum(identifier.Id()).Find(); node)
         {
             table.EnterScope(node);
             Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
-            table.LeaveScope();
+            if (m_Value->ExpressionType() == ExpressionType::Identifier)
+            {
+                table.LeaveScope();
+            }
             return ts;
         }
-        throw "Cannot find the {} namespace";
+        ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the namespace", true);
+        UNREACHABLE();
     }
 
     void NamespaceExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)

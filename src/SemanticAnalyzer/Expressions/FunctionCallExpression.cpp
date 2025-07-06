@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/CompilerError.hpp"
 
 namespace Marble
 {
@@ -9,36 +10,61 @@ namespace Marble
         IdentifierExpression *identifierExpression = m_FnName->TryInto<IdentifierExpression>();
         if (!identifierExpression)
         {
-            throw "Function name must be an identifier expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Function name must be an identifier expression", true);
         }
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *scope = table.CurrentScope();
-        SymbolNode *node = GetFunctionNode(scope, identifierExpression->GetIdentifier().Id());
+        SymbolNode *node = GetFunctionNode(semanticAnalyzer, scope, identifierExpression->GetIdentifier().Id());
         FunctionSymbolNode *fnNode = node->Into<FunctionSymbolNode>();
+
+        if (fnNode->GetSymbolData().Access() != SymbolAccess::Public)
+        {
+            if (!node->IsParentRoot())
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Function declared as private");
+            }
+        }
 
         if (fnNode->IsGeneric())
         {
             const std::string &name = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
-            node = GetFunctionNode(scope, name);
+            node = GetFunctionNode(semanticAnalyzer, scope, name);
             fnNode = node->Into<FunctionSymbolNode>();
+        }
+
+        switch (scope->GetSymbolData().NodeType())
+        {
+        case SymbolNodeTypes::Struct:
+        case SymbolNodeTypes::Enum:
+            table.LeaveScope();
+            break;
+        default:
+            break;
         }
 
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();
 
         if (params.size() < m_Args.size())
         {
-            throw "Too many params";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Too many params");
+            return fnNode->ReturnType();
         }
         if (params.size() > m_Args.size())
         {
-            throw "Missing params";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Missing params");
+            return fnNode->ReturnType();
         }
-        for (size_t i = 1; i < m_Args.size(); i++)
+        if (m_Args.size() == 0)
+        {
+            return fnNode->ReturnType();
+        }
+
+        for (size_t i = 0; i < m_Args.size(); i++)
         {
             Ref<TypeSpecifier> argType = m_Args.at(i)->Analyze(semanticAnalyzer);
             if (*argType != *params.at(i))
             {
-                throw "Parameter expression type does not match";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Parameter expression type does not match");
             }
         }
         return fnNode->ReturnType();
@@ -57,7 +83,7 @@ namespace Marble
         }
     }
 
-    SymbolNode *FunctionCallExpression::GetFunctionNode(SymbolNode *scope, const std::string &name)
+    SymbolNode *FunctionCallExpression::GetFunctionNode(SemanticAnalyzer &semanticAnalyzer, SymbolNode *scope, const std::string &name)
     {
         SymbolNode *node = scope->Iter().Function(name).Find();
         if (!node)
@@ -66,7 +92,7 @@ namespace Marble
             node = table.Root()->Iter().Function(name).Find();
             if (!node)
             {
-                throw "Cannot find the function";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the function", true);
             }
         }
         return node;

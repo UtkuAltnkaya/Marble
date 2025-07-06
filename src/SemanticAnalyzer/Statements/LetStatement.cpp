@@ -18,10 +18,7 @@ namespace Marble
             }
         }
         SymbolNode *node = SymbolTable::GetInstance().CurrentScope();
-        node->Insert(m_Identifier->Id(), new VariableSymbolNode{
-                                             *this,
-                                             node,
-                                         });
+        node->Insert(m_Identifier->Id(), new VariableSymbolNode{*this, node});
         return TypeSpecifierOk;
     }
 

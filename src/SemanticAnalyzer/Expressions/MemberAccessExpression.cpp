@@ -1,11 +1,12 @@
 #include "Ast/Expressions.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
     Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        CheckObjectExpressionType();
+        CheckObjectExpressionType(semanticAnalyzer);
         Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
 
         const Identifier *identifier = nullptr;
@@ -13,7 +14,7 @@ namespace Marble
         {
             if (m_AccessType != TokenType::Dot)
             {
-                throw "Use dot('.') operator to access member";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Use dot('.') operator to access member");
             }
             identifier = &objectType->UserDefine();
         }
@@ -23,17 +24,17 @@ namespace Marble
             Ref<TypeSpecifier> pointerType = pointer.TypeSpecifier;
             if (pointerType->GetType() != Types::UserDefine)
             {
-                throw "Member access only can use with user define type";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type");
             }
             if (m_AccessType != TokenType::Arrow)
             {
-                throw "Use arrow('->') operator to access member with pointer type";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Use arrow('->') operator to access member with pointer type");
             }
             identifier = &pointerType->UserDefine();
         }
         else
         {
-            throw "Member access only can use with user define type";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type");
         }
 
         SymbolTable &table = SymbolTable::GetInstance();
@@ -41,7 +42,7 @@ namespace Marble
 
         if (!iter)
         {
-            throw "Cannot find struct in this scope";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find struct in this scope", true);
         }
 
         table.EnterScope(iter);
@@ -52,7 +53,8 @@ namespace Marble
         case ExpressionType::Identifier:
         {
             IdentifierExpression *identifierExpression = m_Property->Into<IdentifierExpression>();
-            typeSpecifier = AnalyzeIdentifier(identifierExpression, isPublic);
+            typeSpecifier = AnalyzeIdentifier(semanticAnalyzer, identifierExpression, isPublic);
+            table.LeaveScope();
             break;
         }
         case ExpressionType::FunctionCall:
@@ -70,10 +72,9 @@ namespace Marble
         default:
         {
             table.LeaveScope();
-            throw "Invalid property expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid property expression", true);
         }
         }
-        table.LeaveScope();
         if (isPublic)
         {
             return typeSpecifier;
@@ -88,11 +89,11 @@ namespace Marble
             }
             parentNode = parentNode->Iter().Parent().Find();
         }
-
-        throw "Property is private";
+        ErrorSystem::AddError(semanticAnalyzer, this, "Property is private");
+        return typeSpecifier;
     }
 
-    void MemberAccessExpression::CheckObjectExpressionType()
+    void MemberAccessExpression::CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_Object->ExpressionType())
         {
@@ -105,7 +106,7 @@ namespace Marble
         case ExpressionType::Primitive:
         case ExpressionType::Unary:
         case ExpressionType::MemberAccess:
-            throw "Invalid object expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid object expression", true);
         default:
             break;
         }
@@ -118,21 +119,21 @@ namespace Marble
         const IdentifierExpression *identifierExpression = fnCallExpression->FnName().TryInto<IdentifierExpression>();
         if (!identifierExpression)
         {
-            throw "Function name must be identifier expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Function name must be identifier expression", true);
         }
         SymbolNode *fnNode = structSymbol->Iter()
                                  .Function(identifierExpression->GetIdentifier().Id())
                                  .Find();
         if (!fnNode)
         {
-            throw "Cannot find method";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find method", true);
         }
 
         isPublic = CheckAccessSpecifier(fnNode->GetSymbolData().Access());
         return fnCallExpression->Analyze(semanticAnalyzer);
     }
 
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(IdentifierExpression *identifierExpression, bool &isPublic)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, IdentifierExpression *identifierExpression, bool &isPublic)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
@@ -141,7 +142,7 @@ namespace Marble
                                     .Find();
         if (!fieldNode)
         {
-            throw "Cannot find member";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find member", true);
         }
         isPublic = CheckAccessSpecifier(fieldNode->GetSymbolData().Access());
         VariableSymbolNode *variableNode = fieldNode->Into<VariableSymbolNode>();

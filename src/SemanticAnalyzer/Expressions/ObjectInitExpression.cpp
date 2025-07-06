@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -9,14 +10,14 @@ namespace Marble
         Identifier name = structName->GetIdentifier();
         if (!structName)
         {
-            throw "Object name must be identifier expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Object name must be identifier expression", true);
         }
 
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structNode = table.Root()->Iter().Struct(name.Id()).Find();
         if (!structNode)
         {
-            throw "Cannot find the struct";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);
         }
 
         if (structNode->IsGeneric())
@@ -29,11 +30,11 @@ namespace Marble
         size_t size = structNode->Iter().Count(SymbolNodeTypes::StructField);
         if (m_Fields.size() > size)
         {
-            throw "Too many fields";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Too many fields");
         }
         if (m_Fields.size() < size)
         {
-            throw "Missing fields";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Missing fields");
         }
         table.EnterScope(structNode);
         for (auto &field : m_Fields)
@@ -52,7 +53,7 @@ namespace Marble
         SymbolNode *fieldNode = currentScope->Iter().StructField(m_Name.Id()).Find();
         if (!fieldNode)
         {
-            throw "Cannot find the struct field named {}";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);
         }
         Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze(semanticAnalyzer);
 
@@ -60,7 +61,7 @@ namespace Marble
 
         if (*typeSpecifier != *variableNode->GetTypeSpecifier())
         {
-            throw "Struct type and expression types do not matches";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Struct type and expression types do not matches");
         }
 
         return typeSpecifier;

@@ -60,6 +60,23 @@ namespace Marble
         }
     }
 
+    void ErrorSystem::AddError(const SemanticAnalyzer &semanticAnalyzer, const Ast *node, std::string_view message, bool shouldThrow)
+    {
+        ErrorSystem &errorSystem = ErrorSystem::GetInstance();
+        SemanticError *error = new SemanticError{semanticAnalyzer, node, message};
+        errorSystem.m_Errors.emplace_back(Box<SemanticError>(error));
+        if (shouldThrow)
+        {
+            throw CompilationTerminatedException();
+        }
+    }
+
+    void ErrorSystem::RemoveLastError()
+    {
+        ErrorSystem &errorSystem = ErrorSystem::GetInstance();
+        errorSystem.m_Errors.pop_back();
+    }
+
     void ErrorSystem::PrintError()
     {
         for (auto &errors : m_Errors)

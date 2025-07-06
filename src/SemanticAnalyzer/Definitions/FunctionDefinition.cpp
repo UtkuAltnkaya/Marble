@@ -1,5 +1,6 @@
-#include "Ast/Definitions.hpp"
 #include <iostream>
+#include "ErrorSystem/ErrorSystem.hpp"
+#include "Ast/Definitions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "Utils/IDGenerator.hpp"
 
@@ -15,11 +16,10 @@ namespace Marble
                                .Find();
         if (!iter)
         {
-            throw "Cannot find function in this scope";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope");
         }
 
         table.EnterScope(iter);
-
         m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
 
@@ -40,7 +40,8 @@ namespace Marble
         {
             return TypeSpecifierOk;
         }
-        throw "Return statement expected";
+        ErrorSystem::AddError(semanticAnalyzer, this, "Return statement expected");
+        return TypeSpecifierOk;
     }
 
     Box<Definition> FunctionDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
@@ -50,13 +51,13 @@ namespace Marble
         auto map = m_Generics->ToMap(typeArgs);
         castFnDef->SubstituteGenerics(semanticAnalyzer, map);
 
-        std::string name = castFnDef->GetName();
-        for (auto &type : typeArgs)
-        {
-            name += "_" + type->ToString();
-        }
-        name += "_" + IDGenerator::Generate();
-        castFnDef->m_FunctionName = MakeBox<Identifier>(name, castFnDef->m_FunctionName->GetSpan());
+        // std::string name = castFnDef->GetName();
+        // for (auto &type : typeArgs)
+        // {
+        //     name += "_" + type->ToString();
+        // }
+        // name += "_" + IDGenerator::Generate();
+        // castFnDef->m_FunctionName = MakeBox<Identifier>(name, castFnDef->m_FunctionName->GetSpan());
         castFnDef->m_Generics.reset();
         m_IsExpanded = true;
         return clonedFnDef;

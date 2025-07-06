@@ -7,10 +7,12 @@
 
 #include "Lexer/Lexer.hpp"
 #include "Parser/Parser.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
 {
     class ErrorSystem;
+    class Ast;
 
     class CompilerError : public std::exception
     {
@@ -51,6 +53,16 @@ namespace Marble
 
     private:
         ParserError(const Parser &parser, std::string_view message);
+    };
+
+    class SemanticError : public CompilerError
+    {
+    public:
+        friend class ErrorSystem;
+        ~SemanticError() = default;
+
+    private:
+        SemanticError(const SemanticAnalyzer &semanticAnalyzer, const Ast *node, std::string_view message);
     };
 
 } // namespace Marble

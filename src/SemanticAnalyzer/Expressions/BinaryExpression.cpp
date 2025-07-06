@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/CompilerError.hpp"
 
 namespace Marble
 {
@@ -11,13 +12,13 @@ namespace Marble
 
         if (*leftType != *rightType)
         {
-            throw "Left and Right hand-side must be the same type";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Left and Right hand-side must be the same type");
         }
 
         // TODO: Decide, allow operator overloading
         if (!leftType->IsPrimitive())
         {
-            throw "Cannot apply binary operation to complex type";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
         }
 
         if (m_Operator == BinaryOperators::Equal || m_Operator == BinaryOperators::NotEqual ||

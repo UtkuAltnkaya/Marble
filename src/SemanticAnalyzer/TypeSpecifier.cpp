@@ -169,13 +169,13 @@ namespace Marble
         case Types::Pointer:
         {
             const auto &ptr = std::get<PointerType>(m_Variants);
-            m_TypeName = ptr.TypeSpecifier->ToString();
+            m_TypeName = ptr.TypeSpecifier->ToString() + "*";
             break;
         }
         case Types::ArrayType:
         {
             const auto &arr = std::get<ArrayType>(m_Variants);
-            m_TypeName = arr.TypeSpecifier->ToString();
+            m_TypeName = arr.TypeSpecifier->ToString() + "[]";
             break;
         }
         case Types::UserDefine:

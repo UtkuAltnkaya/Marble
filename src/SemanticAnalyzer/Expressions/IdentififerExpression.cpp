@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -24,7 +25,8 @@ namespace Marble
             SymbolNode *parent = iter.Reset().Parent().Find();
             if (parent == nullptr)
             {
-                throw "Cannot find the variable";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the variable in this scope");
+                return TypeSpecifierVoid;
             }
             iter = parent->Iter();
         } while (node == nullptr);

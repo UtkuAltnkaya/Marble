@@ -47,6 +47,7 @@ namespace Marble
             return BinaryExpression::ParseExpression(parser, precedence, binaryPrecedence, [](TokenType token_type)
                                                      { return token_type == TokenType::BitLeft; });
         case BinaryPrecedence::BitRight:
+            // TODO: Since lexer does not return BitRight token anymore because of the generics ambiguity fix BitRight parsing.
             return BinaryExpression::ParseExpression(parser, precedence, binaryPrecedence, [](TokenType token_type)
                                                      { return token_type == TokenType::BitRight; });
         case BinaryPrecedence::Equal:

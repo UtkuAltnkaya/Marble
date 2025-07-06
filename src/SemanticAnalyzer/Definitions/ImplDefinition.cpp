@@ -1,7 +1,8 @@
+#include <iostream>
 #include "Ast/Definitions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
-#include <iostream>
 #include "Utils/IDGenerator.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -38,7 +39,7 @@ namespace Marble
                                  .Find();
         if (!fnNode)
         {
-            throw "Cannot find function in this scope";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope", true);
         }
 
         table.EnterScope(fnNode);
@@ -62,8 +63,8 @@ namespace Marble
         {
             return TypeSpecifierOk;
         }
-
-        throw "Return statement expected";
+        ErrorSystem::AddError(semanticAnalyzer, this, "Return statement expected");
+        return TypeSpecifierOk;
     }
 
     Box<Definition> ImplDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
@@ -106,14 +107,6 @@ namespace Marble
         Box<MemberFunctionDefinition> clonedMemberFn = MakeBox<MemberFunctionDefinition>(*this);
         auto map = m_Prototype->GetGenerics()->ToMap(typeArgs);
         clonedMemberFn->SubstituteGenerics(semanticAnalyzer, map);
-
-        std::string name = clonedMemberFn->m_Prototype->GetName();
-        for (auto &type : typeArgs)
-        {
-            name += "_" + type->ToString();
-        }
-        name += "_" + IDGenerator::Generate();
-        clonedMemberFn->m_Prototype->m_Name = MakeBox<Identifier>(name, clonedMemberFn->m_Prototype->m_Name->GetSpan());
         clonedMemberFn->m_Prototype->m_Generics.reset();
         m_IsExpanded = true;
         m_Prototype->m_IsExpanded = true;
@@ -175,7 +168,8 @@ namespace Marble
         {
             return symbolNode;
         }
-        throw "No such struct or enum";
+        ErrorSystem::AddError("No such struct or enum", nullptr, true);
+        UNREACHABLE();
     }
 
     Box<Definition> ImplDefinition::Clone()

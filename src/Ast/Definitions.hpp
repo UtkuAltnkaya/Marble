@@ -36,9 +36,13 @@ namespace Marble
         static Box<Definition> Parse(Parser &parser);
         inline Marble::DefinitionType DefinitionType() const { return m_DefinitionType; }
         inline virtual bool IsGeneric() const { return false; }
-        inline virtual const std::string &GetName() const = 0;
         inline virtual bool IsAnalyzed() const { return m_IsAnalyzed; }
         virtual bool IsExpanded() const { return m_IsExpanded; }
+
+        inline virtual const std::string &GetName() const = 0;
+        inline virtual const Identifier &GetIdentifier() const = 0;
+        inline virtual void SetName(Box<Identifier> name) = 0;
+
         virtual Box<Definition> InstantiateWith(
             SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) { return nullptr; };
         virtual void SubstituteGenerics(
@@ -91,17 +95,6 @@ namespace Marble
         bool m_IsExpanded;
     };
 
-    // class GenericDefinition
-    // {
-    // public:
-    //     virtual ~GenericDefinition() = default;
-    //     inline virtual const std::string &GetName() const = 0;
-    //     virtual Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer,const std::vector<Ref<TypeSpecifier>> &typeArgs) = 0;
-
-    // protected:
-    //     virtual void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
-    // };
-
     class FunctionDefinition : public Definition /*, public GenericDefinition*/
     {
     public:
@@ -127,12 +120,14 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const override { return m_FunctionName->Id(); }
+        inline const Identifier &GetIdentifier() const override { return *m_FunctionName.get(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
         inline const Statement &GetBody() const { return *m_Block.get(); }
         bool operator==(const FunctionDefinition &obj) const;
 
+        inline void SetName(Box<Identifier> name) override { m_FunctionName = std::move(name); }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
 
     private:
@@ -162,7 +157,9 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType &GetField() const { return *m_Field.get(); }
+        inline const Identifier &GetIdentifier() const override { return m_Field->GetIdentifier(); }
         inline const std::string &GetName() const override { return m_Field->GetIdentifier().Id(); }
+        inline void SetName(Box<Identifier> name) override { m_Field->SetIdentifier(std::move(name)); }
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -185,12 +182,13 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const override { return m_StructName->Id(); }
-        inline const Identifier &GetStructName() const { return *m_StructName.get(); }
+        inline const Identifier &GetIdentifier() const override { return *m_StructName.get(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<StructFieldDefinition>> &GetFields() const { return m_Field; }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
         inline ImplDefinition *GetImplDefinition() const { return m_ImplDefinition; }
 
+        inline void SetName(Box<Identifier> name) override { m_StructName = std::move(name); }
         inline void SetImplDefinition(ImplDefinition *implDefinition) { m_ImplDefinition = implDefinition; }
 
     private:
@@ -216,7 +214,9 @@ namespace Marble
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const std::string &GetName() const override { return m_EnumName->Id(); }
+        inline const Identifier &GetIdentifier() const override { return *m_EnumName.get(); }
         inline const std::vector<Box<Identifier>> &GetFields() const { return m_Fields; }
+        inline void SetName(Box<Identifier> name) override { m_EnumName = std::move(name); }
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -249,10 +249,12 @@ namespace Marble
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType *GetMethod() const { return m_Method.get(); }
         inline const std::string &GetName() const override { return m_Name->Id(); }
+        inline const Identifier &GetIdentifier() const override { return *m_Name.get(); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
+        inline void SetName(Box<Identifier> name) override { m_Name = std::move(name); }
 
     private:
         static Box<VariableType> ParseMethod(Parser &parser);
@@ -284,6 +286,9 @@ namespace Marble
         inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
         inline const Statement &GetBody() const { return *m_Block.get(); }
         inline const std::string &GetName() const override { return m_Prototype->GetName(); }
+        inline const Identifier &GetIdentifier() const override { return m_Prototype->GetIdentifier(); }
+        inline bool IsGeneric() const override { return m_Prototype->IsGeneric(); }
+        inline void SetName(Box<Identifier> name) override { m_Prototype->SetName(std::move(name)); }
 
     private:
         Box<MemberFunctionPrototypeDefinition> m_Prototype;
@@ -305,10 +310,12 @@ namespace Marble
 
         inline const std::string &GetName() const override { return m_ImplName->ToString(); }
         inline const Ref<TypeSpecifier> GetImplName() const { return m_ImplName; }
+        inline const Identifier &GetIdentifier() const override { ASSERT_A(false, "Use GetName or GetImplName function"); }
         inline const Generics *const GetGenerics() const { return m_Generics.get(); }
         inline const std::vector<Box<MemberFunctionDefinition>> &GetMemberFunctions() const { return m_MemberFunctions; }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
         inline void SetImplName(Ref<TypeSpecifier> implName) { m_ImplName = implName; }
+        inline void SetName(Box<Identifier> name) override { ASSERT_A(false, "Use SetImplName function"); }
 
         void CreateSymbol();
         void AddMemberFunction(Box<MemberFunctionDefinition> memberFunction);

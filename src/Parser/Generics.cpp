@@ -34,13 +34,11 @@ namespace Marble
 
         std::vector<Ref<TypeSpecifier>> types;
 
-        try
+        bool result = Parenthesis::Parse<Ref<TypeSpecifier>>(types, parser, TokenType::GreaterThan, [](Parser &parser)
+                                                             { return TypeSpecifier::Parse(parser); });
+        if (!result)
         {
-            Parenthesis::Parse<Ref<TypeSpecifier>>(types, parser, TokenType::GreaterThan, [](Parser &parser)
-                                                   { return TypeSpecifier::Parse(parser); });
-        }
-        catch (...)
-        {
+            ErrorSystem::RemoveLastError();
             parser.RollBack();
             return nullptr;
         }

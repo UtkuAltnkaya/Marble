@@ -31,7 +31,7 @@ namespace Marble
 
             std::string text(lexer.File().Content().substr(lexer.CursorStart(), lexer.Cursor() - lexer.CursorStart()));
             Position start{lexer.Line(), lexer.CursorStart() - lexer.LineStart(), lexer.CursorStart()};
-            Position end{lexer.Line(), lexer.Cursor() - lexer.LineStart(), lexer.Cursor()};
+            Position end{lexer.Line(), lexer.Cursor() - lexer.LineStart() - 1, lexer.Cursor()};
 
             auto keywords = lexer.Keywords();
             TokenType tokenType = TokenType::Identifier;
@@ -201,11 +201,12 @@ namespace Marble
             }
             case '>':
             {
-                if (CheckNextOperator(lexer, '>'))
+                /*if (CheckNextOperator(lexer, '>'))
                 {
                     tokenType = TokenType::BitRight;
                 }
-                else if (CheckNextOperator(lexer, '='))
+                else*/
+                if (CheckNextOperator(lexer, '='))
                 {
                     tokenType = TokenType::GreaterEqual;
                 }

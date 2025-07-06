@@ -30,6 +30,8 @@ namespace Marble
         inline const std::unordered_map<std::string, SymbolNode *> &GetChildren() const { return m_Children; }
         inline bool IsGeneric() const { return m_IsGeneric; }
         inline Ast *GetAstPtr() const { return const_cast<Ast *>(m_AstPtr); }
+        inline bool IsRoot() const { return m_Parent == nullptr; }
+        inline bool IsParentRoot() const { return !IsRoot() && m_Parent->IsRoot(); }
 
         template <typename T>
         T *TryInto()

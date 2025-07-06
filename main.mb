@@ -1,66 +1,46 @@
-struct std{}
+struct std {}
 
 impl std {
-    pub fn allocate<T>(size:usize) -> T* {
+    pub fn allocate<T> (size:usize)-> T* {
         let x: T;
         return &x;
     }
+}
 
-    pub fn deallocate<T>(ptr:T*) -> void {
 
+struct LinkedList<T> {
+    root: Node<T>,
+}
+
+struct Node<T> {
+    data: T,
+    next: Node<T>*,
+}
+
+impl Node<T> {
+   pub fn (n:Node<int>*) get_data() -> T {
+        return n->data;
     }
 }
 
-struct Vec<T> {
-    data: T*,
-    size: int,
-    capacity: int,
-}
-
-impl Vec<T> {
-
-    pub fn init() -> Vec<T> {
-        let capacity = 1;
-        let size = 0;
-        let obj =  Vec<T> {
-            capacity,
-            size,
-            data: std::allocate<T>(capacity) 
-        };
-        return obj;
-    }
-
-    pub fn (v:Vec<T>*) deinit() -> void {
-        std::deallocate<T>(v->data);
-        v->size = 0; 
-        v->capacity = 0;
-    }
-
-    pub fn (v:Vec<T>*) push(element:T) -> void {
-        if (v->capacity == v->size) {
-            v->resize(v->capacity * 2);
-        }
-        v->data[(v->size++) as usize] = element;
-    }
-
-    pub fn (v:Vec<T>*) resize(new_capacity: usize) -> void {
-        let new_data = std::allocate<T>(new_capacity);
-        for (let i = 0; i < v->size; i++)
-        {   
-            let j = i as usize;
-            new_data[j] = v->data[j];
-        }
-        std::deallocate<T>(v->data);
-        v->capacity = new_capacity as int;
-        v->data = new_data;
-    }
+fn add(x:int,y:int) -> int {
+    return x + y;
 }
 
 
 fn main() -> int {
-    let vec = Vec<int>::init();
-    defer vec.deinit();
-    
-    vec.push(1);
+
+    let node = Node<int>{
+        data: 1,
+        next: std::allocate<Node<int>>(1 as usize)
+    }; 
+
+
+    let n_data = node.get_data();
+
+    add(1,n_data);
+
+
+
     return 0;
 }

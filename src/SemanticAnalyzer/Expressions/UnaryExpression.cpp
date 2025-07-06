@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "Utils/Macros.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 
 namespace Marble
@@ -27,11 +28,11 @@ namespace Marble
         case ExpressionType::Unary:
             break;
         default:
-            throw "Unexpected expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Unexpected expression", true);
         }
 
         Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
-        CheckType(expressionType);
+        CheckType(semanticAnalyzer, expressionType);
         return expressionType;
     }
 
@@ -62,12 +63,12 @@ namespace Marble
         {
         case ExpressionType::ObjectInit:
         case ExpressionType::ArrayInit:
-            throw "Unexpected expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Unexpected expression", true);
         default:
             break;
         }
         Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
-        CheckType(expressionType);
+        CheckType(semanticAnalyzer, expressionType);
         return expressionType;
     }
 
@@ -81,7 +82,7 @@ namespace Marble
         case ExpressionType::Unary:
             break;
         default:
-            throw "Unexpected expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Unexpected expression", true);
         }
 
         Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
@@ -98,14 +99,14 @@ namespace Marble
         case ExpressionType::Unary:
             break;
         default:
-            throw "Unexpected expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Unexpected expression", true);
         }
 
         Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
         Types type = expressionType->GetType();
         if (type != Types::Pointer)
         {
-            throw "Expected pointer type";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Expected pointer type", true);
         }
         auto &pointerType = expressionType->Pointer();
         return pointerType.TypeSpecifier;
@@ -117,7 +118,7 @@ namespace Marble
         {
         case ExpressionType::ObjectInit:
         case ExpressionType::ArrayInit:
-            throw "Unexpected expression";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Unexpected expression", true);
         default:
             break;
         }
@@ -131,7 +132,8 @@ namespace Marble
             {
                 return expressionType;
             }
-            throw "Type not supported for the operation";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Type not supported for the operation");
+            return TypeSpecifierVoid;
         }
 
         if (m_UnaryOperator == UnaryOperators::LogicalNot)
@@ -140,12 +142,13 @@ namespace Marble
             {
                 return expressionType;
             }
-            throw "Type not supported for the operation";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Type not supported for the operation");
+            return TypeSpecifierVoid;
         }
         UNREACHABLE();
     }
 
-    void UnaryExpression::CheckType(Ref<TypeSpecifier> expressionType)
+    void UnaryExpression::CheckType(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> expressionType)
     {
         Types type = expressionType->GetType();
 
@@ -157,7 +160,7 @@ namespace Marble
         case Types::Double:
             return;
         default:
-            throw "Value is not supported for the operator";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Value is not supported for the operator");
         }
     }
 

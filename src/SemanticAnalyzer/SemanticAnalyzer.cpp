@@ -1,10 +1,12 @@
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "SemanticAnalyzer.hpp"
 #include "Utils/Macros.hpp"
+#include "Utils/IDGenerator.hpp"
+#include "Utils/File.hpp"
 
 namespace Marble
 {
-    SemanticAnalyzer::SemanticAnalyzer(Ref<Program> program) : m_Program{program}
+    SemanticAnalyzer::SemanticAnalyzer(Ref<Program> program, const Marble::File &file) : m_Program{program}, m_File{file}
     {
     }
 
@@ -31,6 +33,8 @@ namespace Marble
 
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
+        ExpandNestedGenerics(typeArgs);
+
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *scope = table.CurrentScope();
         SymbolNode *parent = scope->Iter().Parent().Find();
@@ -72,8 +76,8 @@ namespace Marble
             ImplDefinition *newImplDefinition = expandedImplDefinition->Into<ImplDefinition>();
 
             Ref<TypeSpecifier> implName = MakeRef<TypeSpecifier>(
-                Identifier{newStructDefinition->GetName(), newStructDefinition->GetStructName().GetSpan()},
-                newStructDefinition->GetStructName().GetSpan());
+                Identifier{newStructDefinition->GetName(), newStructDefinition->GetIdentifier().GetSpan()},
+                newStructDefinition->GetIdentifier().GetSpan());
 
             newImplDefinition->SetImplName(implName);
             newImplDefinition->CreateSymbol();
@@ -101,7 +105,7 @@ namespace Marble
             implDefinition->AddMemberFunction(Box<MemberFunctionDefinition>(expandedMethodDefinition.release()->Into<MemberFunctionDefinition>()));
             return m_Generis[key];
         }
-        ASSERT_D(false, "SOMETHING WENT WRONG");
+        ASSERT_D(false, "Something went wrong");
         UNREACHABLE();
     }
 
@@ -114,9 +118,23 @@ namespace Marble
         {
             return nullptr;
         }
+        Box<Identifier> id = CreateExpandedName(definition->GetIdentifier(), typeArgs);
+        m_Generis[key] = id->Id();
         Box<Definition> expandedDefinition = definition->InstantiateWith(*this, typeArgs);
-        m_Generis[key] = expandedDefinition->GetName();
+        expandedDefinition->SetName(std::move(id));
         return expandedDefinition;
+    }
+
+    Box<Identifier> SemanticAnalyzer::CreateExpandedName(const Identifier &id, const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    {
+        std::string finalName = id.Id();
+        for (auto &type : typeArgs)
+        {
+            finalName += "_" + type->ToString();
+        }
+        finalName += "_" + IDGenerator::Generate();
+
+        return MakeBox<Identifier>(finalName, id.GetSpan());
     }
 
     void SemanticAnalyzer::AddExpandedDefinition(Box<Definition> definition)
@@ -139,6 +157,27 @@ namespace Marble
         for (auto &type : typeArgs)
         {
             key.TypeArgumentNames.emplace_back(type->ToString());
+        }
+    }
+
+    void SemanticAnalyzer::ExpandNestedGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    {
+        auto &vector = const_cast<std::vector<Ref<TypeSpecifier>> &>(typeArgs);
+        size_t size = typeArgs.size();
+        for (int i = 0; i < size; i++)
+        {
+            auto &type = vector[i];
+            if (type->GetType() != Types::GenericType)
+            {
+                continue;
+            }
+            auto &nestedGeneric = type->Generic();
+            const std::string &name = InstantiateGenerics(nestedGeneric.OuterType.Id(), nestedGeneric.InnerType);
+            Span span;
+            span.Start = nestedGeneric.OuterType.GetSpan().Start;
+            span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
+            auto expanded = MakeRef<TypeSpecifier>(Identifier{name, span}, span);
+            vector[i].swap(expanded);
         }
     }
 

@@ -1,5 +1,6 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/CompilerError.hpp"
 
 namespace Marble
 {
@@ -8,7 +9,7 @@ namespace Marble
         Ref<TypeSpecifier> ts = m_Expression->Analyze(semanticAnalyzer);
         if (!ts->IsPrimitive())
         {
-            throw "Cannot cast to complex type";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot cast to complex type");
         }
         return m_TypeSpecifier;
     }

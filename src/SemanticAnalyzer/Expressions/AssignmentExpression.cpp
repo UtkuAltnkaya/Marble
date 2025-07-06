@@ -1,27 +1,30 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/CompilerError.hpp"
 
 namespace Marble
 {
 
     Ref<TypeSpecifier> AssignmentExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        CheckVariableExpressionTypes();
+        CheckVariableExpressionTypes(semanticAnalyzer);
         Ref<TypeSpecifier> left = m_Variable->Analyze(semanticAnalyzer);
         if (left->GetType() == Types::ArrayType)
         {
-            throw "Cannot assign to array";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot assign to array");
         }
         Ref<TypeSpecifier> right = m_Value->Analyze(semanticAnalyzer);
 
         if (*right != *left)
         {
-            throw "Left and Right handside types are not matched";
+            std::string message =
+                "Left and Right handside types are not matched. Trying to assign " + right->ToString() + " to " + left->ToString();
+            ErrorSystem::AddError(semanticAnalyzer, this, message);
         }
         return left;
     }
 
-    void AssignmentExpression::CheckVariableExpressionTypes() const
+    void AssignmentExpression::CheckVariableExpressionTypes(SemanticAnalyzer &semanticAnalyzer) const
     {
         switch (m_Variable->ExpressionType())
         {
@@ -39,7 +42,7 @@ namespace Marble
         case ExpressionType::Cast:
         case ExpressionType::NameSpace:
         case ExpressionType::Binary:
-            throw "Expression must be modifiable value";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Expression must be modifiable value");
         default:
             break;
         }

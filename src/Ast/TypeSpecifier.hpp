@@ -11,6 +11,7 @@ namespace Marble
 {
 
 #define TypeSpecifierOk nullptr;
+#define TypeSpecifierVoid MakeRef<TypeSpecifier>(Types::Void, Span{})
 
     enum class Types
     {

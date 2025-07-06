@@ -230,7 +230,7 @@ namespace Marble
     Ref<TypeSpecifier> AnalyzeAddress(SemanticAnalyzer &semanticAnalyzer);
     Ref<TypeSpecifier> AnalyzePointer(SemanticAnalyzer &semanticAnalyzer);
     Ref<TypeSpecifier> AnalyzeNot(SemanticAnalyzer &semanticAnalyzer);
-    void CheckType(Ref<TypeSpecifier> expressionType);
+    void CheckType(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> expressionType);
 
   private:
     UnaryOperators m_UnaryOperator;
@@ -298,7 +298,7 @@ namespace Marble
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
-    void CheckVariableExpressionTypes() const;
+    void CheckVariableExpressionTypes(SemanticAnalyzer &semanticAnalyzer) const;
 
   private:
     Box<Expression> m_Variable;
@@ -320,9 +320,9 @@ namespace Marble
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
-    void CheckObjectExpressionType();
+    void CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer);
     Ref<TypeSpecifier> AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, bool &isPublic);
-    Ref<TypeSpecifier> AnalyzeIdentifier(IdentifierExpression *identifierExpression, bool &isPublic);
+    Ref<TypeSpecifier> AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, IdentifierExpression *identifierExpression, bool &isPublic);
 
     bool CheckAccessSpecifier(SymbolAccess access);
 
@@ -352,7 +352,7 @@ namespace Marble
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
-    SymbolNode *GetFunctionNode(SymbolNode *scope, const std::string &name);
+    SymbolNode *GetFunctionNode(SemanticAnalyzer &semanticAnalyzer, SymbolNode *scope, const std::string &name);
 
   private:
     Box<Expression> m_FnName;
