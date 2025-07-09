@@ -94,6 +94,14 @@ namespace Marble
         SetNode(node);
         return *this;
     }
+
+    SymbolIterator &SymbolIterator::EnumField(std::string_view name)
+    {
+        SymbolNode *node = Find(name, SymbolNodeTypes::EnumField);
+        SetNode(node);
+        return *this;
+    }
+
     SymbolIterator &SymbolIterator::Reset()
     {
         SetNode(m_StartNode);

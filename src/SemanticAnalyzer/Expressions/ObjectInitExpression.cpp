@@ -55,16 +55,18 @@ namespace Marble
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);
         }
-        Ref<TypeSpecifier> typeSpecifier = m_Value->Analyze(semanticAnalyzer);
-
+        Ref<TypeSpecifier> valueType = m_Value->Analyze(semanticAnalyzer);
         VariableSymbolNode *variableNode = fieldNode->Into<VariableSymbolNode>();
+        Ref<TypeSpecifier> fieldType = variableNode->GetTypeSpecifier();
 
-        if (*typeSpecifier != *variableNode->GetTypeSpecifier())
+        if (*valueType != *fieldType)
         {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Struct type and expression types do not matches");
+            if (!semanticAnalyzer.TryImplicitConversion(m_Value, valueType, fieldType))
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Struct type and expression types do not matches");
+            }
         }
-
-        return typeSpecifier;
+        return valueType;
     }
 
     void ObjectInitExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)

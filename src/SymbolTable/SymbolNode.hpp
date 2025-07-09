@@ -106,12 +106,18 @@ namespace Marble
         VariableSymbolNode(const VariableType &variableType, SymbolNode *parent);
         VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent);
         VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent);
+        VariableSymbolNode(const Identifier &letStmt, SymbolNode *parent);
         ~VariableSymbolNode() = default;
 
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+        inline llvm::AllocaInst *GetAlloca() { return m_Alloca; }
+
+        // TODO: Should old alloca deleted my hand?
+        inline void SetAlloca(llvm::AllocaInst *alloca) { m_Alloca = alloca; }
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;
+        llvm::AllocaInst *m_Alloca;
     };
 
 } // namespace Marble

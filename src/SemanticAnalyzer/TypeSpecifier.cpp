@@ -1,7 +1,8 @@
-#include "Ast/TypeSpecifier.hpp"
-#include "Utils/Macros.hpp"
-#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include <iostream>
+
+#include "Ast/TypeSpecifier.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "Utils/Macros.hpp"
 
 namespace Marble
 {
@@ -36,6 +37,12 @@ namespace Marble
             arr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
             break;
         }
+        case Types::ConstantType:
+        {
+            auto &constant = std::get<ConstantType>(m_Variants);
+            constant.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            break;
+        }
         case Types::GenericType:
         {
             GenericType &gen = std::get<GenericType>(m_Variants);
@@ -57,14 +64,25 @@ namespace Marble
         }
     }
 
+    // bool TypeSpecifier::PassNull(Ref<TypeSpecifier> compareType)
+    // {
+    //     return m_Type == Types::Null && compareType->m_Type == Types::Pointer;
+    // }
+
     bool TypeSpecifier::IsPrimitive() const
     {
-        return m_Type == Types::Int ||
-               m_Type == Types::Usize ||
-               m_Type == Types::Float ||
-               m_Type == Types::Double ||
-               m_Type == Types::Char ||
-               m_Type == Types::Bool;
+        return TypeSpecifier::IsPrimitive(m_Type);
+    }
+
+    bool TypeSpecifier::IsPrimitive(Types type)
+    {
+        return type == Types::Int ||
+               type == Types::Usize ||
+               type == Types::Float ||
+               type == Types::Double ||
+               type == Types::Char ||
+               type == Types::Bool;
+        ;
     }
 
     bool TypeSpecifier::operator==(const TypeSpecifier &obj) const
@@ -98,6 +116,13 @@ namespace Marble
             const ArrayType &tsLeft = std::get<ArrayType>(m_Variants);
             const ArrayType &tsRight = std::get<ArrayType>(obj.m_Variants);
             return tsLeft.Size == tsRight.Size && tsLeft.TypeSpecifier->operator==(*tsRight.TypeSpecifier);
+        }
+
+        if (m_Type == Types::ConstantType)
+        {
+            const ConstantType &tsLeft = std::get<ConstantType>(m_Variants);
+            const ConstantType &tsRight = std::get<ConstantType>(obj.m_Variants);
+            return tsLeft.TypeSpecifier->operator==(*tsRight.TypeSpecifier);
         }
 
         if (m_Type == Types::GenericType)
@@ -197,6 +222,11 @@ namespace Marble
             result += ">";
             m_TypeName = result;
             break;
+        }
+        case Types::ConstantType:
+        {
+            const auto &constant = std::get<ConstantType>(m_Variants);
+            m_TypeName += "const " + constant.TypeSpecifier->ToString();
         }
         case Types::Null:
             m_TypeName = "null";

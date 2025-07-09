@@ -41,6 +41,10 @@ namespace Marble
         : Ast{span, AstType::TypeSpecifier}, m_Type{Types::GenericType}, m_Variants{generic}
     {
     }
+    TypeSpecifier::TypeSpecifier(ConstantType constant, const Span &span)
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::ConstantType}, m_Variants{constant}
+    {
+    }
 
     GenericType::GenericType(const Identifier &outerType, std::vector<Ref<TypeSpecifier>> &&innerType)
         : OuterType{outerType}, InnerType{std::move(innerType)}
@@ -110,16 +114,43 @@ namespace Marble
         UNREACHABLE();
     }
 
+    const ConstantType &TypeSpecifier::Constant()
+    {
+        if (std::holds_alternative<ConstantType>(m_Variants))
+        {
+            return std::get<ConstantType>(m_Variants);
+        }
+        ErrorSystem::AddError("Cannot get the constant type");
+        UNREACHABLE();
+    }
+
     Ref<TypeSpecifier> TypeSpecifier::Parse(Parser &parser)
     {
-        const Token &token = parser.Current();
+        Ref<TypeSpecifier> result = nullptr;
+        Span span;
+        bool flag = false;
+        if (parser.Current().TokenType() == TokenType::Const)
+        {
+            flag = true;
+            span = parser.Current().Span();
+            parser.NextToken();
+        }
+
+        auto &token = parser.Current();
         if (token.TokenType() == TokenType::Identifier)
         {
             Ref<TypeSpecifier> typeSpecifier = MakeRef<TypeSpecifier>(Identifier{token}, token.Span());
-            return TypeSpecifier::UserDefine(parser, typeSpecifier);
+            result = TypeSpecifier::UserDefine(parser, typeSpecifier);
         }
-
-        return TypeSpecifier::Primitive(parser);
+        else
+        {
+            result = TypeSpecifier::Primitive(parser);
+        }
+        if (flag)
+        {
+            return MakeRef<TypeSpecifier>(ConstantType{result}, Span{span.Start, result->m_Span.Start});
+        }
+        return result;
     }
 
     Ref<TypeSpecifier> TypeSpecifier::Primitive(Parser &parser)

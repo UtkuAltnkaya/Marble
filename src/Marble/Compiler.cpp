@@ -1,7 +1,6 @@
 #include <iostream>
 #include "Marble/Compiler.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
-#include "Compiler.hpp"
 
 namespace Marble
 {
@@ -42,13 +41,17 @@ namespace Marble
             Parser parser{lexer};
             program = parser.Parse();
         }
-
-        SemanticAnalyzer semanticAnalyzer{program, file};
-        semanticAnalyzer.Analyze();
+        {
+            SemanticAnalyzer semanticAnalyzer{program, file};
+            semanticAnalyzer.Analyze();
+        }
         if (ErrorSystem::GetInstance().IsError())
         {
             throw CompilationTerminatedException();
         }
+        // CodegenContext codegenContext{file.FileName()};
+        // codegenContext.Generate(program);
+        // codegenContext.Print();
     }
 
     void Compiler::AddArgs()

@@ -6,6 +6,18 @@ namespace Marble
 {
     Ref<TypeSpecifier> StructDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
+        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolIterator paramChecker = table.Iter();
+        for (auto &field : m_Field)
+        {
+            auto castedField = field->Into<StructFieldDefinition>();
+            Ref<TypeSpecifier> paramType = castedField->GetField().GetTypeSpecifier();
+            if (paramType->IsPrimitive())
+            {
+                continue;
+            }
+            CheckParametersType(semanticAnalyzer, paramType, paramChecker);
+        }
         m_IsAnalyzed = true;
         return TypeSpecifierOk;
     }
@@ -16,13 +28,6 @@ namespace Marble
         StructDefinition *castedStruct = clonedStructDef->Into<StructDefinition>();
         auto map = m_Generics->ToMap(typeArgs);
         castedStruct->SubstituteGenerics(semanticAnalyzer, map);
-        // std::string name = castedStruct->GetName();
-        // for (auto &type : typeArgs)
-        // {
-        //     name += "_" + type->ToString();
-        // }
-        // name += "_" + IDGenerator::Generate();
-        // castedStruct->m_StructName = MakeBox<Identifier>(name, castedStruct->m_StructName->GetSpan());
         castedStruct->m_Generics.reset();
         m_IsExpanded = true;
         return clonedStructDef;

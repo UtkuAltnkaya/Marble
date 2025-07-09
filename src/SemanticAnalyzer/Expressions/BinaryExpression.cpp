@@ -7,12 +7,20 @@ namespace Marble
     Ref<TypeSpecifier> BinaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         Ref<TypeSpecifier> leftType = m_Left->Analyze(semanticAnalyzer);
-        Ref<TypeSpecifier>
-            rightType = m_Right->Analyze(semanticAnalyzer);
+        Ref<TypeSpecifier> rightType = m_Right->Analyze(semanticAnalyzer);
 
         if (*leftType != *rightType)
         {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Left and Right hand-side must be the same type");
+            Ref<TypeSpecifier> resultType = semanticAnalyzer.UnifyArithmeticTypes(leftType, rightType);
+            bool r1 = semanticAnalyzer.TryImplicitConversion(m_Left, leftType, resultType);
+            bool r2 = semanticAnalyzer.TryImplicitConversion(m_Right, rightType, resultType);
+
+            if (!r1 && !r2)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Left and Right hand-side types are not compatible: " + leftType->ToString() + " and " + rightType->ToString());
+                return leftType;
+            }
+            leftType = resultType;
         }
 
         // TODO: Decide, allow operator overloading

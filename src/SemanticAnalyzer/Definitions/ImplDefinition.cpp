@@ -42,6 +42,17 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope", true);
         }
 
+        SymbolIterator paramChecker = table.Iter();
+        for (auto &param : m_Prototype->m_Params)
+        {
+            Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
+            if (paramType->IsPrimitive())
+            {
+                continue;
+            }
+            CheckParametersType(semanticAnalyzer, paramType, paramChecker);
+        }
+
         table.EnterScope(fnNode);
         m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
@@ -58,8 +69,7 @@ namespace Marble
         {
             // TODO: Decide to allow empty function body or not, or warn
         }
-
-        if (statements.back()->StatementType() == StatementType::Return)
+        else if (statements.back()->StatementType() == StatementType::Return)
         {
             return TypeSpecifierOk;
         }

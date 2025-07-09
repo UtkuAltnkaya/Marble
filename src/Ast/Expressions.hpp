@@ -13,6 +13,7 @@ namespace Marble
   class IdentifierExpression;
   class SymbolNode;
   enum class SymbolAccess;
+  enum class ConversionKind;
 
   enum class ExpressionType
   {
@@ -29,7 +30,9 @@ namespace Marble
     NameSpace,
     Identifier,
     Primitive,
+    ImplicitConversion,
   };
+
   enum class Precedence
   {
     START,
@@ -243,9 +246,9 @@ namespace Marble
   public:
     static constexpr Marble::ExpressionType StaticType = Marble::ExpressionType::Cast;
 
-    CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, const Span &span);
+    CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, ConversionKind kind, const Span &span);
+    CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, ConversionKind kind, Span &&span);
     CastExpression(const CastExpression &obj);
-    CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, Span &&span);
     ~CastExpression() = default;
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
@@ -253,9 +256,15 @@ namespace Marble
     virtual Box<Expression> Clone() override;
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
+    inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+    inline const Expression &GetExpression() const { return *m_Expression.get(); }
+    inline ConversionKind GetConversionKind() const { return m_Kind; }
+    inline void SetConversionKind(ConversionKind kind) { m_Kind = kind; }
+
   private:
     Ref<TypeSpecifier> m_TypeSpecifier;
     Box<Expression> m_Expression;
+    ConversionKind m_Kind;
   };
 
   class PrimitiveExpression : public Expression

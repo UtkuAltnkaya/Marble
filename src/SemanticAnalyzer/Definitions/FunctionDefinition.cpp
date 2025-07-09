@@ -19,6 +19,17 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope");
         }
 
+        SymbolIterator paramChecker = table.Iter();
+        for (auto &param : m_Params)
+        {
+            Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
+            if (paramType->IsPrimitive())
+            {
+                continue;
+            }
+            CheckParametersType(semanticAnalyzer, paramType, paramChecker);
+        }
+
         table.EnterScope(iter);
         m_Block->Analyze(semanticAnalyzer);
         table.LeaveScope();
@@ -35,8 +46,7 @@ namespace Marble
         {
             // TODO: Decide to allow empty function body or not, or warn
         }
-
-        if (statements.back()->StatementType() == StatementType::Return)
+        else if (statements.back()->StatementType() == StatementType::Return)
         {
             return TypeSpecifierOk;
         }
@@ -50,14 +60,6 @@ namespace Marble
         FunctionDefinition *castFnDef = clonedFnDef->Into<FunctionDefinition>();
         auto map = m_Generics->ToMap(typeArgs);
         castFnDef->SubstituteGenerics(semanticAnalyzer, map);
-
-        // std::string name = castFnDef->GetName();
-        // for (auto &type : typeArgs)
-        // {
-        //     name += "_" + type->ToString();
-        // }
-        // name += "_" + IDGenerator::Generate();
-        // castFnDef->m_FunctionName = MakeBox<Identifier>(name, castFnDef->m_FunctionName->GetSpan());
         castFnDef->m_Generics.reset();
         m_IsExpanded = true;
         return clonedFnDef;

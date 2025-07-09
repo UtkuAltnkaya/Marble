@@ -2,8 +2,7 @@ struct std{}
 
 impl std {
     pub fn allocate<T>(size:usize) -> T* {
-        let x: T;
-        return &x;
+        return null;
     }
 
     pub fn deallocate<T>(ptr:T*) -> void {

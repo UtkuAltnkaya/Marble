@@ -18,7 +18,10 @@ namespace Marble
             Ref<TypeSpecifier> ts = m_Array.at(i)->Analyze(semanticAnalyzer);
             if (*expressionType != *ts)
             {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Array item type must be same");
+                if (!semanticAnalyzer.TryImplicitConversion(m_Array.at(i), ts, expressionType))
+                {
+                    ErrorSystem::AddError(semanticAnalyzer, this, "Array item type must be same");
+                }
             }
         }
         return MakeRef<TypeSpecifier>(ArrayType{expressionType, m_Array.size()}, Span{});

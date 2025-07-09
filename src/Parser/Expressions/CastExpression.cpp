@@ -1,10 +1,11 @@
 #include "Ast/Expressions.hpp"
+#include "SemanticAnalyzer/Conversion.hpp"
 #include "Parser/Parser.hpp"
 
 namespace Marble
 {
-    CastExpression::CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, const Span &span)
-        : Expression{span, ExpressionType::Cast}, m_TypeSpecifier{typeSpecifier}, m_Expression{std::move(expression)}
+    CastExpression::CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, ConversionKind kind, const Span &span)
+        : Expression{span, ExpressionType::Cast}, m_TypeSpecifier{typeSpecifier}, m_Expression{std::move(expression)}, m_Kind{kind}
     {
     }
 
@@ -14,8 +15,8 @@ namespace Marble
         m_Expression = obj.m_Expression->Clone();
     }
 
-    CastExpression::CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, Span &&span)
-        : Expression{std::move(span), ExpressionType::Cast}, m_TypeSpecifier{typeSpecifier}, m_Expression{std::move(expression)}
+    CastExpression::CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, ConversionKind kind, Span &&span)
+        : Expression{std::move(span), ExpressionType::Cast}, m_TypeSpecifier{typeSpecifier}, m_Expression{std::move(expression)}, m_Kind{kind}
     {
     }
 
@@ -35,7 +36,7 @@ namespace Marble
 
         const Span &end = typeSpecifier->GetSpan();
         Span span{start.Start, end.End};
-        return MakeBox<CastExpression>(typeSpecifier, std::move(left), span);
+        return MakeBox<CastExpression>(typeSpecifier, std::move(left), ConversionKind::None, span);
     }
 
 } // namespace Marble

@@ -16,24 +16,26 @@ namespace Marble
     enum class Types
     {
         START,
-        Int,
+        Bool,
         Usize,
+        Int,
         Float,
         Double,
         Char,
         Str,
-        Bool,
         Void,
         UserDefine,
         Pointer,
         ArrayType,
         GenericType,
+        ConstantType,
         Null,
         END
     };
 
     class TypeSpecifier;
     class SemanticAnalyzer;
+    class CodegenContext;
 
     struct ArrayType
     {
@@ -42,6 +44,11 @@ namespace Marble
     };
 
     struct PointerType
+    {
+        Ref<Marble::TypeSpecifier> TypeSpecifier;
+    };
+
+    struct ConstantType
     {
         Ref<Marble::TypeSpecifier> TypeSpecifier;
     };
@@ -66,6 +73,7 @@ namespace Marble
         TypeSpecifier(const Identifier &identifier, const Span &span);
         TypeSpecifier(PointerType pointer, const Span &span);
         TypeSpecifier(GenericType generic, const Span &span);
+        TypeSpecifier(ConstantType constant, const Span &span);
         ~TypeSpecifier() = default;
 
     public:
@@ -75,13 +83,17 @@ namespace Marble
         const ArrayType &Array();
         const PointerType &Pointer();
         const GenericType &Generic();
-        inline const Types GetType() { return m_Type; }
+        const ConstantType &Constant();
+        inline const Types GetType() const { return m_Type; }
         inline void SetType(Types type) { m_Type = type; }
         bool IsPrimitive() const;
+        static bool IsPrimitive(Types type);
         bool operator==(const TypeSpecifier &obj) const;
         bool operator!=(const TypeSpecifier &obj) const;
         const std::string &ToString();
         void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
+
+        llvm::Type *ToLLVMType(CodegenContext &codegenContext);
 
     private:
         static Ref<TypeSpecifier> Primitive(Parser &parser);
@@ -97,7 +109,7 @@ namespace Marble
     private:
         std::string m_TypeName = "";
         Types m_Type;
-        std::variant<PointerType, Identifier, ArrayType, GenericType> m_Variants;
+        std::variant<PointerType, Identifier, ArrayType, GenericType, ConstantType> m_Variants;
     };
 
 } // namespace Marble

@@ -46,4 +46,15 @@ namespace Marble
         }                                                     \
     } while (false)
 
+#define UNIMPLEMENTED(message)                            \
+    do                                                    \
+    {                                                     \
+        std::cerr << "[UNIMPLEMENTED] "                   \
+                  << "function: " << __func__             \
+                  << ", file: " << __FILE__               \
+                  << ", line: " << __LINE__ << "\n"       \
+                  << "Message: " << message << std::endl; \
+        std::abort();                                     \
+    } while (false)
+
 } // namespace Marble

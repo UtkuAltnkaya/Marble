@@ -1,6 +1,7 @@
 #include "Ast/Statements.hpp"
 #include "Utils/IDGenerator.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -26,7 +27,7 @@ namespace Marble
         if (condition->GetType() != Types::Bool)
         {
             table.LeaveScope();
-            throw "Condition type must be boolean";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Condition type must be boolean");
         }
 
         m_Increment->Analyze(semanticAnalyzer);

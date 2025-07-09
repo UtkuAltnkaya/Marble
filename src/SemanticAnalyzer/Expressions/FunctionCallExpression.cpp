@@ -62,9 +62,14 @@ namespace Marble
         for (size_t i = 0; i < m_Args.size(); i++)
         {
             Ref<TypeSpecifier> argType = m_Args.at(i)->Analyze(semanticAnalyzer);
-            if (*argType != *params.at(i))
+            Ref<TypeSpecifier> paramType = params.at(i);
+
+            if (*argType != *paramType)
             {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Parameter expression type does not match");
+                if (!semanticAnalyzer.TryImplicitConversion(m_Args[i], argType, paramType))
+                {
+                    ErrorSystem::AddError(semanticAnalyzer, this, "Parameter expression type does not match");
+                }
             }
         }
         return fnNode->ReturnType();

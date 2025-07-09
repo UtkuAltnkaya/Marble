@@ -1,6 +1,7 @@
 #include "Ast/Statements.hpp"
 #include "Utils/IDGenerator.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -11,7 +12,7 @@ namespace Marble
         // TODO: Decide whether conditions must be bool or bool and int
         if (condition->GetType() != Types::Bool /*&& condition->GetType() != Types::Int*/)
         {
-            throw "Condition type must be boolean";
+            ErrorSystem::AddError(semanticAnalyzer, this, "Condition type must be boolean");
         }
 
         SymbolTable &table = SymbolTable::GetInstance();

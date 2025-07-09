@@ -18,7 +18,6 @@ namespace Marble
     }
 
     // To prevent ambiguity between '<' operator and '<' generic greedy parsing strategy used
-    // TODO: Search for better parsing strategy
     Box<Generics> Generics::Parse(Parser &parser)
     {
         if (parser.Next().TokenType() != TokenType::LessThan)

@@ -8,4 +8,6 @@ add_subdirectory(ErrorSystem)
 
 add_subdirectory(SemanticAnalyzer)
 
+add_subdirectory(Codegen)
+
 add_subdirectory(Marble)

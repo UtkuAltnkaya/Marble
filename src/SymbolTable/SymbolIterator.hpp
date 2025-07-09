@@ -23,10 +23,10 @@ namespace Marble
         SymbolIterator &Enum(std::string_view name);
         SymbolIterator &Variable(std::string_view name);
         SymbolIterator &StructField(std::string_view name);
+        SymbolIterator &EnumField(std::string_view name);
         size_t Count(SymbolNodeTypes filter);
         inline bool IsFound() const { return !m_Flag; }
         SymbolIterator &Reset();
-        // TODO:SymbolIterator &EnumField(std::string_view name);
 
     private:
         SymbolNode *const Find(std::string_view name, SymbolNodeTypes nodeType);

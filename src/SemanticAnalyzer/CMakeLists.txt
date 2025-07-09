@@ -6,4 +6,4 @@ add_library(semanticAnalyzer STATIC ${SEMANTIC_ANALYZER_SRC_FILES} ${SEMANTIC_AN
 
 target_include_directories(semanticAnalyzer PUBLIC ${PROJECT_DIR})
 
-target_link_libraries(semanticAnalyzer PRIVATE symbolTable)
+target_link_libraries(semanticAnalyzer PRIVATE symbolTable errorSystem)

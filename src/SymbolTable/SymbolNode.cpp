@@ -17,7 +17,7 @@ namespace Marble
         m_AstPtr = &enumDefinition;
         for (auto &enumField : enumDefinition.GetFields())
         {
-            Insert(enumField->Id(), new SymbolNode{SymbolData{SymbolAccess::Public, SymbolNodeTypes::EnumField, SymbolNodeBaseTypes::None}, this});
+            Insert(enumField->Id(), new VariableSymbolNode{*enumField.get(), this});
         }
     }
 
@@ -98,7 +98,7 @@ namespace Marble
     }
 
     VariableSymbolNode::VariableSymbolNode(SymbolAccess access, SymbolNode *parent, Ref<TypeSpecifier> typeSpecifier)
-        : SymbolNode{SymbolData{access, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}, m_TypeSpecifier{typeSpecifier}
+        : SymbolNode{SymbolData{access, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}, m_TypeSpecifier{typeSpecifier}, m_Alloca{nullptr}
     {
     }
 
@@ -124,6 +124,13 @@ namespace Marble
     {
         m_AstPtr = &letStmt;
         m_TypeSpecifier = letStmt.GetTypeSpecifier();
+    }
+
+    VariableSymbolNode::VariableSymbolNode(const Identifier &identifier, SymbolNode *parent)
+        : SymbolNode{SymbolData{SymbolAccess::Public, SymbolNodeTypes::EnumField, SymbolNodeBaseTypes::Variable}, parent}
+    {
+        m_AstPtr = &identifier;
+        m_TypeSpecifier = MakeRef<TypeSpecifier>(Types::Int);
     }
 
 } // namespace Marble

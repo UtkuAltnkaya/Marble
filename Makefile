@@ -1,7 +1,7 @@
 MAKEFLAGS += --no-print-directory
 
 all:
-	cmake --build ./build --target marble -j 18 --
+	cmake --build ./build --target marble -j 9 --
 
 clean:
 	cmake --build ./build --target clean

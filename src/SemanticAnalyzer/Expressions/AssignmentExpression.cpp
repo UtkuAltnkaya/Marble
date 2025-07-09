@@ -15,12 +15,20 @@ namespace Marble
         }
         Ref<TypeSpecifier> right = m_Value->Analyze(semanticAnalyzer);
 
-        if (*right != *left)
+        if (*right == *left)
         {
-            std::string message =
-                "Left and Right handside types are not matched. Trying to assign " + right->ToString() + " to " + left->ToString();
-            ErrorSystem::AddError(semanticAnalyzer, this, message);
+            return left;
         }
+
+        if (semanticAnalyzer.TryImplicitConversion(m_Value, right, left))
+        {
+            return left;
+        }
+
+        std::string message =
+            "Left and Right handside types are not matched. Trying to assign " + right->ToString() + " to " + left->ToString();
+        ErrorSystem::AddError(semanticAnalyzer, this, message);
+
         return left;
     }
 

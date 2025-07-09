@@ -1,5 +1,6 @@
 #include "Ast/Statements.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
 {
@@ -16,28 +17,32 @@ namespace Marble
             }
             else
             {
-                throw "Cannot find any parent of this symbol";
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find any parent of this symbol", true);
             }
         }
 
         FunctionSymbolNode *fnNode = parent->Into<FunctionSymbolNode>();
+        Ref<TypeSpecifier> returnType = fnNode->ReturnType();
 
         // TODO: Warn if local addresses returns
         if (m_Expression)
         {
-            Ref<TypeSpecifier> ts = m_Expression->Analyze(semanticAnalyzer);
-
-            if (*ts == *fnNode->ReturnType())
+            Ref<TypeSpecifier> valueType = m_Expression->Analyze(semanticAnalyzer);
+            if (*valueType == *returnType)
+            {
+                return TypeSpecifierOk;
+            }
+            if (semanticAnalyzer.TryImplicitConversion(m_Expression, valueType, returnType))
             {
                 return TypeSpecifierOk;
             }
         }
-        else if (fnNode->ReturnType()->GetType() == Types::Void)
+        else if (returnType->GetType() == Types::Void)
         {
             return TypeSpecifierOk;
         }
-
-        throw "Return value and return type of function does not match";
+        ErrorSystem::AddError(semanticAnalyzer, this, "Return value and return type of function does not match");
+        return TypeSpecifierOk;
     }
 
     void ReturnStatement::SubstituteGenerics(

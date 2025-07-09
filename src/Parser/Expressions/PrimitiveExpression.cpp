@@ -45,7 +45,6 @@ namespace Marble
             typeSpecifier->SetType(Types::Char);
             break;
         case TokenType::Null:
-            // TODO
             typeSpecifier->SetType(Types::Null);
             break;
         case TokenType::True:

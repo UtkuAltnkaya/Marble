@@ -36,7 +36,7 @@ namespace Marble
             Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
             return ts;
         }
-        if (auto node = iter.Enum(identifier.Id()).Find(); node)
+        if (auto node = iter.Reset().Enum(identifier.Id()).Find(); node)
         {
             table.EnterScope(node);
             Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);

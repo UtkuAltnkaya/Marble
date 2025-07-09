@@ -5,6 +5,7 @@
 #include "Lexer/Lexer.hpp"
 #include "Parser/Parser.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "Codegen/Codegen.hpp"
 
 namespace Marble
 {

@@ -2,6 +2,7 @@
 #include "Ast/Program.hpp"
 #include "Ast/Definitions.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/Conversion.hpp"
 
 namespace Marble
 {
@@ -15,6 +16,8 @@ namespace Marble
         void Analyze();
         const std::string &InstantiateGenerics(const std::string &name, const Generics *generics);
         const std::string &InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
+        bool TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
+        Ref<TypeSpecifier> UnifyArithmeticTypes(Ref<TypeSpecifier> a, Ref<TypeSpecifier> b);
 
         inline const Marble::File &File() const { return m_File; }
 
@@ -27,6 +30,7 @@ namespace Marble
 
     private:
         const Marble::File &m_File;
+        Conversion m_Conversion;
         Ref<Program> m_Program;
         std::unordered_map<GenericInstanceKey, std::string, GenericInstanceKeyHasher> m_Generis;
     };

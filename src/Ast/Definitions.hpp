@@ -12,6 +12,7 @@
 namespace Marble
 {
     class SymbolNode;
+    class SymbolIterator;
     class ImplDefinition;
     class MemberFunctionDefinition;
 
@@ -90,6 +91,9 @@ namespace Marble
         }
 
     protected:
+        void CheckParametersType(SemanticAnalyzer &analyzer, Ref<TypeSpecifier> paramType, SymbolIterator &iter);
+
+    protected:
         Marble::DefinitionType m_DefinitionType;
         bool m_IsAnalyzed;
         bool m_IsExpanded;
@@ -114,6 +118,8 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        llvm::Value *Codegen(CodegenContext &codegenContext) override;
+
         Box<Definition> InstantiateWith(
             SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
