@@ -86,6 +86,13 @@ namespace Marble
         }
 
         Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
+        if (expressionType->GetType() == Types::ConstantType)
+        {
+            auto &constType = expressionType->Constant();
+            auto type = MakeRef<TypeSpecifier>(PointerType{constType.TypeSpecifier}, Span{});
+            return TypeSpecifier::ConvertToConst(type);
+        }
+
         return MakeRef<TypeSpecifier>(PointerType{expressionType}, Span{});
     }
 
@@ -103,13 +110,15 @@ namespace Marble
         }
 
         Ref<TypeSpecifier> expressionType = m_Value->Analyze(semanticAnalyzer);
+        bool constFlag = expressionType->GetType() == Types::ConstantType;
+        expressionType = TypeSpecifier::PassConst(expressionType);
         Types type = expressionType->GetType();
         if (type != Types::Pointer)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Expected pointer type", true);
         }
         auto &pointerType = expressionType->Pointer();
-        return pointerType.TypeSpecifier;
+        return constFlag ? TypeSpecifier::ConvertToConst(pointerType.TypeSpecifier) : pointerType.TypeSpecifier;
     }
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzeNot(SemanticAnalyzer &semanticAnalyzer)

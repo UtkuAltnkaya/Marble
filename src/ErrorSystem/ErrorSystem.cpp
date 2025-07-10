@@ -77,6 +77,20 @@ namespace Marble
         errorSystem.m_Errors.pop_back();
     }
 
+    void ErrorSystem::AddWarn(std::string_view message, const File *const file)
+    {
+        ErrorSystem &errorSystem = ErrorSystem::GetInstance();
+        GeneralError *warning = new GeneralError{message, file};
+        errorSystem.m_Warnings.emplace_back(Box<GeneralError>(warning));
+    }
+
+    void ErrorSystem::AddWarn(const SemanticAnalyzer &semanticAnalyzer, const Ast *node, std::string_view message)
+    {
+        ErrorSystem &errorSystem = ErrorSystem::GetInstance();
+        SemanticError *warning = new SemanticError{semanticAnalyzer, node, message};
+        errorSystem.m_Warnings.emplace_back(Box<SemanticError>(warning));
+    }
+
     void ErrorSystem::PrintError()
     {
         for (auto &errors : m_Errors)

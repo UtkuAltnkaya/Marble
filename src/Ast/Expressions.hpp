@@ -279,6 +279,8 @@ namespace Marble
 
     static Box<Expression> Parse(Parser &parser, Precedence precedence);
     Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override { return m_TypeSpecifier; }
+    llvm::Value *Codegen(CodegenContext &codegenContext) override;
+
     inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
     inline const std::string &GetValue() const { return m_Value; }
     virtual Box<Expression> Clone() override;

@@ -13,6 +13,10 @@ namespace Marble
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot assign to array");
         }
+        else if (left->GetType() == Types::ConstantType)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Expression must be a modifiable value");
+        }
         Ref<TypeSpecifier> right = m_Value->Analyze(semanticAnalyzer);
 
         if (*right == *left)

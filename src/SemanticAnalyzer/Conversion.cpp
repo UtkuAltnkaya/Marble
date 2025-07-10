@@ -54,13 +54,13 @@ namespace Marble
     {
         if (from->GetType() == Types::ConstantType)
         {
-            return CanConvert(from->Constant().TypeSpecifier, to) != ConversionKind::None;
+            return false;
         }
         if (to->GetType() != Types::ConstantType)
         {
             return false;
         }
-        return *from == *to->Constant().TypeSpecifier;
+        return CanConvert(from, to->Constant().TypeSpecifier) != ConversionKind::None;
     }
 
     bool Conversion::HandleNullConversion(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)

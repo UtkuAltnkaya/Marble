@@ -4,10 +4,17 @@
 
 namespace Marble
 {
+    // TODO It marks the property value as constat if is the case
+    // TODO This restrict to return or create new value as const to underlying type
+    // TODO It can be bypass by casting to non-const version but gives warning
     Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
+
         CheckObjectExpressionType(semanticAnalyzer);
         Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
+
+        bool constFlag = objectType->GetType() == Types::ConstantType;
+        objectType = TypeSpecifier::PassConst(objectType);
 
         const Identifier *identifier = nullptr;
         if (objectType->GetType() == Types::UserDefine)
@@ -34,7 +41,7 @@ namespace Marble
         }
         else
         {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type");
+            ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type", true);
         }
 
         SymbolTable &table = SymbolTable::GetInstance();
@@ -54,6 +61,8 @@ namespace Marble
         {
             IdentifierExpression *identifierExpression = m_Property->Into<IdentifierExpression>();
             typeSpecifier = AnalyzeIdentifier(semanticAnalyzer, identifierExpression, isPublic);
+            if (constFlag)
+                typeSpecifier = TypeSpecifier::ConvertToConst(typeSpecifier);
             table.LeaveScope();
             break;
         }
@@ -66,8 +75,11 @@ namespace Marble
         case ExpressionType::MemberAccess:
         case ExpressionType::ArrayIndex:
         {
+            typeSpecifier = m_Property->Analyze(semanticAnalyzer);
+            if (constFlag)
+                typeSpecifier = TypeSpecifier::ConvertToConst(typeSpecifier);
             table.LeaveScope();
-            return m_Property->Analyze(semanticAnalyzer);
+            return typeSpecifier;
         }
         default:
         {

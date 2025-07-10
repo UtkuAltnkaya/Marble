@@ -136,7 +136,6 @@ namespace Marble
         return (rankA >= rankB) ? a : b;
     }
 
-    // TODO
     Box<Definition> SemanticAnalyzer::Instantiate(SymbolNode *node, GenericInstanceKey &key, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
 

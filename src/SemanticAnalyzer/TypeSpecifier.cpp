@@ -64,10 +64,19 @@ namespace Marble
         }
     }
 
-    // bool TypeSpecifier::PassNull(Ref<TypeSpecifier> compareType)
-    // {
-    //     return m_Type == Types::Null && compareType->m_Type == Types::Pointer;
-    // }
+    Ref<TypeSpecifier> Marble::TypeSpecifier::PassConst(Ref<TypeSpecifier> ts)
+    {
+        if (ts->m_Type == Types::ConstantType)
+        {
+            return ts->Constant().TypeSpecifier;
+        }
+        return ts;
+    }
+
+    Ref<TypeSpecifier> TypeSpecifier::ConvertToConst(Ref<TypeSpecifier> ts)
+    {
+        return MakeRef<TypeSpecifier>(ConstantType{ts}, ts->m_Span);
+    }
 
     bool TypeSpecifier::IsPrimitive() const
     {

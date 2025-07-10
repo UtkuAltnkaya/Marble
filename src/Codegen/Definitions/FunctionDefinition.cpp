@@ -32,6 +32,7 @@ namespace Marble
             throw "Cannot find function";
         }
 
+        table.EnterScope(node);
         unsigned i = 0;
         for (auto &arg : function->args())
         {
@@ -42,14 +43,21 @@ namespace Marble
             {
                 throw "Cannot find parameter in this scope";
             }
-            llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(function, arg.getType(), param->GetIdentifier().Id());
-            builder.CreateStore(&arg, alloca);
+            // TODO
+            if (param->GetTypeSpecifier()->GetType() != Types::ConstantType)
+            {
+                llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(function, arg.getType(), param->GetIdentifier().Id());
+                builder.CreateStore(&arg, alloca);
 
-            VariableSymbolNode *paramVariable = paramNode->Into<VariableSymbolNode>();
-            paramVariable->SetAlloca(alloca);
+                VariableSymbolNode *paramVariable = paramNode->Into<VariableSymbolNode>();
+                paramVariable->SetAlloca(alloca);
+            }
             i++;
         }
 
+        m_Block->Codegen(codegenContext);
+
+        table.LeaveScope();
         return function;
     }
 } // namespace Marble

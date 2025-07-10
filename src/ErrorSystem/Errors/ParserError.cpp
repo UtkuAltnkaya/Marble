@@ -13,7 +13,7 @@ namespace Marble
     {
         std::ostringstream oss;
         HandleContent(parser, oss, message);
-        m_Error = oss.str();
+        m_Message = oss.str();
     }
 
     void HandleContent(const Parser &parser, std::ostringstream &oss, std::string_view message)

@@ -78,6 +78,8 @@ namespace Marble
 
     public:
         static Ref<TypeSpecifier> Parse(Parser &parser);
+        static Ref<TypeSpecifier> PassConst(Ref<TypeSpecifier> ts);
+        static Ref<TypeSpecifier> ConvertToConst(Ref<TypeSpecifier> ts);
 
         const Identifier &UserDefine();
         const ArrayType &Array();

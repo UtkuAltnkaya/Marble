@@ -46,6 +46,7 @@ namespace Marble
 
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
         inline const Identifier &GetIdentifier() const { return *m_Identifier.get(); }
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
@@ -106,6 +107,7 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser, bool passTokenCheck = false);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         virtual Box<Statement> Clone() override;
+        llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
         inline const std::vector<Box<Statement>> &Statements() const { return m_Statements; }
         void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;

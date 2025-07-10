@@ -9,8 +9,7 @@ namespace Marble
     {
         Ref<TypeSpecifier> condition = m_Condition->Analyze(semanticAnalyzer);
 
-        // TODO: Decide whether conditions must be bool or bool and int
-        if (condition->GetType() != Types::Bool /*&& condition->GetType() != Types::Int*/)
+        if (condition->GetType() != Types::Bool)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Condition type must be boolean");
         }

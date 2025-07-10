@@ -8,24 +8,23 @@
 #include "Lexer/Lexer.hpp"
 #include "Parser/Parser.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
+#include "ErrorSystem/CompilerWarning.hpp"
+#include "ErrorSystem/MessageHolder.hpp"
 
 namespace Marble
 {
     class ErrorSystem;
     class Ast;
 
-    class CompilerError : public std::exception
+    class CompilerError : public std::exception, public virtual MessageHolder
     {
     public:
         virtual ~CompilerError() = default;
         CompilerError() = default;
-        const char *what() const noexcept override { return m_Error.c_str(); }
-
-    protected:
-        std::string m_Error;
+        const char *what() const noexcept override { return m_Message.c_str(); }
     };
 
-    class GeneralError : public CompilerError
+    class GeneralError : public CompilerError, public CompilerWarning
     {
     public:
         friend class ErrorSystem;
@@ -35,7 +34,7 @@ namespace Marble
         GeneralError(std::string_view message, const File *const file);
     };
 
-    class LexicalError : public CompilerError
+    class LexicalError : public CompilerError, public CompilerWarning
     {
     public:
         friend class ErrorSystem;
@@ -45,7 +44,7 @@ namespace Marble
         LexicalError(const Lexer &lexer, std::string_view message);
     };
 
-    class ParserError : public CompilerError
+    class ParserError : public CompilerError, public CompilerWarning
     {
     public:
         friend class ErrorSystem;
@@ -55,7 +54,7 @@ namespace Marble
         ParserError(const Parser &parser, std::string_view message);
     };
 
-    class SemanticError : public CompilerError
+    class SemanticError : public CompilerError, public CompilerWarning
     {
     public:
         friend class ErrorSystem;

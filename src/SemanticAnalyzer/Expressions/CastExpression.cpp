@@ -7,7 +7,11 @@ namespace Marble
     Ref<TypeSpecifier> CastExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         Ref<TypeSpecifier> ts = m_Expression->Analyze(semanticAnalyzer);
-        if (!ts->IsPrimitive())
+        if (ts->GetType() == Types::ConstantType)
+        {
+            ErrorSystem::AddWarn(semanticAnalyzer, this, "Const cast is dangerous avoid using it");
+        }
+        else if (!ts->IsPrimitive())
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot cast to complex type");
         }

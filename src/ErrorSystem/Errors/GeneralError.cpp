@@ -12,7 +12,7 @@ namespace Marble
                 << file->FileName();
         }
         oss << message << '\n';
-        m_Error = oss.str();
+        m_Message = oss.str();
     }
 
 } // namespace Marble

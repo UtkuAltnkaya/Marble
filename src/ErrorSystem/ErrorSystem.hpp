@@ -35,6 +35,9 @@ namespace Marble
         static void AddError(const SemanticAnalyzer &semanticAnalyzer, const Ast *node, std::string_view message, bool shouldThrow = false);
         static void RemoveLastError();
 
+        static void AddWarn(std::string_view message, const File *const file = nullptr);
+        static void AddWarn(const SemanticAnalyzer &semanticAnalyzer, const Ast *node, std::string_view message);
+
         inline const std::vector<Box<CompilerError>> &GetErrors() const { return m_Errors; }
         inline const std::vector<Box<CompilerWarning>> &GetWarnings() const { return m_Warnings; }
         inline bool IsError() const { return m_Errors.size() != 0; }

@@ -1,9 +1,59 @@
-fn main() -> void {
-    let y = 1.0;
-    let z = y + 1;
-    
+struct std {}
+
+struct Person {
+    pub age: int
 }
 
-fn add (x:int,y:double) -> double {
-    return x + y;
+struct ClassRoom {
+    pub teacher: Person,
+    pub students: Person*
+}
+
+
+impl std {
+    pub fn allocate<T>(size:usize) -> T* {
+        return null;
+    }
+
+    pub fn deallocate<T>(ptr:T*) -> void {
+
+    }
+}
+
+impl Person {
+    pub fn init() -> Person {
+        return Person {
+            age: 42
+        };
+    }
+
+    pub fn (p: const Person*) get_age() -> const int* {
+        return &p->age;
+    }
+}
+
+impl ClassRoom {
+    pub fn init() -> ClassRoom {
+        return ClassRoom {
+            teacher: Person::init(),
+            students: std::allocate<Person>(10)
+        };
+    }
+
+    pub fn (c:ClassRoom*) get_teacher() -> Person* {
+        return &c->teacher;
+    }
+}
+
+
+
+fn main() -> void {
+    let x = 12.5;
+    let y = true;
+    let z = '1';
+}
+
+fn add() -> void {
+    let z: int* = null;
+    let a = 12;
 }

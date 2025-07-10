@@ -19,6 +19,7 @@ namespace Marble
 
     void Compiler::Compile()
     {
+        ErrorSystem &errorSystem = ErrorSystem::GetInstance();
         ArgParser argParser = m_ArgParserBuilder.Build();
         argParser.Parse();
 
@@ -45,13 +46,17 @@ namespace Marble
             SemanticAnalyzer semanticAnalyzer{program, file};
             semanticAnalyzer.Analyze();
         }
-        if (ErrorSystem::GetInstance().IsError())
+        if (errorSystem.IsError())
         {
             throw CompilationTerminatedException();
         }
-        // CodegenContext codegenContext{file.FileName()};
-        // codegenContext.Generate(program);
-        // codegenContext.Print();
+        CodegenContext codegenContext{file.FileName()};
+        codegenContext.Generate(program);
+        codegenContext.Print();
+        if (errorSystem.IsWarning())
+        {
+            errorSystem.PrintWarning();
+        }
     }
 
     void Compiler::AddArgs()

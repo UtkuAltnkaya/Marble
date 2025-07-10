@@ -9,16 +9,18 @@
 
 namespace Marble
 {
+    class SymbolNode;
     class CodegenContext
     {
     public:
         CodegenContext(const std::string &name);
-        ~CodegenContext() = default;
+        ~CodegenContext();
 
         void Generate(Ref<Program> program);
-
         void Print();
+
         llvm::AllocaInst *CreateEntryBlockAlloca(llvm::Function *function, llvm::Type *type, const std::string &name);
+        SymbolNode *GetNamedUserDefinedType(const std::string &name);
 
         inline llvm::LLVMContext &Context() { return m_Context; }
         inline llvm::IRBuilder<> &Builder() { return m_Builder; }

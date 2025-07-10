@@ -13,7 +13,7 @@ namespace Marble
     {
         std::ostringstream oss;
         HandleContent(semanticAnalyzer, node, oss, message);
-        m_Error = oss.str();
+        m_Message = oss.str();
     }
 
     void HandleContent(const SemanticAnalyzer &semanticAnalyzer, const Ast *node, std::ostringstream &oss, std::string_view message)

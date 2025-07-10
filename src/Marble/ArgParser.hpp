@@ -9,6 +9,8 @@
 #include <optional>
 #include <variant>
 
+#include "ErrorSystem/CompilerError.hpp"
+
 namespace Marble
 {
     enum class ArgType
@@ -58,7 +60,8 @@ namespace Marble
                 return std::get<T>(value);
             }
 
-            throw "Cannot get the requested type";
+            ErrorSystem::AddError("Cannot get the requested type", nullptr, true);
+            UNREACHABLE();
         }
 
     private:

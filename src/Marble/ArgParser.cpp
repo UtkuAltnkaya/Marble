@@ -1,6 +1,5 @@
-#include "Marble/ArgParser.hpp"
-#include "ArgParser.hpp"
 #include <iostream>
+#include "Marble/ArgParser.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
 
 namespace Marble
@@ -53,7 +52,7 @@ namespace Marble
             auto it = m_ArgMap.find(arg);
             if (it == m_ArgMap.end())
             {
-                // TODO: Warn unknown argument
+                ErrorSystem::AddWarn("Unknown argument " + std::string(arg));
                 continue;
             }
 
