@@ -17,6 +17,7 @@ namespace Marble
         const std::string &InstantiateGenerics(const std::string &name, const Generics *generics);
         const std::string &InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
         bool TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
+        ConversionKind CanConvert(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
         Ref<TypeSpecifier> UnifyArithmeticTypes(Ref<TypeSpecifier> a, Ref<TypeSpecifier> b);
 
         inline const Marble::File &File() const { return m_File; }

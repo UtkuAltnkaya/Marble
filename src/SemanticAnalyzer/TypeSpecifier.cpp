@@ -91,7 +91,16 @@ namespace Marble
                type == Types::Double ||
                type == Types::Char ||
                type == Types::Bool;
-        ;
+    }
+
+    bool TypeSpecifier::IsIntegerType()
+    {
+        return m_Type == Types::Int || m_Type == Types::Usize;
+    }
+
+    bool TypeSpecifier::IsFloatingPointType()
+    {
+        return m_Type == Types::Float || m_Type == Types::Double;
     }
 
     bool TypeSpecifier::operator==(const TypeSpecifier &obj) const

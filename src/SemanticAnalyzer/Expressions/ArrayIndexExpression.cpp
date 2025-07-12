@@ -21,19 +21,23 @@ namespace Marble
             const ArrayType &arrayType = exprType->Array();
             if (arrayType.TypeSpecifier->GetType() == Types::Str)
             {
-                return MakeRef<TypeSpecifier>(Types::Char);
+                m_ValueType = MakeRef<TypeSpecifier>(Types::Char);
+                return m_ValueType;
             }
             if (arrayType.TypeSpecifier->GetType() == Types::ArrayType)
             {
                 const ArrayType &arrayTypeSecond = arrayType.TypeSpecifier->Array();
-                return arrayTypeSecond.TypeSpecifier;
+                m_ValueType = arrayTypeSecond.TypeSpecifier;
+                return m_ValueType;
             }
-            return arrayType.TypeSpecifier;
+            m_ValueType = arrayType.TypeSpecifier;
+            return m_ValueType;
         }
 
         if (exprType->GetType() == Types::Pointer)
         {
-            return exprType->Pointer().TypeSpecifier;
+            m_ValueType = exprType->Pointer().TypeSpecifier;
+            return m_ValueType;
         }
         ErrorSystem::AddError(semanticAnalyzer, this, "Expect the array type");
         return TypeSpecifierVoid;

@@ -39,7 +39,7 @@ namespace Marble
             return TypeSpecifierOk;
         }
 
-        BlockStatement *block = static_cast<BlockStatement *>(m_Block.get());
+        BlockStatement *block = m_Block->Into<BlockStatement>();
 
         const std::vector<Box<Statement>> &statements = block->Statements();
         if (statements.size() == 0)

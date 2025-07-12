@@ -18,6 +18,13 @@ namespace Marble
         {
             if (!definition->IsGeneric())
             {
+                definition->DeclareSignature(*this);
+            }
+        }
+        for (auto &definition : program->Definitions())
+        {
+            if (!definition->IsGeneric())
+            {
                 definition->Codegen(*this);
             }
         }

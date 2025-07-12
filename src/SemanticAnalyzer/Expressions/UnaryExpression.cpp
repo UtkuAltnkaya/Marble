@@ -10,11 +10,14 @@ namespace Marble
         switch (m_UnaryExpressionType)
         {
         case UnaryExpressionType::PostFix:
-            return AnalyzePostFix(semanticAnalyzer);
+            m_ValueType = AnalyzePostFix(semanticAnalyzer);
+            break;
         case UnaryExpressionType::Prefix:
-            return AnalyzePrefix(semanticAnalyzer);
+            m_ValueType = AnalyzePrefix(semanticAnalyzer);
+            break;
         }
-        UNREACHABLE();
+        ASSERT_D(m_ValueType != nullptr, "Must be initialized");
+        return m_ValueType;
     }
 
     Ref<TypeSpecifier> UnaryExpression::AnalyzePostFix(SemanticAnalyzer &semanticAnalyzer)
@@ -147,7 +150,7 @@ namespace Marble
 
         if (m_UnaryOperator == UnaryOperators::LogicalNot)
         {
-            if (type == Types::Bool)
+            if (type == Types::Bool || type == Types::Pointer)
             {
                 return expressionType;
             }

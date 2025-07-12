@@ -8,6 +8,7 @@ namespace llvm
     class Value;
     class Type;
     class AllocaInst;
+    class Function;
 } // namespace llvm
 
 namespace Marble

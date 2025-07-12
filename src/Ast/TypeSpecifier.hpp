@@ -95,6 +95,9 @@ namespace Marble
         const std::string &ToString();
         void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
 
+        bool IsIntegerType();
+        bool IsFloatingPointType();
+
         llvm::Type *ToLLVMType(CodegenContext &codegenContext);
 
     private:

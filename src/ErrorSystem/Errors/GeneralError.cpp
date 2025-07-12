@@ -9,7 +9,7 @@ namespace Marble
         if (file)
         {
             oss << "\n"
-                << file->FileName();
+                << file->FileName() << "\n";
         }
         oss << message << '\n';
         m_Message = oss.str();

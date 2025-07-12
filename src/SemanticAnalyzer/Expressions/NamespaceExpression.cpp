@@ -33,18 +33,18 @@ namespace Marble
                 node = root->Iter().Struct(name).Find();
             }
             table.EnterScope(node);
-            Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
-            return ts;
+            m_ValueType = m_Value->Analyze(semanticAnalyzer);
+            return m_ValueType;
         }
         if (auto node = iter.Reset().Enum(identifier.Id()).Find(); node)
         {
             table.EnterScope(node);
-            Ref<TypeSpecifier> ts = m_Value->Analyze(semanticAnalyzer);
+            m_ValueType = m_Value->Analyze(semanticAnalyzer);
             if (m_Value->ExpressionType() == ExpressionType::Identifier)
             {
                 table.LeaveScope();
             }
-            return ts;
+            return m_ValueType;
         }
         ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the namespace", true);
         UNREACHABLE();

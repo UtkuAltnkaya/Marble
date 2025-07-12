@@ -29,16 +29,16 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
         }
 
+        m_ValueType = leftType;
         if (m_Operator == BinaryOperators::Equal || m_Operator == BinaryOperators::NotEqual ||
             m_Operator == BinaryOperators::And || m_Operator == BinaryOperators::Or ||
             m_Operator == BinaryOperators::GreaterThan || m_Operator == BinaryOperators::LessThan ||
             m_Operator == BinaryOperators::GreaterThanOrEqual ||
             m_Operator == BinaryOperators::LessThanOrEqual)
         {
-            return std::make_shared<TypeSpecifier>(Types::Bool);
+            m_ValueType = std::make_shared<TypeSpecifier>(Types::Bool);
         }
-
-        return leftType;
+        return m_ValueType;
     }
 
     void BinaryExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)

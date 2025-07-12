@@ -4,10 +4,9 @@
 
 namespace Marble
 {
-    llvm::Value *FunctionDefinition::Codegen(CodegenContext &codegenContext)
-    {
-        llvm::IRBuilder<> &builder = codegenContext.Builder();
 
+    llvm::Function *FunctionDefinition::DeclareSignature(CodegenContext &codegenContext)
+    {
         std::vector<llvm::Type *> paramTypes;
         paramTypes.reserve(m_Params.size());
         for (auto &param : m_Params)
@@ -18,7 +17,30 @@ namespace Marble
 
         llvm::Type *returnType = m_ReturnType->ToLLVMType(codegenContext);
         llvm::FunctionType *functionType = llvm::FunctionType::get(returnType, paramTypes, false);
-        llvm::Function *function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, GetName(), codegenContext.Module());
+
+        llvm::Function *function = llvm::Function::Create(
+            functionType,
+            llvm::Function::ExternalLinkage,
+            GetName(),
+            codegenContext.Module());
+
+        unsigned i = 0;
+        for (auto &arg : function->args())
+        {
+            arg.setName(m_Params[i++]->GetIdentifier().Id());
+        }
+        return function;
+    }
+
+    llvm::Value *FunctionDefinition::Codegen(CodegenContext &codegenContext)
+    {
+        llvm::IRBuilder<> &builder = codegenContext.Builder();
+        llvm::Function *function = codegenContext.Module().getFunction(GetName());
+
+        if (!function)
+        {
+            throw "Function declaration must exist before codegen body";
+        }
 
         llvm::BasicBlock *entryBB = llvm::BasicBlock::Create(codegenContext.Context(), "entry", function);
         builder.SetInsertPoint(entryBB);
@@ -58,6 +80,13 @@ namespace Marble
         m_Block->Codegen(codegenContext);
 
         table.LeaveScope();
+
+        BlockStatement *block = m_Block->Into<BlockStatement>();
+        const Box<Statement> &lastStatement = block->Statements().back();
+        if (lastStatement->StatementType() != StatementType::Return)
+        {
+            builder.CreateRetVoid();
+        }
         return function;
     }
 } // namespace Marble

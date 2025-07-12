@@ -42,7 +42,8 @@ namespace Marble
             field->Analyze(semanticAnalyzer);
         }
         table.LeaveScope();
-        return MakeRef<TypeSpecifier>(name, Span{});
+        m_ValueType = MakeRef<TypeSpecifier>(name, Span{});
+        return m_ValueType;
     }
 
     Ref<TypeSpecifier> FieldExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
@@ -66,7 +67,8 @@ namespace Marble
                 ErrorSystem::AddError(semanticAnalyzer, this, "Struct type and expression types do not matches");
             }
         }
-        return valueType;
+        m_ValueType = valueType;
+        return m_ValueType;
     }
 
     void ObjectInitExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)

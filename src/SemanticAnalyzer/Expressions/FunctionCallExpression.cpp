@@ -30,6 +30,8 @@ namespace Marble
             const std::string &name = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
             node = GetFunctionNode(semanticAnalyzer, scope, name);
             fnNode = node->Into<FunctionSymbolNode>();
+            m_Generics.reset();
+            identifierExpression->GetIdentifier().Id(name);
         }
 
         switch (scope->GetSymbolData().NodeType())
@@ -47,16 +49,19 @@ namespace Marble
         if (params.size() < m_Args.size())
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Too many params");
-            return fnNode->ReturnType();
+            m_ValueType = fnNode->ReturnType();
+            return m_ValueType;
         }
         if (params.size() > m_Args.size())
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Missing params");
-            return fnNode->ReturnType();
+            m_ValueType = fnNode->ReturnType();
+            return m_ValueType;
         }
         if (m_Args.size() == 0)
         {
-            return fnNode->ReturnType();
+            m_ValueType = fnNode->ReturnType();
+            return m_ValueType;
         }
 
         for (size_t i = 0; i < m_Args.size(); i++)
@@ -72,7 +77,8 @@ namespace Marble
                 }
             }
         }
-        return fnNode->ReturnType();
+        m_ValueType = fnNode->ReturnType();
+        return m_ValueType;
     }
 
     void FunctionCallExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)

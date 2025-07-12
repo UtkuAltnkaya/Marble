@@ -53,33 +53,32 @@ namespace Marble
         }
 
         table.EnterScope(iter);
-        Ref<TypeSpecifier> typeSpecifier = nullptr;
         bool isPublic = false;
         switch (m_Property->ExpressionType())
         {
         case ExpressionType::Identifier:
         {
             IdentifierExpression *identifierExpression = m_Property->Into<IdentifierExpression>();
-            typeSpecifier = AnalyzeIdentifier(semanticAnalyzer, identifierExpression, isPublic);
+            m_ValueType = AnalyzeIdentifier(semanticAnalyzer, identifierExpression, isPublic);
             if (constFlag)
-                typeSpecifier = TypeSpecifier::ConvertToConst(typeSpecifier);
+                m_ValueType = TypeSpecifier::ConvertToConst(m_ValueType);
             table.LeaveScope();
             break;
         }
         case ExpressionType::FunctionCall:
         {
             FunctionCallExpression *fnCallExpression = m_Property->Into<FunctionCallExpression>();
-            typeSpecifier = AnalyzeMethod(semanticAnalyzer, fnCallExpression, isPublic);
+            m_ValueType = AnalyzeMethod(semanticAnalyzer, fnCallExpression, isPublic);
             break;
         }
         case ExpressionType::MemberAccess:
         case ExpressionType::ArrayIndex:
         {
-            typeSpecifier = m_Property->Analyze(semanticAnalyzer);
+            m_ValueType = m_Property->Analyze(semanticAnalyzer);
             if (constFlag)
-                typeSpecifier = TypeSpecifier::ConvertToConst(typeSpecifier);
+                m_ValueType = TypeSpecifier::ConvertToConst(m_ValueType);
             table.LeaveScope();
-            return typeSpecifier;
+            return m_ValueType;
         }
         default:
         {
@@ -89,7 +88,7 @@ namespace Marble
         }
         if (isPublic)
         {
-            return typeSpecifier;
+            return m_ValueType;
         }
 
         auto parentNode = table.CurrentScope()->Iter().Parent().Find();
@@ -97,12 +96,12 @@ namespace Marble
         {
             if (parentNode == iter)
             {
-                return typeSpecifier;
+                return m_ValueType;
             }
             parentNode = parentNode->Iter().Parent().Find();
         }
         ErrorSystem::AddError(semanticAnalyzer, this, "Property is private");
-        return typeSpecifier;
+        return m_ValueType;
     }
 
     void MemberAccessExpression::CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer)

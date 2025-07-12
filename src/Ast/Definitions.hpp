@@ -48,6 +48,7 @@ namespace Marble
             SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) { return nullptr; };
         virtual void SubstituteGenerics(
             SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) {};
+        virtual llvm::Function *DeclareSignature(CodegenContext &codegenContext) { return nullptr; }
 
         // TODO
         virtual Box<Definition> Clone() { return nullptr; }
@@ -118,6 +119,8 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+
+        llvm::Function *DeclareSignature(CodegenContext &codegenContext) override;
         llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
         Box<Definition> InstantiateWith(

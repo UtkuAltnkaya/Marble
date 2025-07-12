@@ -6,6 +6,20 @@ namespace Marble
 {
     Ref<TypeSpecifier> IdentifierExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
+        SymbolNode *node = FindNode();
+        if (!node)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the variable in this scope");
+            return TypeSpecifierVoid;
+        }
+        VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
+
+        m_ValueType = variableNode->GetTypeSpecifier();
+        return m_ValueType;
+    }
+
+    SymbolNode *IdentifierExpression::FindNode()
+    {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *node = nullptr;
         SymbolIterator iter = table.CurrentScope()->Iter();
@@ -30,13 +44,11 @@ namespace Marble
             SymbolNode *parent = iter.Reset().Parent().Find();
             if (parent == nullptr)
             {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the variable in this scope");
-                return TypeSpecifierVoid;
+                return nullptr;
             }
             iter = parent->Iter();
         } while (node == nullptr);
-        VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
-        return variableNode->GetTypeSpecifier();
+        return node;
     }
 
     Box<Expression> IdentifierExpression::Clone()

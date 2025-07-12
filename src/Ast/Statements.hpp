@@ -4,6 +4,7 @@
 #include "Ast/Identifier.hpp"
 #include "Ast/TypeSpecifier.hpp"
 #include "Ast/Expressions.hpp"
+#include "Utils/Macros.hpp"
 
 namespace Marble
 {
@@ -33,6 +34,44 @@ namespace Marble
         virtual Box<Statement> Clone() = 0;
         virtual void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
 
+        template <typename T>
+        T *TryInto()
+        {
+            static_assert(std::is_base_of<Statement, T>::value, "Type of paramater must be statement");
+            if (T::StaticType != m_StatementType)
+            {
+                return nullptr;
+            }
+            return static_cast<T *>(this);
+        }
+
+        template <typename T>
+        T *Into()
+        {
+            static_assert(std::is_base_of<Statement, T>::value, "Type of paramater must be statement");
+            ASSERT_D(m_StatementType == T::StaticType, "Invalid cast in Statement::Into");
+            return static_cast<T *>(this);
+        }
+
+        template <typename T>
+        const T *TryInto() const
+        {
+            static_assert(std::is_base_of<Statement, T>::value, "Type of paramater must be statement");
+            if (T::StaticType != m_StatementType)
+            {
+                return nullptr;
+            }
+            return static_cast<const T *>(this);
+        }
+
+        template <typename T>
+        const T *Into() const
+        {
+            static_assert(std::is_base_of<Statement, T>::value, "Type of paramater must be statement");
+            ASSERT_D(m_StatementType == T::StaticType, "Invalid cast in Statement::Into");
+            return static_cast<const T *>(this);
+        }
+
     protected:
         Marble::StatementType m_StatementType;
     };
@@ -40,6 +79,8 @@ namespace Marble
     class LetStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::Let;
+
         LetStatement(Box<Identifier> identifier, Ref<TypeSpecifier> typeSpecifier, Box<Expression> value, const Span &span);
         LetStatement(const LetStatement &obj);
         ~LetStatement() = default;
@@ -66,12 +107,16 @@ namespace Marble
     class ReturnStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::Return;
+
         ReturnStatement(Box<Expression> expression, const Span &span);
         ReturnStatement(const ReturnStatement &obj);
         ~ReturnStatement() = default;
 
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        llvm::Value *Codegen(CodegenContext &codegenContext) override;
+
         inline const Expression *const GetExpression() const { return m_Expression.get(); }
         virtual Box<Statement> Clone() override;
         void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
@@ -83,6 +128,8 @@ namespace Marble
     class DeferStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::Defer;
+
         DeferStatement(Box<Expression> expression, const Span &span);
         DeferStatement(const DeferStatement &obj);
         ~DeferStatement() = default;
@@ -100,6 +147,8 @@ namespace Marble
     class BlockStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::Block;
+
         BlockStatement(std::vector<Box<Statement>> statements, const Span &span);
         BlockStatement(const BlockStatement &obj);
         ~BlockStatement() = default;
@@ -119,6 +168,8 @@ namespace Marble
     class ForStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::For;
+
         ForStatement(Box<Statement> letStatement, Box<Expression> condition, Box<Expression> increment, Box<Statement> block, const Span &span);
         ForStatement(Box<Expression> assignmentExpression, Box<Expression> condition, Box<Expression> increment, Box<Statement> block, const Span &span);
         ForStatement(const ForStatement &obj);
@@ -146,6 +197,8 @@ namespace Marble
     class WhileStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::While;
+
         WhileStatement(Box<Expression> condition, Box<Statement> block, const Span &span);
         WhileStatement(const WhileStatement &obj);
         ~WhileStatement() = default;
@@ -166,6 +219,8 @@ namespace Marble
     class ElseStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::Else;
+
         ElseStatement(Box<Statement> block, const Span &span);
         ElseStatement(const ElseStatement &obj);
         ~ElseStatement() = default;
@@ -183,6 +238,8 @@ namespace Marble
     class ElseIfStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::ElseIf;
+
         ElseIfStatement(Box<Expression> condition, Box<Statement> block, const Span &span);
         ElseIfStatement(const ElseIfStatement &obj);
         ~ElseIfStatement() = default;
@@ -204,6 +261,8 @@ namespace Marble
     {
 
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::If;
+
         IfStatement(Box<Expression> condition, Box<Statement> block, std::vector<Box<Statement>> &&elseIfStatements, Box<Statement> elseStatement, const Span &span);
         IfStatement(const IfStatement &obj);
         ~IfStatement() = default;
@@ -228,6 +287,8 @@ namespace Marble
     class ExpressionStatement : public Statement
     {
     public:
+        static constexpr Marble::StatementType StaticType = Marble::StatementType::Expression;
+
         ExpressionStatement(Box<Expression> expression)
             : Statement{expression->GetSpan(), StatementType::Expression}, m_Expression{std::move(expression)} {}
         ExpressionStatement(const ExpressionStatement &obj)
@@ -244,6 +305,8 @@ namespace Marble
             m_Expression->Analyze(semanticAnalyzer);
             return TypeSpecifierOk;
         }
+
+        llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
         virtual Box<Statement> Clone() override
         {

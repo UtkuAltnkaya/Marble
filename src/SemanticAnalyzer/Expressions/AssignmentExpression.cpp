@@ -21,19 +21,22 @@ namespace Marble
 
         if (*right == *left)
         {
-            return left;
+            m_ValueType = left;
+            return m_ValueType;
         }
 
         if (semanticAnalyzer.TryImplicitConversion(m_Value, right, left))
         {
-            return left;
+            m_ValueType = left;
+            return m_ValueType;
         }
 
         std::string message =
             "Left and Right handside types are not matched. Trying to assign " + right->ToString() + " to " + left->ToString();
         ErrorSystem::AddError(semanticAnalyzer, this, message);
 
-        return left;
+        m_ValueType = left;
+        return m_ValueType;
     }
 
     void AssignmentExpression::CheckVariableExpressionTypes(SemanticAnalyzer &semanticAnalyzer) const
