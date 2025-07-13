@@ -42,13 +42,17 @@ namespace Marble
         {
             const Identifier &id = std::get<Identifier>(m_Variants);
             SymbolNode *node = codegenContext.GetNamedUserDefinedType(id.Id());
-            if (!node)
-            {
-                throw "Cannot find enum or struct named " + id.Id();
-            }
             if (node->GetSymbolData().NodeType() == SymbolNodeTypes::Struct)
             {
-                return llvm::StructType::create(context, id.Id());
+                StructSymbolNode *structSymbol = node->Into<StructSymbolNode>();
+                llvm::StructType *structType = structSymbol->StructType();
+                if (!structType)
+                {
+                    structSymbol->GetAstPtr()->Codegen(codegenContext);
+                    structType = structSymbol->StructType();
+                    ASSERT_D(structType != nullptr, "Cannot declare struct");
+                }
+                return structType;
             }
             return llvm::Type::getInt32Ty(context);
         }
@@ -60,7 +64,7 @@ namespace Marble
         case Types::GenericType:
             ASSERT_A(false, "Generics must be expanded at this stage");
         default:
-            UNIMPLEMENTED("");
+            UNREACHABLE();
             break;
         }
     }

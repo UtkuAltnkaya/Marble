@@ -13,7 +13,7 @@ namespace Marble
         Invalid
     };
 
-    std::string TypeToString(llvm::Type *type)
+    static std::string TypeToString(llvm::Type *type)
     {
         std::string result;
         llvm::raw_string_ostream rso(result);
@@ -44,19 +44,45 @@ namespace Marble
         case ConversionKind::WideningNumeric:
         {
             if (sourceType->isIntegerTy() && targetType->isFloatingPointTy())
+            {
                 return builder.CreateSIToFP(value, targetType, "sitofp");
-            if (sourceType->isIntegerTy() && targetType->isIntegerTy() && targetType->getIntegerBitWidth() > sourceType->getIntegerBitWidth())
-                return builder.CreateSExt(value, targetType, "sext");
+            }
+            if (sourceType->isIntegerTy() && targetType->isIntegerTy())
+            {
+                if (targetType->getIntegerBitWidth() > sourceType->getIntegerBitWidth())
+                {
+                    if (m_TypeSpecifier->GetType() == Types::Usize)
+                    {
+                        return builder.CreateZExt(value, targetType, "zext");
+                    }
+                    return builder.CreateSExt(value, targetType, "sext");
+                }
+            }
             if (sourceType->isFloatingPointTy() && targetType->isFloatingPointTy() && targetType->getPrimitiveSizeInBits() > sourceType->getPrimitiveSizeInBits())
+            {
                 return builder.CreateFPExt(value, targetType, "fpext");
+            }
             break;
         }
         case ConversionKind::NarrowingNumeric:
         {
             if (sourceType->isFloatingPointTy() && targetType->isIntegerTy())
+            {
                 return builder.CreateFPToSI(value, targetType, "fptosi");
-            if (sourceType->isIntegerTy() && targetType->isIntegerTy() && targetType->getIntegerBitWidth() < sourceType->getIntegerBitWidth())
-                return builder.CreateTrunc(value, targetType, "trunc");
+            }
+            if (sourceType->isIntegerTy() && targetType->isIntegerTy())
+            {
+                unsigned srcBits = sourceType->getIntegerBitWidth();
+                unsigned tgtBits = targetType->getIntegerBitWidth();
+                if (tgtBits < srcBits)
+                {
+                    return builder.CreateTrunc(value, targetType, "trunc");
+                }
+                if (srcBits == tgtBits && m_Expression->ValueType()->GetType() == Types::Usize && m_TypeSpecifier->GetType() != Types::Usize)
+                {
+                    return value;
+                }
+            }
             if (sourceType->isFloatingPointTy() && targetType->isFloatingPointTy() && targetType->getPrimitiveSizeInBits() < sourceType->getPrimitiveSizeInBits())
                 return builder.CreateFPTrunc(value, targetType, "fptrunc");
             break;

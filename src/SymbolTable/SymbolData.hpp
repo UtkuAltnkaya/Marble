@@ -26,6 +26,7 @@ namespace Marble
     {
         Variable,
         Function,
+        Struct,
         None,
     };
 

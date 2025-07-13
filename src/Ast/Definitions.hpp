@@ -48,7 +48,7 @@ namespace Marble
             SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) { return nullptr; };
         virtual void SubstituteGenerics(
             SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) {};
-        virtual llvm::Function *DeclareSignature(CodegenContext &codegenContext) { return nullptr; }
+        virtual llvm::Value *DeclareSignature(CodegenContext &codegenContext) { return nullptr; }
 
         // TODO
         virtual Box<Definition> Clone() { return nullptr; }
@@ -100,7 +100,7 @@ namespace Marble
         bool m_IsExpanded;
     };
 
-    class FunctionDefinition : public Definition /*, public GenericDefinition*/
+    class FunctionDefinition : public Definition
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Function;
@@ -120,7 +120,7 @@ namespace Marble
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
 
-        llvm::Function *DeclareSignature(CodegenContext &codegenContext) override;
+        llvm::Value *DeclareSignature(CodegenContext &codegenContext) override;
         llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
         Box<Definition> InstantiateWith(
@@ -175,7 +175,7 @@ namespace Marble
         Box<VariableType> m_Field;
     };
 
-    class StructDefinition : public Definition /*,public GenericDefinition */
+    class StructDefinition : public Definition
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Struct;
@@ -186,6 +186,8 @@ namespace Marble
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
+        llvm::Value *Codegen(CodegenContext &codegenContext) override;
+
         Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
 
@@ -199,6 +201,7 @@ namespace Marble
 
         inline void SetName(Box<Identifier> name) override { m_StructName = std::move(name); }
         inline void SetImplDefinition(ImplDefinition *implDefinition) { m_ImplDefinition = implDefinition; }
+        int GetFieldIndex(const std::string &fieldName);
 
     private:
         void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
@@ -277,7 +280,7 @@ namespace Marble
         Ref<TypeSpecifier> m_ReturnType;
     };
 
-    class MemberFunctionDefinition : public Definition /*,public GenericDefinition*/
+    class MemberFunctionDefinition : public Definition
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunction;

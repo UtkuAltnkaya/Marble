@@ -21,17 +21,6 @@ namespace Marble
         }
     }
 
-    SymbolNode::SymbolNode(const StructDefinition &structDefinition, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()), SymbolNodeTypes::Struct, SymbolNodeBaseTypes::None}, parent}
-    {
-        m_AstPtr = &structDefinition;
-        m_IsGeneric = structDefinition.GetGenerics() != nullptr;
-        for (auto &structField : structDefinition.GetFields())
-        {
-            Insert(structField->GetField().GetIdentifier().Id(), new VariableSymbolNode{*structField.get(), this});
-        }
-    }
-
     SymbolNode::~SymbolNode()
     {
         for (auto &[key, value] : m_Children)
@@ -52,7 +41,24 @@ namespace Marble
             m_Children.insert({name, node});
             return;
         }
+        // TODO Pretty print error
         throw "Duplicate identifier";
+    }
+
+    StructSymbolNode::StructSymbolNode(const StructDefinition &structDefinition, SymbolNode *parent)
+        : SymbolNode{
+              SymbolData{
+                  SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()),
+                  SymbolNodeTypes::Struct, SymbolNodeBaseTypes::Struct},
+              parent}
+    {
+        m_StructType = nullptr;
+        m_AstPtr = &structDefinition;
+        m_IsGeneric = structDefinition.GetGenerics() != nullptr;
+        for (auto &structField : structDefinition.GetFields())
+        {
+            Insert(structField->GetField().GetIdentifier().Id(), new VariableSymbolNode{*structField.get(), this});
+        }
     }
 
     FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition, SymbolNode *parent)

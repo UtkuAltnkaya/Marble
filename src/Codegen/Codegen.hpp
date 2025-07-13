@@ -19,7 +19,7 @@ namespace Marble
         void Generate(Ref<Program> program);
         void Print();
 
-        llvm::AllocaInst *CreateEntryBlockAlloca(llvm::Function *function, llvm::Type *type, const std::string &name);
+        llvm::AllocaInst *CreateEntryBlockAlloca(llvm::Function *function, llvm::Type *type, const std::string &name = "");
         SymbolNode *GetNamedUserDefinedType(const std::string &name);
 
         inline llvm::LLVMContext &Context() { return m_Context; }

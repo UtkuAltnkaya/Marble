@@ -24,6 +24,7 @@ namespace Marble
         SymbolIterator &Variable(std::string_view name);
         SymbolIterator &StructField(std::string_view name);
         SymbolIterator &EnumField(std::string_view name);
+
         size_t Count(SymbolNodeTypes filter);
         inline bool IsFound() const { return !m_Flag; }
         SymbolIterator &Reset();

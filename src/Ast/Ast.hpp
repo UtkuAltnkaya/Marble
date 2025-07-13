@@ -9,6 +9,7 @@ namespace llvm
     class Type;
     class AllocaInst;
     class Function;
+    class StructType;
 } // namespace llvm
 
 namespace Marble

@@ -47,7 +47,7 @@ namespace Marble
             accessSpecifier, std::move(structName), std::move(generics), std::move(fields), Span{start.Start, end.End});
 
         SymbolTable &table = SymbolTable::GetInstance();
-        table.Insert(structDefinition->m_StructName->Id(), new SymbolNode{*structDefinition.get(), table.Root()});
+        table.Insert(structDefinition->m_StructName->Id(), new StructSymbolNode{*structDefinition.get(), table.Root()});
         return structDefinition;
     }
 

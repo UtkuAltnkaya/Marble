@@ -44,7 +44,8 @@ namespace Marble
         const std::vector<Box<Statement>> &statements = block->Statements();
         if (statements.size() == 0)
         {
-            // TODO: Decide to allow empty function body or not, or warn
+            ErrorSystem::AddWarn(semanticAnalyzer, this, "Empty function body");
+            return TypeSpecifierOk;
         }
         else if (statements.back()->StatementType() == StatementType::Return)
         {

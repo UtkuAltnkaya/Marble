@@ -21,7 +21,6 @@ namespace Marble
 
         SymbolNode(SymbolData symbolData, SymbolNode *parent);
         SymbolNode(const EnumDefinition &enumDefinition, SymbolNode *parent);
-        SymbolNode(const StructDefinition &structDefinition, SymbolNode *parent);
         virtual ~SymbolNode();
 
         SymbolIterator Iter() const;
@@ -79,6 +78,21 @@ namespace Marble
         bool m_IsGeneric = false;
     };
 
+    class StructSymbolNode : public SymbolNode
+    {
+    public:
+        static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Struct;
+
+        StructSymbolNode(const StructDefinition &structDefinition, SymbolNode *parent);
+        ~StructSymbolNode() = default;
+
+        inline llvm::StructType *StructType() const { return m_StructType; }
+        inline void StructType(llvm::StructType *structType) { m_StructType = structType; }
+
+    private:
+        llvm::StructType *m_StructType;
+    };
+
     class FunctionSymbolNode : public SymbolNode
     {
     public:
@@ -111,8 +125,6 @@ namespace Marble
 
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
         inline llvm::AllocaInst *GetAlloca() { return m_Alloca; }
-
-        // TODO: Should old alloca deleted my hand?
         inline void SetAlloca(llvm::AllocaInst *alloca) { m_Alloca = alloca; }
 
     private:

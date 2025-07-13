@@ -16,11 +16,12 @@ namespace Marble
             m_ConversionMap[{Types::Int, Types::Float}] = ConversionKind::WideningNumeric;
             m_ConversionMap[{Types::Int, Types::Double}] = ConversionKind::WideningNumeric;
             m_ConversionMap[{Types::Float, Types::Double}] = ConversionKind::WideningNumeric;
+            m_ConversionMap[{Types::Int, Types::Usize}] = ConversionKind::WideningNumeric;
 
             m_ConversionMap[{Types::Double, Types::Float}] = ConversionKind::NarrowingNumeric;
             m_ConversionMap[{Types::Double, Types::Int}] = ConversionKind::NarrowingNumeric;
             m_ConversionMap[{Types::Float, Types::Int}] = ConversionKind::NarrowingNumeric;
-            m_ConversionMap[{Types::Int, Types::Usize}] = ConversionKind::NarrowingNumeric;
+            m_ConversionMap[{Types::Usize, Types::Int}] = ConversionKind::NarrowingNumeric;
         }
     }
 

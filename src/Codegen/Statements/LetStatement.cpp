@@ -6,36 +6,42 @@ namespace Marble
 {
     llvm::Value *LetStatement::Codegen(CodegenContext &codegenContext)
     {
+        ASSERT_D(m_TypeSpecifier != nullptr, "Type must be referred at semantic analysis.");
+
         llvm::IRBuilder<> &builder = codegenContext.Builder();
-        llvm::Value *value = nullptr;
-        if (m_Value)
-        {
-            value = m_Value->Codegen(codegenContext);
-        }
-
-        llvm::Type *llvmType = nullptr;
-        if (m_TypeSpecifier)
-        {
-            llvmType = m_TypeSpecifier->ToLLVMType(codegenContext);
-        }
-        else
-        {
-            llvmType = value->getType();
-        }
-
         llvm::Function *currentFunction = builder.GetInsertBlock()->getParent();
-        llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(currentFunction, llvmType, m_Identifier->Id());
-
-        if (value)
-        {
-            builder.CreateStore(value, alloca);
-        }
+        llvm::Type *llvmType = m_TypeSpecifier->ToLLVMType(codegenContext);
+        llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(currentFunction, llvmType);
 
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *node = table.CurrentScope()->Iter().Variable(m_Identifier->Id()).Find();
         ASSERT_D(node != nullptr, "Variable not found in the scope");
         VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
         variableNode->SetAlloca(alloca);
+
+        if (!m_Value)
+        {
+            return nullptr;
+        }
+
+        switch (m_Value->ExpressionType())
+        {
+        case ExpressionType::ArrayInit:
+        {
+            auto expr = m_Value->Into<ArrayInitExpression>();
+            expr->CodegenInPlace(codegenContext, alloca);
+            break;
+        }
+        case ExpressionType::ObjectInit:
+        {
+            auto expr = m_Value->Into<ObjectInitExpression>();
+            expr->CodegenInPlace(codegenContext, alloca);
+            break;
+        }
+        default:
+            llvm::Value *value = m_Value->Codegen(codegenContext);
+            builder.CreateStore(value, alloca);
+        }
 
         return nullptr;
     }

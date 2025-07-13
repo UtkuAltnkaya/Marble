@@ -15,24 +15,14 @@ namespace Marble
 
     void SemanticAnalyzer::Analyze()
     {
-        // bool mainFlag = false;
         for (size_t i = 0; i < m_Program->Definitions().size(); i++)
         {
             auto &definition = m_Program->Definitions()[i];
             if (!definition->IsGeneric() && !definition->IsAnalyzed())
             {
-                // if (definition->GetName() == "main" && definition->DefinitionType() == DefinitionType::Function)
-                // {
-                //     mainFlag = true;
-                // }
                 definition->Analyze(*this);
             }
         }
-        // // TODO: Works only for single compilation unit.
-        // if (!mainFlag)
-        // {
-        //     ErrorSystem::AddError("Cannot find main function", &m_File);
-        // }
     }
 
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const Generics *generics)
@@ -74,7 +64,7 @@ namespace Marble
                 return m_Generis[key];
             }
             StructDefinition *newStructDefinition = expandedStructDefinition->Into<StructDefinition>();
-            SymbolNode *newStructNode = new SymbolNode{*newStructDefinition, table.Root()};
+            SymbolNode *newStructNode = new StructSymbolNode{*newStructDefinition, table.Root()};
             table.Insert(expandedStructDefinition->GetName(), newStructNode);
 
             ImplDefinition *implDefinition = newStructDefinition->GetImplDefinition();
@@ -134,6 +124,7 @@ namespace Marble
         expr = MakeBox<CastExpression>(to, std::move(expr), conversionKind, span);
         return true;
     }
+
     ConversionKind SemanticAnalyzer::CanConvert(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
     {
         return m_Conversion.CanConvert(from, to);

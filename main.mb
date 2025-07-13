@@ -1,59 +1,20 @@
-struct std {}
-
 struct Person {
-    pub age: int
+    pub name: str,
+    pub age: int,
+    pub job: str,
 }
 
-struct ClassRoom {
-    pub teacher: Person,
-    pub students: Person*
+fn someFunc(p:Person*) -> void {
+    p->age = 42;
 }
 
-
-impl std {
-    pub fn allocate<T>(size:usize) -> T* {
-        return null;
-    }
-
-    pub fn deallocate<T>(ptr:T*) -> void {
-
-    }
-}
-
-impl Person {
-    pub fn init() -> Person {
-        return Person {
-            age: 42
-        };
-    }
-
-    pub fn (p: const Person*) get_age() -> const int* {
-        return &p->age;
-    }
-}
-
-impl ClassRoom {
-    pub fn init() -> ClassRoom {
-        return ClassRoom {
-            teacher: Person::init(),
-            students: std::allocate<Person>(10)
-        };
-    }
-
-    pub fn (c:ClassRoom*) get_teacher() -> Person* {
-        return &c->teacher;
-    }
-}
-
-fn add<T>(x:T,y:T) -> T {
-    return x + y;
-}
 
 fn main() -> int {
-    let x = 10;
-    let y = 20;
-    let r = add<int>(x,y);
-
-    let z = r++ + ++y;
-    return z;
+    let person:Person = Person {
+        name: "Utku",
+        age: 24,
+        job: "Computer Engineer"
+    };
+    someFunc(&person);
+    return person.age;
 }

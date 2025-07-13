@@ -25,6 +25,13 @@ namespace Marble
             args.push_back(argVal);
         }
 
-        return builder.CreateCall(function, args, "calltmp");
+        if (function->getReturnType()->isVoidTy())
+        {
+            return builder.CreateCall(function, args);
+        }
+        else
+        {
+            return builder.CreateCall(function, args, "calltmp");
+        }
     }
 } // namespace Marble

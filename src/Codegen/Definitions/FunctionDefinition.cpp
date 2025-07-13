@@ -5,7 +5,7 @@
 namespace Marble
 {
 
-    llvm::Function *FunctionDefinition::DeclareSignature(CodegenContext &codegenContext)
+    llvm::Value *FunctionDefinition::DeclareSignature(CodegenContext &codegenContext)
     {
         std::vector<llvm::Type *> paramTypes;
         paramTypes.reserve(m_Params.size());
@@ -27,11 +27,13 @@ namespace Marble
         unsigned i = 0;
         for (auto &arg : function->args())
         {
+            const auto &param = m_Params[i];
             arg.setName(m_Params[i++]->GetIdentifier().Id());
         }
         return function;
     }
 
+    // TODO handle function arguments, allocate or not;
     llvm::Value *FunctionDefinition::Codegen(CodegenContext &codegenContext)
     {
         llvm::IRBuilder<> &builder = codegenContext.Builder();
@@ -59,19 +61,17 @@ namespace Marble
         for (auto &arg : function->args())
         {
             const auto &param = m_Params.at(i);
-            arg.setName(param->GetIdentifier().Id());
-            SymbolNode *paramNode = fnIter.Reset().Variable(param->GetIdentifier().Id()).Find();
-            if (!paramNode)
-            {
-                throw "Cannot find parameter in this scope";
-            }
-            // TODO
-            if (param->GetTypeSpecifier()->GetType() != Types::ConstantType)
-            {
-                llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(function, arg.getType(), param->GetIdentifier().Id());
-                builder.CreateStore(&arg, alloca);
 
-                VariableSymbolNode *paramVariable = paramNode->Into<VariableSymbolNode>();
+            SymbolNode *paramNode = fnIter.Reset().Variable(param->GetIdentifier().Id()).Find();
+            ASSERT_D(paramNode != nullptr, "Cannot find parameter in this scope");
+
+            Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
+            VariableSymbolNode *paramVariable = paramNode->Into<VariableSymbolNode>();
+
+            if (paramType->GetType() != Types::ConstantType)
+            {
+                llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(function, arg.getType());
+                builder.CreateStore(&arg, alloca);
                 paramVariable->SetAlloca(alloca);
             }
             i++;
@@ -82,10 +82,18 @@ namespace Marble
         table.LeaveScope();
 
         BlockStatement *block = m_Block->Into<BlockStatement>();
-        const Box<Statement> &lastStatement = block->Statements().back();
-        if (lastStatement->StatementType() != StatementType::Return)
+        const std::vector<Box<Statement>> &statements = block->Statements();
+        if (statements.size() == 0)
         {
             builder.CreateRetVoid();
+        }
+        else
+        {
+            const Box<Statement> &lastStatement = block->Statements().back();
+            if (lastStatement->StatementType() != StatementType::Return)
+            {
+                builder.CreateRetVoid();
+            }
         }
         return function;
     }

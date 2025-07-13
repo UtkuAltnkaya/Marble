@@ -36,12 +36,11 @@ namespace Marble
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Missing fields");
         }
-        table.EnterScope(structNode);
         for (auto &field : m_Fields)
         {
+            table.EnterScope(structNode);
             field->Analyze(semanticAnalyzer);
         }
-        table.LeaveScope();
         m_ValueType = MakeRef<TypeSpecifier>(name, Span{});
         return m_ValueType;
     }
@@ -52,6 +51,7 @@ namespace Marble
         SymbolNode *currentScope = table.CurrentScope();
 
         SymbolNode *fieldNode = currentScope->Iter().StructField(m_Name.Id()).Find();
+        table.LeaveScope();
         if (!fieldNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);

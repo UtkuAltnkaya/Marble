@@ -19,10 +19,8 @@ namespace Marble
 
     llvm::Value *IdentifierExpression::Address(CodegenContext &codegenContext)
     {
-
         SymbolNode *node = FindNode();
         VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
-
         return variableNode->GetAlloca();
     }
 } // namespace Marble
