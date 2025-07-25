@@ -41,26 +41,12 @@ namespace Marble
 
     void AssignmentExpression::CheckVariableExpressionTypes(SemanticAnalyzer &semanticAnalyzer) const
     {
-        switch (m_Variable->ExpressionType())
+
+        if (m_Variable->IsAssignable())
         {
-        case ExpressionType::Unary:
-        {
-            const UnaryExpression *expr = m_Variable->Into<UnaryExpression>();
-            if (expr->GetUnaryExpressionType() == UnaryExpressionType::Prefix && expr->Operator() == UnaryOperators::Indirection)
-            {
-                break;
-            }
+            return;
         }
-        case ExpressionType::Primitive:
-        case ExpressionType::ObjectInit:
-        case ExpressionType::ArrayInit:
-        case ExpressionType::Cast:
-        case ExpressionType::NameSpace:
-        case ExpressionType::Binary:
-            ErrorSystem::AddError(semanticAnalyzer, this, "Expression must be modifiable value");
-        default:
-            break;
-        }
+        ErrorSystem::AddError(semanticAnalyzer, this, "Expression must be modifiable value");
     }
 
     void AssignmentExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)

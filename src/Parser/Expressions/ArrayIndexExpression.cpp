@@ -20,6 +20,11 @@ namespace Marble
         {
             m_SecondIndex = nullptr;
         }
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> ArrayIndexExpression::Parse(Parser &parser, Precedence precedence)

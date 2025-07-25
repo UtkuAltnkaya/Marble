@@ -44,7 +44,7 @@ namespace Marble
         }
         case Types::Str:
         {
-            return codegenContext.Builder().CreateGlobalStringPtr(m_Value, ".str");
+            return codegenContext.Builder().CreateGlobalString(m_Value, ".str");
         }
         default:
             throw "Unknown primitive kind";

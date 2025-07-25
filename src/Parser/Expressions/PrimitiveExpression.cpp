@@ -16,6 +16,11 @@ namespace Marble
     {
         m_TypeSpecifier = MakeRef<TypeSpecifier>(*obj.m_TypeSpecifier.get());
         m_Value = obj.m_Value;
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> PrimitiveExpression::Parse(Parser &parser, Precedence precedence)

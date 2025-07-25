@@ -17,6 +17,10 @@ namespace Marble
         {
             m_Args.push_back(arg->Clone());
         }
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> FunctionCallExpression::Parse(Parser &parser, Precedence precedence)
@@ -39,5 +43,10 @@ namespace Marble
         const Span &end = parser.Current().Span();
         Span span{start.Start, end.End};
         return MakeBox<FunctionCallExpression>(std::move(left), std::move(generics), std::move(args), span);
+    }
+
+    void FunctionCallExpression::AddArg(Box<Expression> arg, int index)
+    {
+        m_Args.insert(m_Args.begin() + index, std::move(arg));
     }
 } // namespace Marble

@@ -5,12 +5,12 @@
 namespace Marble
 {
 
-    enum class AccessSpecifier
-    {
-        Public,
-        Private,
-    };
+  enum class AccessSpecifier
+  {
+    Public,
+    Private,
+  };
 
-    AccessSpecifier ParseAccessSpecifier(Parser &parser, Span &span);
+  AccessSpecifier ParseAccessSpecifier(Parser &parser, Span &span);
 
 } // namespace Marble

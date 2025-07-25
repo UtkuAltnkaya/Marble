@@ -31,7 +31,7 @@ namespace Marble
         }
         else
         {
-            return builder.CreateCall(function, args, "calltmp");
+            return builder.CreateCall(function, args);
         }
     }
 } // namespace Marble

@@ -1,6 +1,7 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "ErrorSystem/CompilerError.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 namespace Marble
 {
     Ref<TypeSpecifier> ArrayIndexExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
@@ -15,7 +16,23 @@ namespace Marble
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Array type must be Identifier, Member Access or Function Call expression");
         }
+
         Ref<TypeSpecifier> exprType = m_Array->Analyze(semanticAnalyzer);
+        if (arrayType != ExpressionType::FunctionCall)
+        {
+        }
+        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolNode *scope = table.CurrentScope();
+        switch (scope->GetSymbolData().NodeType())
+        {
+        case SymbolNodeTypes::Struct:
+        case SymbolNodeTypes::Enum:
+            table.LeaveScope();
+            break;
+        default:
+            break;
+        }
+
         if (exprType->GetType() == Types::ArrayType)
         {
             const ArrayType &arrayType = exprType->Array();
@@ -33,10 +50,14 @@ namespace Marble
             m_ValueType = arrayType.TypeSpecifier;
             return m_ValueType;
         }
-
         if (exprType->GetType() == Types::Pointer)
         {
             m_ValueType = exprType->Pointer().TypeSpecifier;
+            return m_ValueType;
+        }
+        if (exprType->GetType() == Types::Str)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(Types::Char);
             return m_ValueType;
         }
         ErrorSystem::AddError(semanticAnalyzer, this, "Expect the array type");

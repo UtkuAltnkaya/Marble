@@ -17,6 +17,11 @@ namespace Marble
         {
             m_Fields.push_back(field->Clone());
         }
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> ObjectInitExpression::Parse(Parser &parser, Precedence precedence)
@@ -59,6 +64,10 @@ namespace Marble
         : Expression{obj.m_Span, ExpressionType::ObjectField}, m_Name{obj.m_Name}
     {
         m_Value = obj.m_Value->Clone();
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> FieldExpression::Parse(Parser &parser)

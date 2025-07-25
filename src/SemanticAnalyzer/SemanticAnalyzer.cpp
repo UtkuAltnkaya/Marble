@@ -23,6 +23,11 @@ namespace Marble
                 definition->Analyze(*this);
             }
         }
+
+        auto &vec = m_Program->Definitions();
+        vec.erase(std::remove_if(vec.begin(), vec.end(), [](Box<Definition> &definition)
+                                 { return definition->IsGeneric() || definition->DefinitionType() == DefinitionType::Impl; }),
+                  vec.end());
     }
 
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const Generics *generics)
@@ -139,6 +144,35 @@ namespace Marble
         int rankA = RankTypes(a->GetType());
         int rankB = RankTypes(b->GetType());
         return (rankA >= rankB) ? a : b;
+    }
+
+    const std::string &SemanticAnalyzer::ConvertMethodIntoFunction(Definition *definition, const std::string &structName, SymbolNode *currentScope)
+    {
+        MemberFunctionDefinition *memberFunctionDefinition = definition->TryInto<MemberFunctionDefinition>();
+        if (!memberFunctionDefinition)
+        {
+            ErrorSystem::AddError(*this, definition, "MemberFunction definition expected", true);
+        }
+        MethodInstanceKey key;
+        key.StructName = structName;
+        key.MethodName = definition->GetName();
+        for (auto &param : memberFunctionDefinition->GetPrototype().GetParams())
+        {
+            key.Params.push_back(param->GetTypeSpecifier()->ToString());
+        }
+        if (m_ConvertedMethodsName.contains(key))
+        {
+            return m_ConvertedMethodsName[key];
+        }
+
+        FunctionDefinition *functionDefinition = new FunctionDefinition((*memberFunctionDefinition), structName);
+        SymbolTable &table = SymbolTable::GetInstance();
+        FunctionSymbolNode *fnSymbol = new FunctionSymbolNode{*functionDefinition, table.Root()};
+        table.Insert(functionDefinition->GetName(), fnSymbol);
+        currentScope->Insert(functionDefinition->GetName(), new FunctionSymbolNode{*functionDefinition, table.Root()});
+        m_ConvertedMethodsName[key] = functionDefinition->GetName();
+        AddExpandedDefinition(Box<Definition>(functionDefinition));
+        return m_ConvertedMethodsName[key];
     }
 
     Box<Definition> SemanticAnalyzer::Instantiate(SymbolNode *node, GenericInstanceKey &key, const std::vector<Ref<TypeSpecifier>> &typeArgs)

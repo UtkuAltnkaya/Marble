@@ -19,61 +19,61 @@ namespace Marble
 
         bool isFloat = left->getType()->isFloatingPointTy();
 
-                switch (m_Operator)
+        switch (m_Operator)
         {
         case BinaryOperators::Add:
-            return isFloat ? builder.CreateFAdd(left, right, "faddtmp") : builder.CreateAdd(left, right, "addtmp");
+            return isFloat ? builder.CreateFAdd(left, right) : builder.CreateAdd(left, right);
 
         case BinaryOperators::Subtract:
-            return isFloat ? builder.CreateFSub(left, right, "fsubtmp") : builder.CreateSub(left, right, "subtmp");
+            return isFloat ? builder.CreateFSub(left, right) : builder.CreateSub(left, right);
 
         case BinaryOperators::Multiply:
-            return isFloat ? builder.CreateFMul(left, right, "fmultmp") : builder.CreateMul(left, right, "multmp");
+            return isFloat ? builder.CreateFMul(left, right) : builder.CreateMul(left, right);
 
         case BinaryOperators::Divide:
-            return isFloat ? builder.CreateFDiv(left, right, "fdivtmp") : builder.CreateSDiv(left, right, "divtmp");
+            return isFloat ? builder.CreateFDiv(left, right) : builder.CreateSDiv(left, right);
 
         case BinaryOperators::Modulo:
-            return isFloat ? builder.CreateFRem(left, right, "fmodtmp") : builder.CreateSRem(left, right, "modtmp");
+            return isFloat ? builder.CreateFRem(left, right) : builder.CreateSRem(left, right);
 
         case BinaryOperators::Equal:
-            return isFloat ? builder.CreateFCmpUEQ(left, right, "cmptmp") : builder.CreateICmpEQ(left, right, "cmptmp");
+            return isFloat ? builder.CreateFCmpUEQ(left, right) : builder.CreateICmpEQ(left, right);
 
         case BinaryOperators::NotEqual:
-            return isFloat ? builder.CreateFCmpUNE(left, right, "cmptmp") : builder.CreateICmpNE(left, right, "cmptmp");
+            return isFloat ? builder.CreateFCmpUNE(left, right) : builder.CreateICmpNE(left, right);
 
         case BinaryOperators::GreaterThan:
-            return isFloat ? builder.CreateFCmpUGT(left, right, "cmptmp") : builder.CreateICmpSGT(left, right, "cmptmp");
+            return isFloat ? builder.CreateFCmpUGT(left, right) : builder.CreateICmpSGT(left, right);
 
         case BinaryOperators::LessThan:
-            return isFloat ? builder.CreateFCmpULT(left, right, "cmptmp") : builder.CreateICmpSLT(left, right, "cmptmp");
+            return isFloat ? builder.CreateFCmpULT(left, right) : builder.CreateICmpSLT(left, right);
 
         case BinaryOperators::GreaterThanOrEqual:
-            return isFloat ? builder.CreateFCmpUGE(left, right, "cmptmp") : builder.CreateICmpSGE(left, right, "cmptmp");
+            return isFloat ? builder.CreateFCmpUGE(left, right) : builder.CreateICmpSGE(left, right);
 
         case BinaryOperators::LessThanOrEqual:
-            return isFloat ? builder.CreateFCmpULE(left, right, "cmptmp") : builder.CreateICmpSLE(left, right, "cmptmp");
+            return isFloat ? builder.CreateFCmpULE(left, right) : builder.CreateICmpSLE(left, right);
 
         case BinaryOperators::And:
-            return builder.CreateAnd(left, right, "andtmp");
+            return builder.CreateAnd(left, right);
 
         case BinaryOperators::Or:
-            return builder.CreateOr(left, right, "ortmp");
+            return builder.CreateOr(left, right);
 
         case BinaryOperators::BitAnd:
-            return builder.CreateAnd(left, right, "bitandtmp");
+            return builder.CreateAnd(left, right);
 
         case BinaryOperators::BitOr:
-            return builder.CreateOr(left, right, "bitor");
+            return builder.CreateOr(left, right);
 
         case BinaryOperators::BitXor:
-            return builder.CreateXor(left, right, "bitxor");
+            return builder.CreateXor(left, right);
 
         case BinaryOperators::BitLeft:
-            return builder.CreateShl(left, right, "shltmp");
+            return builder.CreateShl(left, right);
 
         case BinaryOperators::BitRight:
-            return builder.CreateAShr(left, right, "ashrtmp");
+            return builder.CreateAShr(left, right);
         default:
             throw "Unknown binary operator";
         }

@@ -120,16 +120,19 @@ namespace Marble
         VariableSymbolNode(const VariableType &variableType, SymbolNode *parent);
         VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent);
         VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent);
-        VariableSymbolNode(const Identifier &letStmt, SymbolNode *parent);
+        VariableSymbolNode(const Identifier &identifier, SymbolNode *parent, Ref<TypeSpecifier> ts, SymbolNodeTypes nodeType);
         ~VariableSymbolNode() = default;
 
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
         inline llvm::AllocaInst *GetAlloca() { return m_Alloca; }
         inline void SetAlloca(llvm::AllocaInst *alloca) { m_Alloca = alloca; }
+        inline bool IsTempVariable() const { return m_IsTempVariable; }
+        inline void SetTempVariable(bool isTempVariable) { m_IsTempVariable = isTempVariable; }
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;
         llvm::AllocaInst *m_Alloca;
+        bool m_IsTempVariable = false;
     };
 
 } // namespace Marble

@@ -47,7 +47,21 @@ namespace Marble
             ErrorSystem::AddWarn(semanticAnalyzer, this, "Empty function body");
             return TypeSpecifierOk;
         }
-        else if (statements.back()->StatementType() == StatementType::Return)
+
+        bool returnFlag = false;
+        for (size_t i = 0; i < statements.size(); i++)
+        {
+            if (returnFlag)
+            {
+                ErrorSystem::AddWarn(semanticAnalyzer, statements[i].get(), "Dead code");
+            }
+
+            if (statements[i]->StatementType() == StatementType::Return)
+            {
+                returnFlag = true;
+            }
+        }
+        if (returnFlag)
         {
             return TypeSpecifierOk;
         }

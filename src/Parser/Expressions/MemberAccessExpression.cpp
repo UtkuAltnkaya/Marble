@@ -13,6 +13,11 @@ namespace Marble
         m_Object = obj.m_Object->Clone();
         m_AccessType = obj.m_AccessType;
         m_Property = obj.m_Property->Clone();
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> MemberAccessExpression::Parse(Parser &parser, Precedence precedence)

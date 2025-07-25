@@ -1,6 +1,8 @@
 #include "Ast/Expressions.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
+#include "Utils/IDGenerator.hpp"
 
 namespace Marble
 {
@@ -68,7 +70,7 @@ namespace Marble
         case ExpressionType::FunctionCall:
         {
             FunctionCallExpression *fnCallExpression = m_Property->Into<FunctionCallExpression>();
-            m_ValueType = AnalyzeMethod(semanticAnalyzer, fnCallExpression, isPublic);
+            m_ValueType = AnalyzeMethod(semanticAnalyzer, fnCallExpression, identifier, isPublic);
             break;
         }
         case ExpressionType::MemberAccess:
@@ -77,7 +79,6 @@ namespace Marble
             m_ValueType = m_Property->Analyze(semanticAnalyzer);
             if (constFlag)
                 m_ValueType = TypeSpecifier::ConvertToConst(m_ValueType);
-            table.LeaveScope();
             return m_ValueType;
         }
         default:
@@ -108,26 +109,24 @@ namespace Marble
     {
         switch (m_Object->ExpressionType())
         {
-        case ExpressionType::Binary:
-        case ExpressionType::Assignment:
-        case ExpressionType::Cast:
-        case ExpressionType::ArrayInit:
-        case ExpressionType::ObjectInit:
+
+        case ExpressionType::FunctionCall:
+        case ExpressionType::Identifier:
+        case ExpressionType::ArrayIndex:
         case ExpressionType::NameSpace:
-        case ExpressionType::Primitive:
-        case ExpressionType::Unary:
-        case ExpressionType::MemberAccess:
-            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid object expression", true);
+            break;
         default:
+            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid object expression", true);
             break;
         }
     }
 
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, bool &isPublic)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(
+        SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, bool &isPublic)
     {
         SymbolTable &table = SymbolTable::GetInstance();
         SymbolNode *structSymbol = table.CurrentScope();
-        const IdentifierExpression *identifierExpression = fnCallExpression->FnName().TryInto<IdentifierExpression>();
+        IdentifierExpression *identifierExpression = fnCallExpression->FnName().TryInto<IdentifierExpression>();
         if (!identifierExpression)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Function name must be identifier expression", true);
@@ -141,7 +140,9 @@ namespace Marble
         }
 
         isPublic = CheckAccessSpecifier(fnNode->GetSymbolData().Access());
-        return fnCallExpression->Analyze(semanticAnalyzer);
+        Ref<TypeSpecifier> ts = fnCallExpression->Analyze(semanticAnalyzer);
+        DeSugar(semanticAnalyzer, fnCallExpression, structName, fnNode, structSymbol);
+        return ts;
     }
 
     Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, IdentifierExpression *identifierExpression, bool &isPublic)
@@ -164,6 +165,43 @@ namespace Marble
     {
         m_Object->SubstituteGenerics(semanticAnalyzer, map);
         m_Property->SubstituteGenerics(semanticAnalyzer, map);
+    }
+
+    void MemberAccessExpression::DeSugar(
+        SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, SymbolNode *fnNode, SymbolNode *currentScope)
+    {
+        SymbolTable &table = SymbolTable::GetInstance();
+        IdentifierExpression *identifierExpression = fnCallExpression->FnName().Into<IdentifierExpression>();
+        const std::string &fnDefName = semanticAnalyzer.ConvertMethodIntoFunction(static_cast<Definition *>(fnNode->GetAstPtr()), structName->Id(), currentScope);
+
+        Box<Expression> firstArg;
+
+        switch (m_Object->ExpressionType())
+        {
+        case ExpressionType::FunctionCall:
+        case ExpressionType::NameSpace:
+        {
+            SymbolNode *node = table.CurrentScope();
+            Identifier tempName{"temp_" + structName->Id() + "_" + IDGenerator::Generate(), Span{}};
+            Ref<TypeSpecifier> ts = MakeRef<TypeSpecifier>(*structName, Span{});
+            VariableSymbolNode *variableNode = new VariableSymbolNode{tempName, node, ts, SymbolNodeTypes::Variable};
+            variableNode->SetTempVariable(true);
+            node->Insert(tempName.Id(), variableNode);
+            firstArg = MakeBox<IdentifierExpression>(std::move(tempName), Span{});
+            break;
+        }
+        default:
+        {
+            firstArg = m_Object->Clone();
+            break;
+        }
+        }
+
+        identifierExpression->SetId(fnDefName);
+        Span span = firstArg->GetSpan();
+        m_TempValue = firstArg->Clone();
+        Box<Expression> pointerToStruct = MakeBox<UnaryExpression>(UnaryOperators::Address, std::move(firstArg), UnaryExpressionType::Prefix, span);
+        fnCallExpression->AddArg(std::move(pointerToStruct), 0);
     }
 
     bool MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)

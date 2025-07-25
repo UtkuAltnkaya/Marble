@@ -21,6 +21,11 @@ namespace Marble
         m_Operator = obj.m_Operator;
         m_Left = obj.m_Left->Clone();
         m_Right = obj.m_Right->Clone();
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> BinaryExpression::Parse(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence)

@@ -14,6 +14,11 @@ namespace Marble
         m_Namespace = obj.m_Namespace->Clone();
         m_Generics = obj.m_Generics ? MakeBox<Generics>(*obj.m_Generics.get()) : nullptr;
         m_Value = obj.m_Value->Clone();
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> NamespaceExpression::Parse(Parser &parser, Precedence precedence)

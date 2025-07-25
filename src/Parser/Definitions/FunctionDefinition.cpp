@@ -2,6 +2,7 @@
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include "Utils/IDGenerator.hpp"
 
 namespace Marble
 {
@@ -25,6 +26,29 @@ namespace Marble
       m_Params.push_back(MakeBox<VariableType>(*param.get()));
     }
     m_ReturnType = MakeRef<TypeSpecifier>(*obj.m_ReturnType.get());
+    m_Block = obj.m_Block->Clone();
+  }
+
+  FunctionDefinition::FunctionDefinition(const MemberFunctionDefinition &obj, const std::string &structName) : Definition{obj.GetSpan(), DefinitionType::Function}
+  {
+    const MemberFunctionPrototypeDefinition &prototype = *obj.m_Prototype;
+    m_AccessSpecifier = prototype.m_AccessSpecifier;
+    m_IsAnalyzed = obj.m_IsAnalyzed;
+
+    m_FunctionName = MakeBox<Identifier>(MethodToFunctionName(obj, structName), prototype.m_Name->GetSpan());
+
+    if (prototype.m_Method)
+    {
+      m_Params.push_back(MakeBox<VariableType>(*prototype.m_Method.get()));
+    }
+
+    for (auto &param : prototype.m_Params)
+    {
+      m_Params.push_back(MakeBox<VariableType>(*param.get()));
+    }
+
+    m_Generics = prototype.m_Generics ? MakeBox<Generics>(*prototype.m_Generics.get()) : nullptr;
+    m_ReturnType = MakeRef<TypeSpecifier>(*prototype.m_ReturnType.get());
     m_Block = obj.m_Block->Clone();
   }
 
@@ -60,6 +84,16 @@ namespace Marble
     table.Insert(fnDefinition->m_FunctionName->Id(), new FunctionSymbolNode{*fnDefinition.get(), table.Root()});
 
     return fnDefinition;
+  }
+  std::string FunctionDefinition::MethodToFunctionName(const MemberFunctionDefinition &obj, const std::string &structName)
+  {
+    const MemberFunctionPrototypeDefinition &prototype = *obj.m_Prototype;
+    std::string paramsName = "";
+    for (auto &param : prototype.m_Params)
+    {
+      paramsName += "_" + param->GetTypeSpecifier()->ToString();
+    }
+    return structName + "_" + prototype.m_Name->Id() + paramsName + "_" + IDGenerator::Generate();
   }
 
 } // namespace Marble

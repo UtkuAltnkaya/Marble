@@ -35,7 +35,7 @@ namespace Marble
     {
         if (m_UnaryOperator == UnaryOperators::Indirection)
         {
-            return m_Value->Address(codegenContext);
+            return m_Value->Codegen(codegenContext);
         }
         return nullptr;
     }
@@ -117,8 +117,8 @@ namespace Marble
         }
 
         llvm::Type *elementType = m_Value->ValueType()->ToLLVMType(codegenContext);
-        llvm::Value *typedAddress = builder.CreateBitCast(address, elementType->getPointerTo());
-        llvm::Value *loadedValue = builder.CreateLoad(elementType, typedAddress, "load");
+        llvm::Value *typedAddress = builder.CreateBitCast(address, llvm::PointerType::get(elementType, 0));
+        llvm::Value *loadedValue = builder.CreateLoad(elementType, typedAddress);
 
         llvm::Value *step = nullptr;
         if (elementType->isIntegerTy())
@@ -192,7 +192,7 @@ namespace Marble
         }
 
         llvm::Type *pointeeType = valueType->ToLLVMType(codegenContext);
-        return codegenContext.Builder().CreateLoad(pointeeType, pointer, "deref_tmp");
+        return codegenContext.Builder().CreateLoad(pointeeType, pointer);
     }
 
 } // namespace Marble

@@ -113,9 +113,9 @@ namespace Marble
             Ref<TypeSpecifier> returnType,
             Box<Statement> block,
             const Span &span);
-        ~FunctionDefinition() = default;
-
+        FunctionDefinition(const MemberFunctionDefinition &obj, const std::string &structName);
         FunctionDefinition(const FunctionDefinition &obj);
+        ~FunctionDefinition() = default;
 
         static Box<Definition> Parse(Parser &parser, AccessSpecifier accessSpecifier, const Span &span);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
@@ -138,6 +138,8 @@ namespace Marble
 
         inline void SetName(Box<Identifier> name) override { m_FunctionName = std::move(name); }
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
+
+        static std::string MethodToFunctionName(const MemberFunctionDefinition &obj, const std::string &structName);
 
     private:
         void SubstituteGenerics(
@@ -214,6 +216,7 @@ namespace Marble
         ImplDefinition *m_ImplDefinition;
     };
 
+    // TODO: Decide to allow assign numbers
     class EnumDefinition : public Definition
     {
     public:
@@ -236,10 +239,11 @@ namespace Marble
         std::vector<Box<Identifier>> m_Fields;
     };
 
-    class MemberFunctionPrototypeDefinition : public Definition /* ,public GenericDefinition*/
+    class MemberFunctionPrototypeDefinition : public Definition
     {
     public:
         friend class MemberFunctionDefinition;
+        friend class FunctionDefinition;
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunctionPrototype;
 
         MemberFunctionPrototypeDefinition(
@@ -283,6 +287,7 @@ namespace Marble
     class MemberFunctionDefinition : public Definition
     {
     public:
+        friend class FunctionDefinition;
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::MemberFunction;
 
         MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span);
@@ -307,7 +312,7 @@ namespace Marble
         Box<Statement> m_Block;
     };
 
-    class ImplDefinition : public Definition /* ,public GenericDefinition*/
+    class ImplDefinition : public Definition
     {
     public:
         static constexpr Marble::DefinitionType StaticType = Marble::DefinitionType::Impl;

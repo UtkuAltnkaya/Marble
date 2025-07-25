@@ -4,14 +4,24 @@
 
 namespace Marble
 {
-    IdentifierExpression::IdentifierExpression(Identifier &&identifier, const Span &span)
-        : Expression{span, ExpressionType::Identifier}, m_Identifier{std::move(identifier)}
+
+    IdentifierExpression::IdentifierExpression(const Identifier &identifier, const Span &span)
+        : Expression{span, ExpressionType::Identifier}, m_Identifier{identifier}
+    {
+    }
+
+    IdentifierExpression::IdentifierExpression(Identifier &&identifier, Span &&span)
+        : Expression{std::move(span), ExpressionType::Identifier}, m_Identifier{std::move(identifier)}
     {
     }
 
     IdentifierExpression::IdentifierExpression(const IdentifierExpression &obj)
         : Expression{obj.m_Span, ExpressionType::Identifier}, m_Identifier{obj.m_Identifier}
     {
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> IdentifierExpression::Parse(Parser &parser, Precedence precedence)

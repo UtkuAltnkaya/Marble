@@ -54,4 +54,12 @@ namespace Marble
         return MakeBox<Identifier>(token);
     }
 
+    void Identifier::Id(const std::string &id)
+    {
+        int diff = id.size() - m_Id.size();
+        m_Span.End.Cursor += diff;
+        m_Span.End.Col += diff;
+        m_Id = id;
+    }
+
 } // namespace Marble

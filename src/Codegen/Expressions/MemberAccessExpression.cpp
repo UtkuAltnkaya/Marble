@@ -6,6 +6,30 @@ namespace Marble
 {
     llvm::Value *MemberAccessExpression::Codegen(CodegenContext &codegenContext)
     {
+        switch (m_Object->ExpressionType())
+        {
+        case ExpressionType::NameSpace:
+        case ExpressionType::FunctionCall:
+        {
+            llvm::Value *result = m_Object->Codegen(codegenContext);
+            IdentifierExpression *tempIdentifier = GetTempIdentifier();
+            if (!tempIdentifier)
+            {
+                throw "Temp oject call must have temp variable";
+            }
+            llvm::Value *tempAddr = tempIdentifier->Address(codegenContext);
+            codegenContext.Builder().CreateStore(result, tempAddr);
+            break;
+        }
+        default:
+            break;
+        }
+
+        if (m_Property->ExpressionType() == ExpressionType::FunctionCall)
+        {
+            return m_Property->Codegen(codegenContext);
+        }
+
         llvm::Value *addr = Address(codegenContext);
         if (!addr)
         {
@@ -18,10 +42,9 @@ namespace Marble
             return addr;
         }
 
-        return codegenContext.Builder().CreateLoad(elemType, addr, "member_load");
+        return codegenContext.Builder().CreateLoad(elemType, addr);
     }
 
-    // TODO
     llvm::Value *MemberAccessExpression::Address(CodegenContext &codegenContext)
     {
         llvm::IRBuilder<> &builder = codegenContext.Builder();
@@ -42,6 +65,7 @@ namespace Marble
             auto &ptr = objectTypeSpecifier->Pointer();
             objectType = llvm::cast<llvm::StructType>(ptr.TypeSpecifier->ToLLVMType(codegenContext));
             identifier = &ptr.TypeSpecifier->UserDefine();
+            objPtr = builder.CreateLoad(llvm::PointerType::get(objectType, 0), objPtr);
         }
         else
         {
@@ -62,9 +86,31 @@ namespace Marble
             int index = structDefinition->GetFieldIndex(fieldName);
             return builder.CreateStructGEP(objectType, objPtr, index);
         }
+        case ExpressionType::ArrayIndex:
+        {
+            auto *arrayIndexExpr = m_Property->Into<ArrayIndexExpression>();
+            // llvm::Value *arrayPtr = arrayIndexExpr-
+
+            // // Step 2: Evaluate the index expression
+            // llvm::Value *indexValue = arrayIndexExpr->IndexExpr()->Codegen(codegenContext);
+        }
+        case ExpressionType::FunctionCall:
+        {
+            ASSERT_D(false, "Must be unreachable");
+            UNREACHABLE();
+        }
         default:
             UNIMPLEMENTED("Member Access Expression");
             break;
         }
+    }
+
+    IdentifierExpression *MemberAccessExpression::GetTempIdentifier()
+    {
+        if (!m_TempValue)
+        {
+            return nullptr;
+        }
+        return m_TempValue->TryInto<IdentifierExpression>();
     }
 } // namespace Marble

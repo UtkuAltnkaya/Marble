@@ -34,6 +34,7 @@ namespace Marble
             }
             table.EnterScope(node);
             m_ValueType = m_Value->Analyze(semanticAnalyzer);
+            DeSugar(semanticAnalyzer, node, identifier.Id());
             return m_ValueType;
         }
         if (auto node = iter.Reset().Enum(identifier.Id()).Find(); node)
@@ -44,6 +45,7 @@ namespace Marble
             {
                 table.LeaveScope();
             }
+            DeSugar(semanticAnalyzer, node, identifier.Id());
             return m_ValueType;
         }
         ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the namespace", true);
@@ -58,6 +60,20 @@ namespace Marble
         }
         m_Namespace->SubstituteGenerics(semanticAnalyzer, map);
         m_Value->SubstituteGenerics(semanticAnalyzer, map);
+    }
+
+    void NamespaceExpression::DeSugar(SemanticAnalyzer &semanticAnalyzer, SymbolNode *node, const std::string &namespaceName)
+    {
+        if (m_Value->ExpressionType() != ExpressionType::FunctionCall)
+        {
+            return;
+        }
+        FunctionCallExpression *fnCallExpression = m_Value->Into<FunctionCallExpression>();
+        IdentifierExpression *identifierExpression = fnCallExpression->FnName().Into<IdentifierExpression>();
+        SymbolNode *fnNode = node->Iter().Function(identifierExpression->GetIdentifier().Id()).Find();
+        ASSERT_D(fnNode != nullptr, "Cannot find function " + identifierExpression->GetIdentifier().Id());
+        const std::string &fnName = semanticAnalyzer.ConvertMethodIntoFunction(static_cast<Definition *>(fnNode->GetAstPtr()), namespaceName, node);
+        identifierExpression->SetId(fnName);
     }
 
     Box<Expression> NamespaceExpression::Clone()

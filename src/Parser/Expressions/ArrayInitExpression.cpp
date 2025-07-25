@@ -16,6 +16,10 @@ namespace Marble
             m_Array.push_back(array->Clone());
         }
         m_Size = obj.m_Size;
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> ArrayInitExpression::Parse(Parser &parser, Precedence precedence)

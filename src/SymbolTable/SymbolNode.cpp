@@ -17,7 +17,7 @@ namespace Marble
         m_AstPtr = &enumDefinition;
         for (auto &enumField : enumDefinition.GetFields())
         {
-            Insert(enumField->Id(), new VariableSymbolNode{*enumField.get(), this});
+            Insert(enumField->Id(), new VariableSymbolNode{*enumField.get(), this, MakeRef<TypeSpecifier>(Types::Int), SymbolNodeTypes::EnumField});
         }
     }
 
@@ -109,34 +109,33 @@ namespace Marble
     }
 
     VariableSymbolNode::VariableSymbolNode(const VariableType &variableType, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}
+        : VariableSymbolNode{SymbolAccess::Local, parent, variableType.GetTypeSpecifier()}
     {
         m_AstPtr = &variableType;
-        m_TypeSpecifier = variableType.GetTypeSpecifier();
     }
 
     VariableSymbolNode::VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent)
         : SymbolNode{
               SymbolData{SymbolData::FromAccessSpecifier(structField.GetAccessSpecifier()),
                          SymbolNodeTypes::StructField, SymbolNodeBaseTypes::Variable},
-              parent}
+              parent},
+          m_Alloca{nullptr}
     {
         m_AstPtr = &structField;
         m_TypeSpecifier = structField.GetField().GetTypeSpecifier();
     }
 
     VariableSymbolNode::VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}
+        : VariableSymbolNode{SymbolAccess::Local, parent, letStmt.GetTypeSpecifier()}
     {
         m_AstPtr = &letStmt;
-        m_TypeSpecifier = letStmt.GetTypeSpecifier();
     }
 
-    VariableSymbolNode::VariableSymbolNode(const Identifier &identifier, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolAccess::Public, SymbolNodeTypes::EnumField, SymbolNodeBaseTypes::Variable}, parent}
+    VariableSymbolNode::VariableSymbolNode(const Identifier &identifier, SymbolNode *parent, Ref<TypeSpecifier> ts, SymbolNodeTypes nodeType)
+        : VariableSymbolNode{SymbolAccess::Public, parent, ts}
     {
         m_AstPtr = &identifier;
-        m_TypeSpecifier = MakeRef<TypeSpecifier>(Types::Int);
+        m_TypeSpecifier = ts;
     }
 
 } // namespace Marble

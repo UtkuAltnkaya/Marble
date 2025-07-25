@@ -27,7 +27,7 @@ namespace Marble
             std::fstream file(m_FileName);
             if (!file.is_open())
             {
-                ErrorSystem::AddError("Cannot open file named" + m_FileName, nullptr);
+                ErrorSystem::AddError("Cannot open file named " + m_FileName, nullptr);
             }
             m_Content = std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
         }

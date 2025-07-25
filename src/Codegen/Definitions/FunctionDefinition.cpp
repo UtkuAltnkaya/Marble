@@ -68,7 +68,7 @@ namespace Marble
             Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
             VariableSymbolNode *paramVariable = paramNode->Into<VariableSymbolNode>();
 
-            if (paramType->GetType() != Types::ConstantType)
+            if (true && paramType->GetType() != Types::ConstantType)
             {
                 llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(function, arg.getType());
                 builder.CreateStore(&arg, alloca);

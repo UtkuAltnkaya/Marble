@@ -11,8 +11,13 @@ namespace Marble
 
     CastExpression::CastExpression(const CastExpression &obj) : Expression{obj.m_Span, ExpressionType::Cast}
     {
+        m_Kind = obj.m_Kind;
         m_TypeSpecifier = MakeRef<TypeSpecifier>(*obj.m_TypeSpecifier.get());
         m_Expression = obj.m_Expression->Clone();
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     CastExpression::CastExpression(Ref<TypeSpecifier> typeSpecifier, Box<Expression> expression, ConversionKind kind, Span &&span)

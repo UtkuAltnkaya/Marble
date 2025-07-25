@@ -1,5 +1,6 @@
 #include "Codegen/Codegen.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include <llvm/Support/ManagedStatic.h>
 namespace Marble
 {
     CodegenContext::CodegenContext(const std::string &name)
@@ -16,17 +17,11 @@ namespace Marble
     {
         for (auto &definition : program->Definitions())
         {
-            if (!definition->IsGeneric())
-            {
-                definition->DeclareSignature(*this);
-            }
+            definition->DeclareSignature(*this);
         }
         for (auto &definition : program->Definitions())
         {
-            if (!definition->IsGeneric())
-            {
-                definition->Codegen(*this);
-            }
+            definition->Codegen(*this);
         }
     }
 

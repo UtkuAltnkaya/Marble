@@ -12,6 +12,11 @@ namespace Marble
     {
         m_Variable = obj.m_Variable->Clone();
         m_Value = obj.m_Value->Clone();
+
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> AssignmentExpression::Parse(Parser &parser, Precedence precedence)

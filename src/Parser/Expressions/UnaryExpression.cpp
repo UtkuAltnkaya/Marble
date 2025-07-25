@@ -18,6 +18,10 @@ namespace Marble
         m_UnaryOperator = obj.m_UnaryOperator;
         m_Value = obj.m_Value->Clone();
         m_UnaryExpressionType = obj.m_UnaryExpressionType;
+        if (obj.m_ValueType)
+        {
+            m_ValueType = MakeRef<TypeSpecifier>(*obj.m_ValueType.get());
+        }
     }
 
     Box<Expression> UnaryExpression::Parse(Parser &parser, Precedence precedence)

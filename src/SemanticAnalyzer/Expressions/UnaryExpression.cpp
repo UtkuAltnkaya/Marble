@@ -106,6 +106,7 @@ namespace Marble
         case ExpressionType::Identifier:
         case ExpressionType::MemberAccess:
         case ExpressionType::ArrayIndex:
+        case ExpressionType::FunctionCall:
         case ExpressionType::Unary:
             break;
         default:
@@ -184,5 +185,10 @@ namespace Marble
     Box<Expression> UnaryExpression::Clone()
     {
         return MakeBox<UnaryExpression>(*this);
+    }
+
+    bool UnaryExpression::IsAssignable() const
+    {
+        return m_UnaryExpressionType == UnaryExpressionType::Prefix && m_UnaryOperator == UnaryOperators::Indirection;
     }
 } // namespace Marble
