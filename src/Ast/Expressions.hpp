@@ -359,6 +359,7 @@ namespace Marble
         FunctionCallExpression *fnCallExpression, const Identifier *structName, SymbolNode *fnNode, SymbolNode *currentScope);
 
   private:
+    const Identifier &FindStructName(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> objectType);
     void CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer);
     Ref<TypeSpecifier> AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, bool &isPublic);
     Ref<TypeSpecifier> AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, IdentifierExpression *identifierExpression, bool &isPublic);

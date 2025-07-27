@@ -1,54 +1,27 @@
-struct std {}
-
 struct Person {
-    pub name: String,
-    pub age: int,
-    pub job: str,
+    pub name: char*
 }
 
-struct String{
-    data: char*,
-    size: usize,
-    capacity: usize,
+struct ClassRoom {
+    pub teacher: Person
 }
 
-impl std {
-    pub fn allocate<T>(size:usize) -> T* {
-        return null;
-    }
-}
-
-impl String {
-    pub fn init() -> String {
-        return String {
-            data: std::allocate<char>(1 as usize),
-            size: 0,
-            capacity: 1,
-        };
-    }
-}
 
 impl Person {
-    pub fn init() -> Person {
-        return Person{
-            name: String::init(),
-            age: 24,
-            job: "Computer Engineer"
-        };
-    }
-
-    pub fn (p:Person*) get_name() -> str {
+    pub fn (p:Person*) get_name() -> char* {
         return p->name;
-    }
-    
-    pub fn (p:Person*) get_age() -> int {
-        return p->age;
     }
 }
 
+
 fn main() -> int {
-    let person = Person::init();
+    let classRoom =  ClassRoom {
+        teacher: Person {
+            name: null
+        }
+    };
 
+    let name = classRoom.teacher.get_name();
 
-    return person.get_age();
+    return 1;
 }

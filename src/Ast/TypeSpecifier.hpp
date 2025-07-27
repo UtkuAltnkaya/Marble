@@ -86,6 +86,13 @@ namespace Marble
         const PointerType &Pointer();
         const GenericType &Generic();
         const ConstantType &Constant();
+
+        const Identifier &UserDefineUnchecked() const;
+        const ArrayType &ArrayUnchecked() const;
+        const PointerType &PointerUnchecked() const;
+        const GenericType &GenericUnchecked() const;
+        const ConstantType &ConstantUnchecked() const;
+
         inline const Types GetType() const { return m_Type; }
         inline void SetType(Types type) { m_Type = type; }
         bool IsPrimitive() const;

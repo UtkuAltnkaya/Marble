@@ -6,6 +6,78 @@
 
 namespace Marble
 {
+    Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    {
+        CheckObjectExpressionType(semanticAnalyzer);
+        Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
+        bool constFlag = objectType->GetType() == Types::ConstantType;
+        objectType = TypeSpecifier::PassConst(objectType);
+
+        const Identifier &structName = FindStructName(semanticAnalyzer, objectType);
+
+        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolNode *structNode = table.Iter().Struct(structName.Id()).Find();
+
+        if (!structNode)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find struct in this scope", true);
+        }
+
+        return nullptr;
+    }
+
+    void MemberAccessExpression::CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer)
+    {
+        switch (m_Object->ExpressionType())
+        {
+
+        case ExpressionType::FunctionCall:
+        case ExpressionType::Identifier:
+        case ExpressionType::ArrayIndex:
+        case ExpressionType::NameSpace:
+            break;
+        default:
+            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid object expression", true);
+            break;
+        }
+    }
+
+    const Identifier &MemberAccessExpression::FindStructName(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> objectType)
+    {
+
+        if (objectType->GetType() == Types::UserDefine)
+        {
+            if (m_AccessType != TokenType::Dot)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Use dot('.') operator to access member");
+            }
+            return objectType->UserDefine();
+        }
+
+        if (objectType->GetType() == Types::Pointer)
+        {
+            const PointerType &pointer = objectType->Pointer();
+            Ref<TypeSpecifier> pointerType = pointer.TypeSpecifier;
+            if (pointerType->GetType() != Types::UserDefine)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type");
+            }
+            if (m_AccessType != TokenType::Arrow)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Use arrow('->') operator to access member with pointer type");
+            }
+            return pointerType->UserDefine();
+        }
+
+        ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type", true);
+        UNREACHABLE();
+    }
+
+} // namespace Marble
+
+/*
+namespace Marble
+{
     // TODO It marks the property value as constat if is the case
     // TODO This restrict to return or create new value as const to underlying type
     // TODO It can be bypass by casting to non-const version but gives warning
@@ -105,21 +177,7 @@ namespace Marble
         return m_ValueType;
     }
 
-    void MemberAccessExpression::CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer)
-    {
-        switch (m_Object->ExpressionType())
-        {
 
-        case ExpressionType::FunctionCall:
-        case ExpressionType::Identifier:
-        case ExpressionType::ArrayIndex:
-        case ExpressionType::NameSpace:
-            break;
-        default:
-            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid object expression", true);
-            break;
-        }
-    }
 
     Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(
         SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, bool &isPublic)
@@ -214,3 +272,4 @@ namespace Marble
         return MakeBox<MemberAccessExpression>(*this);
     }
 } // namespace Marble
+*/

@@ -124,6 +124,36 @@ namespace Marble
         UNREACHABLE();
     }
 
+    const Identifier &TypeSpecifier::UserDefineUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::UserDefine, "Cannot get user define type");
+        return std::get<Identifier>(m_Variants);
+    }
+
+    const ArrayType &TypeSpecifier::ArrayUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::ArrayType, "Cannot get array type");
+        return std::get<ArrayType>(m_Variants);
+    }
+
+    const PointerType &TypeSpecifier::PointerUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::Pointer, "Cannot get pointer type");
+        return std::get<PointerType>(m_Variants);
+    }
+
+    const GenericType &TypeSpecifier::GenericUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::GenericType, "Cannot get generic type");
+        return std::get<GenericType>(m_Variants);
+    }
+
+    const ConstantType &TypeSpecifier::ConstantUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::ConstantType, "Cannot get constant type");
+        return std::get<ConstantType>(m_Variants);
+    }
+
     Ref<TypeSpecifier> TypeSpecifier::Parse(Parser &parser)
     {
         Ref<TypeSpecifier> result = nullptr;
