@@ -1,126 +1,94 @@
 #include "SymbolTable/SymbolIterator.hpp"
 #include "SymbolTable/SymbolNode.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "Ast/Ast.hpp"
-#include "SymbolIterator.hpp"
 
 namespace Marble
 {
+    SymbolIterator::SymbolIterator()
+    {
+        m_Node = SymbolTable::Get().Root()->Into<BlockSymbolNode>();
+    }
+
     SymbolIterator::SymbolIterator(SymbolNode *node)
-        : m_Node{node}, m_StartNode{node}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
     {
-    }
-
-    SymbolIterator::SymbolIterator(const SymbolNode *node)
-        : m_Node{const_cast<SymbolNode *>(node)}, m_StartNode{const_cast<SymbolNode *>(node)}, m_NodeType{node->m_SymbolData.NodeType()}, m_Flag{false}
-    {
-    }
-
-    SymbolNode *SymbolIterator::Find()
-    {
-        if (m_Flag)
+        m_Node = node->TryInto<BlockSymbolNode>();
+        if (!m_Node)
         {
-            m_Flag = false;
+            ErrorSystem::AddError("Node must be a block symbol");
+        }
+    }
+
+    FunctionSymbolNode *SymbolIterator::Function(const std::string &name)
+    {
+        SymbolNode *node = Find(m_Node, name, SymbolNodeTypes::Function);
+        if (!node)
+        {
             return nullptr;
         }
-        return m_Node;
+        return node->Into<FunctionSymbolNode>();
     }
 
-    SymbolNode *const SymbolIterator::Find(std::string_view name, SymbolNodeTypes nodeType)
+    StructSymbolNode *SymbolIterator::Struct(const std::string &name)
     {
-        if (m_Flag)
+        SymbolNode *node = Find(m_Node, name, SymbolNodeTypes::Struct);
+        if (!node)
         {
-            return m_Node;
+            return nullptr;
         }
-        m_NodeType = nodeType;
-        auto iter = m_Node->m_Children.find(name.data());
-        if (iter == m_Node->m_Children.end())
+        return node->Into<StructSymbolNode>();
+    }
+
+    VariableSymbolNode *SymbolIterator::Variable(const std::string &name)
+    {
+        return Variable(m_Node, name);
+    }
+
+    VariableSymbolNode *SymbolIterator::Variable(BlockSymbolNode *blockNode, const std::string &name)
+    {
+        SymbolNode *node = Find(blockNode, name, SymbolNodeTypes::Enum);
+        if (node)
         {
-            m_Flag = true;
-            return m_Node;
+            return node->Into<VariableSymbolNode>();
         }
-        SymbolNode *node = iter->second;
-        if (node->m_SymbolData.NodeType() != nodeType)
+        if (!blockNode->m_Parent)
         {
-            m_Flag = true;
-            return node;
+            return nullptr;
         }
-        return node;
-    }
-
-    SymbolIterator &SymbolIterator::Parent()
-    {
-        if (!m_Node->m_Parent)
+        BlockSymbolNode *parent = blockNode->m_Parent->TryInto<BlockSymbolNode>();
+        if (!parent)
         {
-            m_Flag = true;
+            return nullptr;
         }
-        else
+        return Variable(parent, name);
+    }
+
+    EnumSymbolNode *SymbolIterator::Enum(const std::string &name)
+    {
+        SymbolNode *node = Find(m_Node, name, SymbolNodeTypes::Enum);
+        if (!node)
         {
-            SetNode(m_Node->m_Parent);
+            return nullptr;
         }
-        return *this;
+        return node->Into<EnumSymbolNode>();
     }
 
-    SymbolIterator &SymbolIterator::Function(std::string_view name)
+    SymbolNode *SymbolIterator::Find(BlockSymbolNode *node, const std::string &name, SymbolNodeTypes type)
     {
-        SymbolNode *node = Find(name, SymbolNodeTypes::Function);
-        SetNode(node);
-        return *this;
-    }
+        auto it = node->m_Children.find(name);
 
-    SymbolIterator &SymbolIterator::Struct(std::string_view name)
-    {
-        SymbolNode *node = Find(name, SymbolNodeTypes::Struct);
-        SetNode(node);
-        return *this;
-    }
-
-    SymbolIterator &SymbolIterator::Enum(std::string_view name)
-    {
-        SymbolNode *node = Find(name, SymbolNodeTypes::Enum);
-        SetNode(node);
-        return *this;
-    }
-
-    SymbolIterator &SymbolIterator::Variable(std::string_view name)
-    {
-        SymbolNode *node = Find(name, SymbolNodeTypes::Variable);
-        SetNode(node);
-        return *this;
-    }
-
-    SymbolIterator &SymbolIterator::StructField(std::string_view name)
-    {
-        SymbolNode *node = Find(name, SymbolNodeTypes::StructField);
-        SetNode(node);
-        return *this;
-    }
-
-    SymbolIterator &SymbolIterator::EnumField(std::string_view name)
-    {
-        SymbolNode *node = Find(name, SymbolNodeTypes::EnumField);
-        SetNode(node);
-        return *this;
-    }
-
-    SymbolIterator &SymbolIterator::Reset()
-    {
-        SetNode(m_StartNode);
-        m_NodeType = m_StartNode->GetSymbolData().NodeType();
-        m_Flag = false;
-        return *this;
-    }
-
-    size_t SymbolIterator::Count(SymbolNodeTypes filter)
-    {
-        size_t i = 0;
-        for (auto &[key, value] : m_Node->m_Children)
+        if (it == node->m_Children.end())
         {
-            if (filter == value->m_SymbolData.NodeType())
-            {
-                i++;
-            }
+            return nullptr;
         }
-        return i;
+        auto symbolNode = it->second;
+
+        if (symbolNode->GetSymbolData().NodeType() != type)
+        {
+            return nullptr;
+        }
+
+        return symbolNode;
     }
 
 } //  namespace Marble

@@ -14,10 +14,10 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Condition type must be boolean");
         }
 
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         SymbolNode *parent = table.CurrentScope();
-        SymbolNode *whileNode = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, parent};
-        parent->Insert("while-" + IDGenerator::Generate(), whileNode);
+        SymbolNode *whileNode = new BlockSymbolNode{"while_" + IDGenerator::Generate(), parent};
+        parent->Insert(whileNode);
 
         table.EnterScope(whileNode);
         m_Block->Analyze(semanticAnalyzer);

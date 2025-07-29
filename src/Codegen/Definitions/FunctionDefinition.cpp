@@ -47,9 +47,9 @@ namespace Marble
         llvm::BasicBlock *entryBB = llvm::BasicBlock::Create(codegenContext.Context(), "entry", function);
         builder.SetInsertPoint(entryBB);
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *node = table.Iter().Function(GetName()).Find();
-        SymbolIterator fnIter = node->Iter();
+        SymbolTable &table = SymbolTable::Get();
+        SymbolNode *node = SymbolIterator().Function(GetName());
+        SymbolIterator fnIter(node);
 
         if (!node)
         {
@@ -62,17 +62,16 @@ namespace Marble
         {
             const auto &param = m_Params.at(i);
 
-            SymbolNode *paramNode = fnIter.Reset().Variable(param->GetIdentifier().Id()).Find();
+            VariableSymbolNode *paramNode = fnIter.Variable(param->GetIdentifier().Id());
             ASSERT_D(paramNode != nullptr, "Cannot find parameter in this scope");
 
             Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
-            VariableSymbolNode *paramVariable = paramNode->Into<VariableSymbolNode>();
 
             if (true && paramType->GetType() != Types::ConstantType)
             {
                 llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(function, arg.getType());
                 builder.CreateStore(&arg, alloca);
-                paramVariable->SetAlloca(alloca);
+                // paramVariable->SetAlloca(alloca);
             }
             i++;
         }

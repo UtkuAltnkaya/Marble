@@ -1,8 +1,8 @@
 #include "Ast/Definitions.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
-#include "SymbolTable/SymbolTable.hpp"
 #include "Utils/IDGenerator.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {
@@ -80,11 +80,10 @@ namespace Marble
         accessSpecifier, std::move(functionName), std::move(generics),
         std::move(params), returnType, std::move(block), Span{start.Start, end.Start});
 
-    SymbolTable &table = SymbolTable::GetInstance();
-    table.Insert(fnDefinition->m_FunctionName->Id(), new FunctionSymbolNode{*fnDefinition.get(), table.Root()});
-
+    SymbolTable::Get().Insert(*fnDefinition);
     return fnDefinition;
   }
+
   std::string FunctionDefinition::MethodToFunctionName(const MemberFunctionDefinition &obj, const std::string &structName)
   {
     const MemberFunctionPrototypeDefinition &prototype = *obj.m_Prototype;

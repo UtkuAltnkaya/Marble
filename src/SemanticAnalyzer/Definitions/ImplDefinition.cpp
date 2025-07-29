@@ -9,7 +9,7 @@ namespace Marble
 
     Ref<TypeSpecifier> ImplDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         SymbolNode *node = table.Root();
 
         if (!m_ImplName->IsPrimitive())
@@ -32,17 +32,15 @@ namespace Marble
 
     Ref<TypeSpecifier> MemberFunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        const SymbolNode *node = table.CurrentScope();
-        SymbolNode *fnNode = node->Iter()
-                                 .Function(m_Prototype->GetName())
-                                 .Find();
+        SymbolTable &table = SymbolTable::Get();
+        SymbolNode *node = table.CurrentScope();
+        SymbolNode *fnNode = SymbolIterator(node)
+                                 .Function(m_Prototype->GetName());
         if (!fnNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope", true);
         }
 
-        SymbolIterator paramChecker = table.Iter();
         for (auto &param : m_Prototype->m_Params)
         {
             Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
@@ -50,7 +48,7 @@ namespace Marble
             {
                 continue;
             }
-            CheckParametersType(semanticAnalyzer, paramType, paramChecker);
+            CheckParametersType(semanticAnalyzer, paramType);
         }
 
         table.EnterScope(fnNode);
@@ -98,18 +96,18 @@ namespace Marble
 
     void ImplDefinition::CreateSymbol()
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *node = table.Root();
+        // SymbolTable &table = SymbolTable::GetInstance();
+        // SymbolNode *node = table.Root();
 
-        if (!m_ImplName->IsPrimitive())
-        {
-            node = HandleRoot(node);
-        }
+        // if (!m_ImplName->IsPrimitive())
+        // {
+        //     node = HandleRoot(node);
+        // }
 
-        for (auto &memberFunction : m_MemberFunctions)
-        {
-            node->Insert(memberFunction->GetPrototype().GetName(), new FunctionSymbolNode{*memberFunction.get(), node});
-        }
+        // for (auto &memberFunction : m_MemberFunctions)
+        // {
+        //     node->Insert(memberFunction->GetPrototype().GetName(), new FunctionSymbolNode{*memberFunction.get(), node});
+        // }
     }
 
     Box<Definition> MemberFunctionDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
@@ -162,24 +160,24 @@ namespace Marble
 
     SymbolNode *ImplDefinition::HandleRoot(SymbolNode *node)
     {
-        SymbolIterator iter = node->Iter();
-        const std::string &name = m_ImplName->UserDefine().Id();
+        // SymbolIterator iter = node->Iter();
+        // const std::string &name = m_ImplName->UserDefine().Id();
 
-        if (auto symbolNode = iter.Struct(name).Find(); symbolNode)
-        {
-            auto structNode = static_cast<StructDefinition *>(symbolNode->GetAstPtr());
-            if (structNode && !structNode->GetImplDefinition())
-            {
-                structNode->SetImplDefinition(this);
-            }
-            return symbolNode;
-        }
-        if (auto symbolNode = iter.Reset().Enum(name).Find(); symbolNode)
-        {
-            return symbolNode;
-        }
-        ErrorSystem::AddError("No such struct or enum", nullptr, true);
-        UNREACHABLE();
+        // if (auto symbolNode = iter.Struct(name).Find(); symbolNode)
+        // {
+        //     auto structNode = static_cast<StructDefinition *>(symbolNode->GetAstPtr());
+        //     if (structNode && !structNode->GetImplDefinition())
+        //     {
+        //         structNode->SetImplDefinition(this);
+        //     }
+        //     return symbolNode;
+        // }
+        // if (auto symbolNode = iter.Reset().Enum(name).Find(); symbolNode)
+        // {
+        //     return symbolNode;
+        // }
+        // ErrorSystem::AddError("No such struct or enum", nullptr, true);
+        // UNREACHABLE();
     }
 
     Box<Definition> ImplDefinition::Clone()

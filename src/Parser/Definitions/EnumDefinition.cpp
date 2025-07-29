@@ -26,8 +26,7 @@ namespace Marble
         Box<EnumDefinition> enumDefinition = MakeBox<EnumDefinition>(
             accessSpecifier, std::move(enumName), std::move(fields), Span{start.Start, end.Start});
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        table.Insert(enumDefinition->m_EnumName->Id(), new SymbolNode{*enumDefinition.get(), table.Root()});
+        SymbolTable::Get().Insert(*enumDefinition);
 
         return enumDefinition;
     }

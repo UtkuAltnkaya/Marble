@@ -7,11 +7,10 @@ namespace Marble
 {
     Ref<TypeSpecifier> ForStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         SymbolNode *parent = table.CurrentScope();
-        SymbolNode *forNode = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, parent};
-        parent->Insert("for-" + IDGenerator::Generate(), forNode);
-
+        BlockSymbolNode *forNode = new BlockSymbolNode("for_" + IDGenerator::Generate(), parent);
+        parent->Insert(forNode);
         table.EnterScope(forNode);
         if (m_LetStatement)
         {

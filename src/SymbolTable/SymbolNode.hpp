@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "Ast/Definitions.hpp"
@@ -14,23 +15,19 @@
 
 namespace Marble
 {
+    class BlockSymbolNode;
     class SymbolNode
     {
     public:
         friend class SymbolIterator;
 
-        SymbolNode(SymbolData symbolData, SymbolNode *parent);
-        SymbolNode(const EnumDefinition &enumDefinition, SymbolNode *parent);
+        SymbolNode(SymbolData symbolData);
         virtual ~SymbolNode();
+        BlockSymbolNode *Block();
+        void Insert(SymbolNode *node);
 
-        SymbolIterator Iter() const;
-        void Insert(const std::string &name, SymbolNode *node);
         inline const SymbolData &GetSymbolData() const { return m_SymbolData; }
-        inline const std::unordered_map<std::string, SymbolNode *> &GetChildren() const { return m_Children; }
         inline bool IsGeneric() const { return m_IsGeneric; }
-        inline Ast *GetAstPtr() const { return const_cast<Ast *>(m_AstPtr); }
-        inline bool IsRoot() const { return m_Parent == nullptr; }
-        inline bool IsParentRoot() const { return !IsRoot() && m_Parent->IsRoot(); }
 
         template <typename T>
         T *TryInto()
@@ -71,26 +68,34 @@ namespace Marble
         }
 
     protected:
+        BlockSymbolNode *m_Block;
         SymbolData m_SymbolData;
-        SymbolNode *m_Parent;
-        std::unordered_map<std::string, SymbolNode *> m_Children;
-        const Ast *m_AstPtr;
-        bool m_IsGeneric = false;
+        bool m_IsGeneric;
     };
 
     class StructSymbolNode : public SymbolNode
     {
     public:
         static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Struct;
-
-        StructSymbolNode(const StructDefinition &structDefinition, SymbolNode *parent);
+        StructSymbolNode(const StructDefinition &structDefinition);
         ~StructSymbolNode() = default;
 
-        inline llvm::StructType *StructType() const { return m_StructType; }
-        inline void StructType(llvm::StructType *structType) { m_StructType = structType; }
+        inline const std::unordered_set<std::string> &Methods() const { return m_Methods; }
 
     private:
-        llvm::StructType *m_StructType;
+        std::unordered_set<std::string> m_Methods;
+    };
+
+    class EnumSymbolNode : public SymbolNode
+    {
+    public:
+        static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Enum;
+        EnumSymbolNode(const EnumDefinition &enumDefinition);
+        ~EnumSymbolNode() = default;
+
+    private:
+        std::unordered_set<std::string> m_EnumFields;
+        std::unordered_set<std::string> m_Methods;
     };
 
     class FunctionSymbolNode : public SymbolNode
@@ -98,8 +103,7 @@ namespace Marble
     public:
         static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Function;
 
-        FunctionSymbolNode(const FunctionDefinition &fnDefinition, SymbolNode *parent);
-        FunctionSymbolNode(const MemberFunctionDefinition &memberFunction, SymbolNode *parent);
+        FunctionSymbolNode(const FunctionDefinition &fnDefinition);
         ~FunctionSymbolNode() = default;
 
         inline const Ref<TypeSpecifier> ReturnType() const { return m_ReturnType; }
@@ -116,23 +120,34 @@ namespace Marble
     public:
         static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Variable;
 
-        VariableSymbolNode(SymbolAccess access, SymbolNode *parent, Ref<TypeSpecifier> typeSpecifier);
-        VariableSymbolNode(const VariableType &variableType, SymbolNode *parent);
-        VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent);
-        VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent);
-        VariableSymbolNode(const Identifier &identifier, SymbolNode *parent, Ref<TypeSpecifier> ts, SymbolNodeTypes nodeType);
+        VariableSymbolNode(const std::string &name, SymbolAccess access, Ref<TypeSpecifier> typeSpecifier);
+        VariableSymbolNode(const VariableType &variableType);
+        VariableSymbolNode(const LetStatement &letStmt);
         ~VariableSymbolNode() = default;
 
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
-        inline llvm::AllocaInst *GetAlloca() { return m_Alloca; }
-        inline void SetAlloca(llvm::AllocaInst *alloca) { m_Alloca = alloca; }
-        inline bool IsTempVariable() const { return m_IsTempVariable; }
-        inline void SetTempVariable(bool isTempVariable) { m_IsTempVariable = isTempVariable; }
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;
-        llvm::AllocaInst *m_Alloca;
-        bool m_IsTempVariable = false;
+    };
+
+    class BlockSymbolNode : public SymbolNode
+    {
+    public:
+        friend class SymbolIterator;
+        static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Block;
+        BlockSymbolNode(const std::string &name, SymbolNode *parent);
+        ~BlockSymbolNode();
+
+        void Insert(SymbolNode *node);
+        SymbolIterator Iter();
+
+        inline size_t Size() const { return m_Children.size(); }
+        inline SymbolNode *Parent() const { return m_Parent; }
+
+    private:
+        SymbolNode *m_Parent;
+        std::unordered_map<std::string, SymbolNode *> m_Children;
     };
 
 } // namespace Marble

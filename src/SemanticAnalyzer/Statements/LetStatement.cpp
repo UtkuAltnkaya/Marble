@@ -39,8 +39,8 @@ namespace Marble
                 ErrorSystem::AddError(semanticAnalyzer, this, "Const variable \"" + m_Identifier->Id() + "\" requires an initializer");
             }
         }
-        SymbolNode *node = SymbolTable::GetInstance().CurrentScope();
-        node->Insert(m_Identifier->Id(), new VariableSymbolNode{*this, node});
+        SymbolNode *node = SymbolTable::Get().CurrentScope();
+        node->Insert(new VariableSymbolNode{*this});
         return TypeSpecifierOk;
     }
 

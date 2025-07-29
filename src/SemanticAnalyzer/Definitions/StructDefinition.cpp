@@ -6,8 +6,6 @@ namespace Marble
 {
     Ref<TypeSpecifier> StructDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolIterator paramChecker = table.Iter();
         for (auto &field : m_Field)
         {
             auto castedField = field->Into<StructFieldDefinition>();
@@ -16,7 +14,7 @@ namespace Marble
             {
                 continue;
             }
-            CheckParametersType(semanticAnalyzer, paramType, paramChecker);
+            CheckParametersType(semanticAnalyzer, paramType);
         }
         m_IsAnalyzed = true;
         return TypeSpecifierOk;

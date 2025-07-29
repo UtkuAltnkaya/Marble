@@ -6,20 +6,18 @@
 
 namespace Marble
 {
-
     Ref<TypeSpecifier> FunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         m_IsAnalyzed = true;
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *iter = table.Iter()
-                               .Function(m_FunctionName->Id())
-                               .Find();
-        if (!iter)
+        FunctionSymbolNode *fnNode = SymbolIterator().Function(m_FunctionName->Id());
+        if (!fnNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope");
         }
 
-        SymbolIterator paramChecker = table.Iter();
+        BlockSymbolNode *blockNode = fnNode->Block();
+        SymbolScopeGuard guard{blockNode};
+
         for (auto &param : m_Params)
         {
             Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
@@ -27,12 +25,10 @@ namespace Marble
             {
                 continue;
             }
-            CheckParametersType(semanticAnalyzer, paramType, paramChecker);
+            CheckParametersType(semanticAnalyzer, paramType);
         }
 
-        table.EnterScope(iter);
         m_Block->Analyze(semanticAnalyzer);
-        table.LeaveScope();
 
         if (m_ReturnType->GetType() == Types::Void)
         {

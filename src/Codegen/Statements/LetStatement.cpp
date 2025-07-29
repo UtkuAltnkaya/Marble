@@ -13,11 +13,12 @@ namespace Marble
         llvm::Type *llvmType = m_TypeSpecifier->ToLLVMType(codegenContext);
         llvm::AllocaInst *alloca = codegenContext.CreateEntryBlockAlloca(currentFunction, llvmType);
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *node = table.CurrentScope()->Iter().Variable(m_Identifier->Id()).Find();
-        ASSERT_D(node != nullptr, "Variable not found in the scope");
-        VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
-        variableNode->SetAlloca(alloca);
+        TODO("HANDLE ALLOCA");
+        // SymbolTable &table = SymbolTable::GetInstance();
+        // SymbolNode *node = table.CurrentScope()->Iter().Variable(m_Identifier->Id()).Find();
+        // ASSERT_D(node != nullptr, "Variable not found in the scope");
+        // VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
+        // variableNode->SetAlloca(alloca);
 
         if (!m_Value)
         {

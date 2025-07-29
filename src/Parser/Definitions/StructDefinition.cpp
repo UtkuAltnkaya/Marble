@@ -46,8 +46,7 @@ namespace Marble
         Box<StructDefinition> structDefinition = MakeBox<StructDefinition>(
             accessSpecifier, std::move(structName), std::move(generics), std::move(fields), Span{start.Start, end.End});
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        table.Insert(structDefinition->m_StructName->Id(), new StructSymbolNode{*structDefinition.get(), table.Root()});
+        SymbolTable::Get().Insert(*structDefinition);
         return structDefinition;
     }
 
