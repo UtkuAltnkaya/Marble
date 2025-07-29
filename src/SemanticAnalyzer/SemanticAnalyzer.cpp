@@ -38,80 +38,80 @@ namespace Marble
 
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
-        ExpandNestedGenerics(typeArgs);
+        // ExpandNestedGenerics(typeArgs);
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *scope = table.CurrentScope();
-        SymbolNode *parent = scope->Iter().Parent().Find();
+        // SymbolTable &table = SymbolTable::Get();
+        // SymbolNode *scope = table.CurrentScope();
+        // SymbolNode *parent = scope->Iter().Parent().Find();
 
-        GenericInstanceKey key;
+        // GenericInstanceKey key;
 
-        if (auto node = parent->Iter().Function(name).Find(); node)
-        {
-            Box<Definition> expandedFnDefinition = Instantiate(node, key, typeArgs);
-            if (!expandedFnDefinition)
-            {
-                return m_Generis[key];
-            }
+        // if (auto node = parent->Iter().Function(name).Find(); node)
+        // {
+        //     Box<Definition> expandedFnDefinition = Instantiate(node, key, typeArgs);
+        //     if (!expandedFnDefinition)
+        //     {
+        //         return m_Generis[key];
+        //     }
 
-            FunctionSymbolNode *newFnSymbol = new FunctionSymbolNode{*expandedFnDefinition->Into<FunctionDefinition>(),
-                                                                     parent};
-            parent->Insert(expandedFnDefinition->GetName(), newFnSymbol);
-            AddExpandedDefinition(std::move(expandedFnDefinition));
-            return m_Generis[key];
-        }
+        //     FunctionSymbolNode *newFnSymbol = new FunctionSymbolNode{*expandedFnDefinition->Into<FunctionDefinition>(),
+        //                                                              parent};
+        //     parent->Insert(expandedFnDefinition->GetName(), newFnSymbol);
+        //     AddExpandedDefinition(std::move(expandedFnDefinition));
+        //     return m_Generis[key];
+        // }
 
-        if (auto node = table.Root()->Iter().Struct(name).Find(); node)
-        {
-            Box<Definition> expandedStructDefinition = Instantiate(node, key, typeArgs);
-            if (!expandedStructDefinition)
-            {
-                return m_Generis[key];
-            }
-            StructDefinition *newStructDefinition = expandedStructDefinition->Into<StructDefinition>();
-            SymbolNode *newStructNode = new StructSymbolNode{*newStructDefinition, table.Root()};
-            table.Insert(expandedStructDefinition->GetName(), newStructNode);
+        // if (auto node = table.Root()->Iter().Struct(name).Find(); node)
+        // {
+        //     Box<Definition> expandedStructDefinition = Instantiate(node, key, typeArgs);
+        //     if (!expandedStructDefinition)
+        //     {
+        //         return m_Generis[key];
+        //     }
+        //     StructDefinition *newStructDefinition = expandedStructDefinition->Into<StructDefinition>();
+        //     SymbolNode *newStructNode = new StructSymbolNode{*newStructDefinition, table.Root()};
+        //     table.Insert(expandedStructDefinition->GetName(), newStructNode);
 
-            ImplDefinition *implDefinition = newStructDefinition->GetImplDefinition();
-            if (!implDefinition)
-            {
-                return m_Generis[key];
-            }
-            Box<Definition> expandedImplDefinition = implDefinition->InstantiateWith(*this, typeArgs);
-            ImplDefinition *newImplDefinition = expandedImplDefinition->Into<ImplDefinition>();
+        //     ImplDefinition *implDefinition = newStructDefinition->GetImplDefinition();
+        //     if (!implDefinition)
+        //     {
+        //         return m_Generis[key];
+        //     }
+        //     Box<Definition> expandedImplDefinition = implDefinition->InstantiateWith(*this, typeArgs);
+        //     ImplDefinition *newImplDefinition = expandedImplDefinition->Into<ImplDefinition>();
 
-            Ref<TypeSpecifier> implName = MakeRef<TypeSpecifier>(
-                Identifier{newStructDefinition->GetName(), newStructDefinition->GetIdentifier().GetSpan()},
-                newStructDefinition->GetIdentifier().GetSpan());
+        //     Ref<TypeSpecifier> implName = MakeRef<TypeSpecifier>(
+        //         Identifier{newStructDefinition->GetName(), newStructDefinition->GetIdentifier().GetSpan()},
+        //         newStructDefinition->GetIdentifier().GetSpan());
 
-            newImplDefinition->SetImplName(implName);
-            newImplDefinition->CreateSymbol();
-            AddExpandedDefinition(std::move(expandedStructDefinition));
-            AddExpandedDefinition(std::move(expandedImplDefinition));
-            return m_Generis[key];
-        }
+        //     newImplDefinition->SetImplName(implName);
+        //     newImplDefinition->CreateSymbol();
+        //     AddExpandedDefinition(std::move(expandedStructDefinition));
+        //     AddExpandedDefinition(std::move(expandedImplDefinition));
+        //     return m_Generis[key];
+        // }
 
-        if (auto node = scope->Iter().Function(name).Find(); node)
-        {
-            Box<Definition> expandedMethodDefinition = Instantiate(node, key, typeArgs);
-            if (!expandedMethodDefinition)
-            {
-                return m_Generis[key];
-            }
-            MemberFunctionDefinition *newMemberFunctionDefinition = expandedMethodDefinition->Into<MemberFunctionDefinition>();
-            FunctionSymbolNode *newFunctionNode = new FunctionSymbolNode{*newMemberFunctionDefinition, scope};
-            scope->Insert(newMemberFunctionDefinition->GetName(), newFunctionNode);
+        // if (auto node = scope->Iter().Function(name).Find(); node)
+        // {
+        //     Box<Definition> expandedMethodDefinition = Instantiate(node, key, typeArgs);
+        //     if (!expandedMethodDefinition)
+        //     {
+        //         return m_Generis[key];
+        //     }
+        //     MemberFunctionDefinition *newMemberFunctionDefinition = expandedMethodDefinition->Into<MemberFunctionDefinition>();
+        //     FunctionSymbolNode *newFunctionNode = new FunctionSymbolNode{*newMemberFunctionDefinition, scope};
+        //     scope->Insert(newMemberFunctionDefinition->GetName(), newFunctionNode);
 
-            expandedMethodDefinition->Analyze(*this);
+        //     expandedMethodDefinition->Analyze(*this);
 
-            Definition *definition = static_cast<Definition *>(scope->GetAstPtr());
-            StructDefinition *structDefinition = definition->Into<StructDefinition>();
-            ImplDefinition *implDefinition = structDefinition->GetImplDefinition();
-            implDefinition->AddMemberFunction(Box<MemberFunctionDefinition>(expandedMethodDefinition.release()->Into<MemberFunctionDefinition>()));
-            return m_Generis[key];
-        }
-        ASSERT_D(false, "Something went wrong");
-        UNREACHABLE();
+        //     Definition *definition = static_cast<Definition *>(scope->GetAstPtr());
+        //     StructDefinition *structDefinition = definition->Into<StructDefinition>();
+        //     ImplDefinition *implDefinition = structDefinition->GetImplDefinition();
+        //     implDefinition->AddMemberFunction(Box<MemberFunctionDefinition>(expandedMethodDefinition.release()->Into<MemberFunctionDefinition>()));
+        //     return m_Generis[key];
+        // }
+        // ASSERT_D(false, "Something went wrong");
+        // UNREACHABLE();
     }
 
     bool SemanticAnalyzer::TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
@@ -148,47 +148,47 @@ namespace Marble
 
     const std::string &SemanticAnalyzer::ConvertMethodIntoFunction(Definition *definition, const std::string &structName, SymbolNode *currentScope)
     {
-        MemberFunctionDefinition *memberFunctionDefinition = definition->TryInto<MemberFunctionDefinition>();
-        if (!memberFunctionDefinition)
-        {
-            ErrorSystem::AddError(*this, definition, "MemberFunction definition expected", true);
-        }
-        MethodInstanceKey key;
-        key.StructName = structName;
-        key.MethodName = definition->GetName();
-        for (auto &param : memberFunctionDefinition->GetPrototype().GetParams())
-        {
-            key.Params.push_back(param->GetTypeSpecifier()->ToString());
-        }
-        if (m_ConvertedMethodsName.contains(key))
-        {
-            return m_ConvertedMethodsName[key];
-        }
+        // MemberFunctionDefinition *memberFunctionDefinition = definition->TryInto<MemberFunctionDefinition>();
+        // if (!memberFunctionDefinition)
+        // {
+        //     ErrorSystem::AddError(*this, definition, "MemberFunction definition expected", true);
+        // }
+        // MethodInstanceKey key;
+        // key.StructName = structName;
+        // key.MethodName = definition->GetName();
+        // for (auto &param : memberFunctionDefinition->GetPrototype().GetParams())
+        // {
+        //     key.Params.push_back(param->GetTypeSpecifier()->ToString());
+        // }
+        // if (m_ConvertedMethodsName.contains(key))
+        // {
+        //     return m_ConvertedMethodsName[key];
+        // }
 
-        FunctionDefinition *functionDefinition = new FunctionDefinition((*memberFunctionDefinition), structName);
-        SymbolTable &table = SymbolTable::GetInstance();
-        FunctionSymbolNode *fnSymbol = new FunctionSymbolNode{*functionDefinition, table.Root()};
-        table.Insert(functionDefinition->GetName(), fnSymbol);
-        currentScope->Insert(functionDefinition->GetName(), new FunctionSymbolNode{*functionDefinition, table.Root()});
-        m_ConvertedMethodsName[key] = functionDefinition->GetName();
-        AddExpandedDefinition(Box<Definition>(functionDefinition));
-        return m_ConvertedMethodsName[key];
+        // FunctionDefinition *functionDefinition = new FunctionDefinition((*memberFunctionDefinition), structName);
+        // SymbolTable &table = SymbolTable::GetInstance();
+        // FunctionSymbolNode *fnSymbol = new FunctionSymbolNode{*functionDefinition, table.Root()};
+        // table.Insert(functionDefinition->GetName(), fnSymbol);
+        // currentScope->Insert(functionDefinition->GetName(), new FunctionSymbolNode{*functionDefinition, table.Root()});
+        // m_ConvertedMethodsName[key] = functionDefinition->GetName();
+        // AddExpandedDefinition(Box<Definition>(functionDefinition));
+        // return m_ConvertedMethodsName[key];
     }
 
     Box<Definition> SemanticAnalyzer::Instantiate(SymbolNode *node, GenericInstanceKey &key, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
 
-        Definition *definition = static_cast<Definition *>(node->GetAstPtr());
-        GenerateGenericKey(key, definition, typeArgs);
-        if (m_Generis.contains(key))
-        {
-            return nullptr;
-        }
-        Box<Identifier> id = CreateExpandedName(definition->GetIdentifier(), typeArgs);
-        m_Generis[key] = id->Id();
-        Box<Definition> expandedDefinition = definition->InstantiateWith(*this, typeArgs);
-        expandedDefinition->SetName(std::move(id));
-        return expandedDefinition;
+        // Definition *definition = static_cast<Definition *>(node->GetAstPtr());
+        // GenerateGenericKey(key, definition, typeArgs);
+        // if (m_Generis.contains(key))
+        // {
+        //     return nullptr;
+        // }
+        // Box<Identifier> id = CreateExpandedName(definition->GetIdentifier(), typeArgs);
+        // m_Generis[key] = id->Id();
+        // Box<Definition> expandedDefinition = definition->InstantiateWith(*this, typeArgs);
+        // expandedDefinition->SetName(std::move(id));
+        // return expandedDefinition;
     }
 
     Box<Identifier> SemanticAnalyzer::CreateExpandedName(const Identifier &id, const std::vector<Ref<TypeSpecifier>> &typeArgs)

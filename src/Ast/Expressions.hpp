@@ -397,8 +397,6 @@ namespace Marble
     void AddArg(Box<Expression> arg, int index);
 
   private:
-    SymbolNode *GetFunctionNode(SemanticAnalyzer &semanticAnalyzer, SymbolNode *scope, const std::string &name);
-
   private:
     Box<Expression> m_FnName;
     Box<Generics> m_Generics;

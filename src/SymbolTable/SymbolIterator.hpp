@@ -2,42 +2,37 @@
 
 #include <string>
 #include <string_view>
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {
     class Ast;
     class SymbolNode;
+    class BlockSymbolNode;
+    class FunctionSymbolNode;
+    class VariableSymbolNode;
+    class StructSymbolNode;
+    class EnumSymbolNode;
     enum class SymbolNodeTypes;
 
     class SymbolIterator
     {
     public:
+        SymbolIterator();
         SymbolIterator(SymbolNode *node);
-        SymbolIterator(const SymbolNode *node);
         ~SymbolIterator() = default;
 
-        SymbolNode *Find();
-        SymbolIterator &Parent();
-        SymbolIterator &Function(std::string_view name);
-        SymbolIterator &Struct(std::string_view name);
-        SymbolIterator &Enum(std::string_view name);
-        SymbolIterator &Variable(std::string_view name);
-        SymbolIterator &StructField(std::string_view name);
-        SymbolIterator &EnumField(std::string_view name);
-
-        size_t Count(SymbolNodeTypes filter);
-        inline bool IsFound() const { return !m_Flag; }
-        SymbolIterator &Reset();
+        FunctionSymbolNode *Function(const std::string &name);
+        StructSymbolNode *Struct(const std::string &name);
+        VariableSymbolNode *Variable(const std::string &name);
+        EnumSymbolNode *Enum(const std::string &name);
 
     private:
-        SymbolNode *const Find(std::string_view name, SymbolNodeTypes nodeType);
-        inline void SetNode(SymbolNode *node) { m_Node = node; };
+        VariableSymbolNode *Variable(BlockSymbolNode *blockNode, const std::string &name);
+        SymbolNode *Find(BlockSymbolNode *node, const std::string &name, SymbolNodeTypes type);
 
     private:
-        SymbolNode *m_Node;
-        SymbolNode *m_StartNode;
-        SymbolNodeTypes m_NodeType;
-        bool m_Flag;
+        BlockSymbolNode *m_Node;
     };
 
 } // namespace Marble

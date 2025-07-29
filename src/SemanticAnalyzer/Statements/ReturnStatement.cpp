@@ -6,22 +6,38 @@ namespace Marble
 {
     Ref<TypeSpecifier> ReturnStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *parent = table.CurrentScope();
+        SymbolTable &table = SymbolTable::Get();
+        BlockSymbolNode *parent = table.CurrentScope()->Into<BlockSymbolNode>();
+        FunctionSymbolNode *fnNode = nullptr;
 
-        while (parent && parent->GetSymbolData().NodeType() != SymbolNodeTypes::Function)
+        while (parent)
         {
-            if (auto node = parent->Iter().Parent().Find(); node)
+            auto node = parent->Parent();
+            if (!node)
             {
-                parent = node;
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function which return statement used into.", true);
+            }
+            auto &data = node->GetSymbolData();
+            if (data.NodeType() == SymbolNodeTypes::Function)
+            {
+                fnNode = node->Into<FunctionSymbolNode>();
+                break;
+            }
+            else if (data.NodeType() == SymbolNodeTypes::Block)
+            {
+                parent = node->Into<BlockSymbolNode>();
             }
             else
             {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find any parent of this symbol", true);
+                ErrorSystem::AddError(semanticAnalyzer, this, "(Cast error) Cannot find function which return statement used into.", true);
             }
         }
 
-        FunctionSymbolNode *fnNode = parent->Into<FunctionSymbolNode>();
+        if (!fnNode)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function which return statement used into.", true);
+        }
+
         Ref<TypeSpecifier> returnType = fnNode->ReturnType();
 
         // TODO: Warn if local addresses returns

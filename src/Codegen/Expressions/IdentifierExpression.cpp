@@ -19,18 +19,19 @@ namespace Marble
 
     llvm::Value *IdentifierExpression::Address(CodegenContext &codegenContext)
     {
-        SymbolNode *node = FindNode();
-        VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
+        TODO("GET ALLOCA");
+        // SymbolNode *node = FindNode();
+        // VariableSymbolNode *variableNode = node->Into<VariableSymbolNode>();
 
-        if (variableNode->IsTempVariable() && variableNode->GetAlloca() == nullptr)
-        {
-            llvm::IRBuilder<> &builder = codegenContext.Builder();
-            llvm::Type *llvmType = variableNode->GetTypeSpecifier()->ToLLVMType(codegenContext);
-            llvm::AllocaInst *alloca = builder.CreateAlloca(llvmType, nullptr);
-            variableNode->SetAlloca(alloca);
-            return alloca;
-        }
+        // if (variableNode->IsTempVariable() && variableNode->GetAlloca() == nullptr)
+        // {
+        //     llvm::IRBuilder<> &builder = codegenContext.Builder();
+        //     llvm::Type *llvmType = variableNode->GetTypeSpecifier()->ToLLVMType(codegenContext);
+        //     llvm::AllocaInst *alloca = builder.CreateAlloca(llvmType, nullptr);
+        //     variableNode->SetAlloca(alloca);
+        //     return alloca;
+        // }
 
-        return variableNode->GetAlloca();
+        // return variableNode->GetAlloca();
     }
 } // namespace Marble

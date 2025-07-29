@@ -73,18 +73,19 @@ namespace Marble
             identifier = &objectTypeSpecifier->UserDefine();
         }
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *node = table.Iter().Struct(identifier->Id()).Find();
-        StructDefinition *structDefinition = static_cast<StructDefinition *>(node->GetAstPtr());
+        TODO("Find struct index");
+        // SymbolTable &table = SymbolTable::GetInstance();
+        // SymbolNode *node = table.Iter().Struct(identifier->Id()).Find();
+        // StructDefinition *structDefinition = static_cast<StructDefinition *>(node->GetAstPtr());
 
         switch (m_Property->ExpressionType())
         {
         case ExpressionType::Identifier:
         {
-            auto identifier = m_Property->Into<IdentifierExpression>();
-            const std::string &fieldName = identifier->GetIdentifier().Id();
-            int index = structDefinition->GetFieldIndex(fieldName);
-            return builder.CreateStructGEP(objectType, objPtr, index);
+            // auto identifier = m_Property->Into<IdentifierExpression>();
+            // const std::string &fieldName = identifier->GetIdentifier().Id();
+            // int index = structDefinition->GetFieldIndex(fieldName);
+            // return builder.CreateStructGEP(objectType, objPtr, index);
         }
         case ExpressionType::ArrayIndex:
         {

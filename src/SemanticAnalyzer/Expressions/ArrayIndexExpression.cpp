@@ -18,20 +18,6 @@ namespace Marble
         }
 
         Ref<TypeSpecifier> exprType = m_Array->Analyze(semanticAnalyzer);
-        if (arrayType != ExpressionType::FunctionCall)
-        {
-        }
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *scope = table.CurrentScope();
-        switch (scope->GetSymbolData().NodeType())
-        {
-        case SymbolNodeTypes::Struct:
-        case SymbolNodeTypes::Enum:
-            table.LeaveScope();
-            break;
-        default:
-            break;
-        }
 
         if (exprType->GetType() == Types::ArrayType)
         {

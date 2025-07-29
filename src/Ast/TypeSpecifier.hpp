@@ -95,6 +95,7 @@ namespace Marble
 
         inline const Types GetType() const { return m_Type; }
         inline void SetType(Types type) { m_Type = type; }
+
         bool IsPrimitive() const;
         static bool IsPrimitive(Types type);
         bool operator==(const TypeSpecifier &obj) const;
@@ -104,6 +105,7 @@ namespace Marble
 
         bool IsIntegerType();
         bool IsFloatingPointType();
+        Ref<TypeSpecifier> Clone();
 
         llvm::Type *ToLLVMType(CodegenContext &codegenContext);
 

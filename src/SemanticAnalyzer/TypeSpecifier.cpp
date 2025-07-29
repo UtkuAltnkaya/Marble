@@ -255,4 +255,8 @@ namespace Marble
         return m_TypeName;
     }
 
+    Ref<TypeSpecifier> TypeSpecifier::Clone()
+    {
+        return MakeRef<TypeSpecifier>(*this);
+    }
 } // namespace Marble

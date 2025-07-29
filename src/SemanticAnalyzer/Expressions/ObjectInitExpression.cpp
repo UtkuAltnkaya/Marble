@@ -13,8 +13,7 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Object name must be identifier expression", true);
         }
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *structNode = table.Root()->Iter().Struct(name.Id()).Find();
+        StructSymbolNode *structNode = SymbolIterator().Struct(name.Id());
         if (!structNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);
@@ -22,12 +21,12 @@ namespace Marble
 
         if (structNode->IsGeneric())
         {
-            auto &a = semanticAnalyzer.InstantiateGenerics(name.Id(), m_Generics.get());
-            name.Id(a);
-            structNode = table.Root()->Iter().Struct(name.Id()).Find();
+            auto &newName = semanticAnalyzer.InstantiateGenerics(name.Id(), m_Generics.get());
+            name.Id(newName);
+            structNode = SymbolIterator().Struct(name.Id());
         }
 
-        size_t size = structNode->Iter().Count(SymbolNodeTypes::StructField);
+        size_t size = structNode->Block()->Size();
         if (m_Fields.size() > size)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Too many fields");
@@ -38,7 +37,7 @@ namespace Marble
         }
         for (auto &field : m_Fields)
         {
-            table.EnterScope(structNode);
+            SymbolTable::Get().EnterScope(structNode);
             field->Analyze(semanticAnalyzer);
         }
         m_ValueType = MakeRef<TypeSpecifier>(name, Span{});
@@ -47,11 +46,10 @@ namespace Marble
 
     Ref<TypeSpecifier> FieldExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *currentScope = table.CurrentScope();
+        SymbolNode *currentScope = SymbolTable::Get().CurrentScope();
+        VariableSymbolNode *fieldNode = SymbolIterator(currentScope->Block()).Variable(m_Name.Id());
+        SymbolTable::Get().LeaveScope();
 
-        SymbolNode *fieldNode = currentScope->Iter().StructField(m_Name.Id()).Find();
-        table.LeaveScope();
         if (!fieldNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);

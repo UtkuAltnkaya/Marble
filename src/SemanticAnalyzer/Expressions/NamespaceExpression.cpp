@@ -18,26 +18,25 @@ namespace Marble
 
         IdentifierExpression *identifierExpression = m_Namespace->Into<IdentifierExpression>();
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *root = table.Root();
+        SymbolTable &table = SymbolTable::Get();
 
         const Identifier &identifier = identifierExpression->GetIdentifier();
 
-        SymbolIterator iter = root->Iter();
+        SymbolIterator iter;
 
-        if (auto node = iter.Struct(identifier.Id()).Find(); node)
+        if (auto node = iter.Struct(identifier.Id()); node)
         {
             if (node->IsGeneric())
             {
                 const std::string &name = semanticAnalyzer.InstantiateGenerics(identifier.Id(), m_Generics.get());
-                node = root->Iter().Struct(name).Find();
+                node = SymbolIterator().Struct(name);
             }
             table.EnterScope(node);
             m_ValueType = m_Value->Analyze(semanticAnalyzer);
             DeSugar(semanticAnalyzer, node, identifier.Id());
             return m_ValueType;
         }
-        if (auto node = iter.Reset().Enum(identifier.Id()).Find(); node)
+        if (auto node = iter.Enum(identifier.Id()); node)
         {
             table.EnterScope(node);
             m_ValueType = m_Value->Analyze(semanticAnalyzer);
@@ -64,16 +63,16 @@ namespace Marble
 
     void NamespaceExpression::DeSugar(SemanticAnalyzer &semanticAnalyzer, SymbolNode *node, const std::string &namespaceName)
     {
-        if (m_Value->ExpressionType() != ExpressionType::FunctionCall)
-        {
-            return;
-        }
-        FunctionCallExpression *fnCallExpression = m_Value->Into<FunctionCallExpression>();
-        IdentifierExpression *identifierExpression = fnCallExpression->FnName().Into<IdentifierExpression>();
-        SymbolNode *fnNode = node->Iter().Function(identifierExpression->GetIdentifier().Id()).Find();
-        ASSERT_D(fnNode != nullptr, "Cannot find function " + identifierExpression->GetIdentifier().Id());
-        const std::string &fnName = semanticAnalyzer.ConvertMethodIntoFunction(static_cast<Definition *>(fnNode->GetAstPtr()), namespaceName, node);
-        identifierExpression->SetId(fnName);
+        // if (m_Value->ExpressionType() != ExpressionType::FunctionCall)
+        // {
+        //     return;
+        // }
+        // FunctionCallExpression *fnCallExpression = m_Value->Into<FunctionCallExpression>();
+        // IdentifierExpression *identifierExpression = fnCallExpression->FnName().Into<IdentifierExpression>();
+        // SymbolNode *fnNode = node->Iter().Function(identifierExpression->GetIdentifier().Id()).Find();
+        // ASSERT_D(fnNode != nullptr, "Cannot find function " + identifierExpression->GetIdentifier().Id());
+        // const std::string &fnName = semanticAnalyzer.ConvertMethodIntoFunction(static_cast<Definition *>(fnNode->GetAstPtr()), namespaceName, node);
+        // identifierExpression->SetId(fnName);
     }
 
     Box<Expression> NamespaceExpression::Clone()

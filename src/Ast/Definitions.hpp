@@ -92,7 +92,7 @@ namespace Marble
         }
 
     protected:
-        void CheckParametersType(SemanticAnalyzer &analyzer, Ref<TypeSpecifier> paramType, SymbolIterator &iter);
+        void CheckParametersType(SemanticAnalyzer &analyzer, Ref<TypeSpecifier> paramType);
 
     protected:
         Marble::DefinitionType m_DefinitionType;

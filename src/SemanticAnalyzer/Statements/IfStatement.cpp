@@ -52,11 +52,10 @@ namespace Marble
 
     void InsertAndAnalyzeBlock(SemanticAnalyzer &semanticAnalyzer, const std::string &name, Statement &blockStatement)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         SymbolNode *parent = table.CurrentScope();
-        SymbolNode *ifNode = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, parent};
-        parent->Insert(name + IDGenerator::Generate(), ifNode);
-
+        BlockSymbolNode *ifNode = new BlockSymbolNode(name, parent);
+        parent->Insert(ifNode);
         table.EnterScope(ifNode);
         blockStatement.Analyze(semanticAnalyzer);
         table.LeaveScope();

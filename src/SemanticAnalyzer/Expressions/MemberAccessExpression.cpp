@@ -15,8 +15,7 @@ namespace Marble
 
         const Identifier &structName = FindStructName(semanticAnalyzer, objectType);
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *structNode = table.Iter().Struct(structName.Id()).Find();
+        StructSymbolNode *structNode = SymbolIterator().Struct(structName.Id());
 
         if (!structNode)
         {
@@ -71,6 +70,17 @@ namespace Marble
 
         ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type", true);
         UNREACHABLE();
+    }
+
+    void MemberAccessExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    {
+        m_Object->SubstituteGenerics(semanticAnalyzer, map);
+        m_Property->SubstituteGenerics(semanticAnalyzer, map);
+    }
+
+    Box<Expression> MemberAccessExpression::Clone()
+    {
+        return MakeBox<MemberAccessExpression>(*this);
     }
 
 } // namespace Marble
@@ -219,11 +229,7 @@ namespace Marble
         return variableNode->GetTypeSpecifier();
     }
 
-    void MemberAccessExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
-    {
-        m_Object->SubstituteGenerics(semanticAnalyzer, map);
-        m_Property->SubstituteGenerics(semanticAnalyzer, map);
-    }
+
 
     void MemberAccessExpression::DeSugar(
         SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, SymbolNode *fnNode, SymbolNode *currentScope)

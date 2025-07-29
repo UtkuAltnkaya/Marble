@@ -38,13 +38,12 @@ namespace Marble
 
     SymbolNode *CodegenContext::GetNamedUserDefinedType(const std::string &name)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolIterator iter = table.Iter();
-        if (auto node = iter.Struct(name).Find(); node)
+        SymbolIterator iter;
+        if (auto node = iter.Struct(name); node)
         {
             return node;
         }
-        if (auto node = iter.Reset().Enum(name).Find(); node)
+        if (auto node = iter.Enum(name); node)
         {
             return node;
         }

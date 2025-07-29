@@ -12,12 +12,9 @@ namespace Marble
 
     enum class SymbolNodeTypes
     {
-        Global,
         Function,
         Struct,
-        StructField,
         Enum,
-        EnumField,
         Block,
         Variable,
     };
@@ -27,14 +24,16 @@ namespace Marble
         Variable,
         Function,
         Struct,
+        Enum,
+        Block,
         None,
     };
 
     class SymbolData
     {
     public:
-        SymbolData(SymbolAccess access, SymbolNodeTypes nodeType, SymbolNodeBaseTypes baseType = SymbolNodeBaseTypes::None)
-            : m_Access{access}, m_NodeType{nodeType}, m_BaseType{baseType}
+        SymbolData(const std::string &name, SymbolAccess access, SymbolNodeTypes nodeType, SymbolNodeBaseTypes baseType = SymbolNodeBaseTypes::None)
+            : m_Name{name}, m_Access{access}, m_NodeType{nodeType}, m_BaseType{baseType}
         {
         }
         ~SymbolData() = default;
@@ -60,9 +59,13 @@ namespace Marble
         inline SymbolAccess Access() const { return m_Access; }
         inline SymbolNodeTypes NodeType() const { return m_NodeType; }
         inline SymbolNodeBaseTypes BaseType() const { return m_BaseType; }
-        inline void SetAccess(SymbolAccess access) { m_Access = access; }
+        inline const std::string &Name() const { return m_Name; }
+
+        inline void Name(const std::string &name) { m_Name = name; }
+        inline void Access(SymbolAccess access) { m_Access = access; }
 
     private:
+        std::string m_Name;
         SymbolAccess m_Access;
         SymbolNodeTypes m_NodeType;
         SymbolNodeBaseTypes m_BaseType;
