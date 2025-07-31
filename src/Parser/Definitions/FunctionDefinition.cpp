@@ -80,7 +80,7 @@ namespace Marble
         accessSpecifier, std::move(functionName), std::move(generics),
         std::move(params), returnType, std::move(block), Span{start.Start, end.Start});
 
-    SymbolTable::Get().Insert(*fnDefinition);
+    SymbolTable::Get().Insert(*fnDefinition, false);
     return fnDefinition;
   }
 

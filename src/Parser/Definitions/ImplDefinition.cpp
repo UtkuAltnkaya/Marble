@@ -60,17 +60,7 @@ namespace Marble
 
         const Span &end = parser.Current().Span();
 
-        Box<ImplDefinition> implDefinition = MakeBox<ImplDefinition>(
-            implName, std::move(generics), std::move(memberFunctions), Span{start.Start, end.Start});
-
-        implDefinition->CreateSymbol();
-
-        return implDefinition;
-    }
-
-    void ImplDefinition::AddMemberFunction(Box<MemberFunctionDefinition> memberFunction)
-    {
-        m_MemberFunctions.push_back(std::move(memberFunction));
+        return MakeBox<ImplDefinition>(implName, std::move(generics), std::move(memberFunctions), Span{start.Start, end.Start});
     }
 
     MemberFunctionDefinition::MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span)

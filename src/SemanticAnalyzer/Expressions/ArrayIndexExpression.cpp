@@ -1,7 +1,7 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "ErrorSystem/CompilerError.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+
 namespace Marble
 {
     Ref<TypeSpecifier> ArrayIndexExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)

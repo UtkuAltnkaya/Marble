@@ -12,6 +12,8 @@ namespace Marble
   class FunctionCallExpression;
   class IdentifierExpression;
   class SymbolNode;
+  class BlockSymbolNode;
+  class StructSymbolNode;
   enum class SymbolAccess;
   enum class ConversionKind;
 
@@ -354,23 +356,19 @@ namespace Marble
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
     bool IsAssignable() const override { return m_Object->IsAssignable(); }
 
-    void DeSugar(
-        SemanticAnalyzer &semanticAnalyzer,
-        FunctionCallExpression *fnCallExpression, const Identifier *structName, SymbolNode *fnNode, SymbolNode *currentScope);
-
   private:
     const Identifier &FindStructName(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> objectType);
-    void CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer);
-    Ref<TypeSpecifier> AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, bool &isPublic);
-    Ref<TypeSpecifier> AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, IdentifierExpression *identifierExpression, bool &isPublic);
-    bool CheckAccessSpecifier(SymbolAccess access);
-    IdentifierExpression *GetTempIdentifier();
+    Ref<TypeSpecifier> AnalyzeObject(SemanticAnalyzer &semanticAnalyzer);
+    bool AnalyzeProperty(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, StructSymbolNode *structNode);
+    void AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, bool &isPublic);
+    void AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, StructSymbolNode *structNode, bool &isPublic);
+    Box<Expression> CreateObjectPointer(StructSymbolNode *structNode);
+    Ref<TypeSpecifier> CheckVisibility(SemanticAnalyzer &semanticAnalyzer, bool isPublic);
 
   private:
     Box<Expression> m_Object;
     TokenType m_AccessType;
     Box<Expression> m_Property;
-    Box<Expression> m_TempValue;
   };
 
   class FunctionCallExpression : public Expression
@@ -391,6 +389,7 @@ namespace Marble
 
     inline const Expression &FnName() const { return *m_FnName.get(); }
     inline Expression &FnName() { return *m_FnName.get(); }
+    inline void FnName(Box<Expression> fnName) { m_FnName = std::move(fnName); }
     inline const Generics *const GetGenerics() { return m_Generics.get(); }
     inline const std::vector<Box<Expression>> &GetArgs() const { return m_Args; }
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;

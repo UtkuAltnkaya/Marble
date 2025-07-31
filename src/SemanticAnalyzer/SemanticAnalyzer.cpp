@@ -30,10 +30,52 @@ namespace Marble
                   vec.end());
     }
 
+    void SemanticAnalyzer::RegisterFunction(Box<FunctionDefinition> functionDefinition)
+    {
+        m_Program->Definitions().push_back(std::move(functionDefinition));
+    }
+
+    void SemanticAnalyzer::RegisterMethod(const std::string &implName, const MemberFunctionDefinition &memberFunctionDefinition, const std::string &functionName)
+    {
+        MemberFunctionInstanceKey key;
+    }
+
+    bool SemanticAnalyzer::TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
+    {
+        ConversionKind conversionKind = m_Conversion.CanConvert(from, to);
+        if (conversionKind == ConversionKind::None)
+        {
+            return false;
+        }
+        if (conversionKind == ConversionKind::Identity)
+        {
+            return true;
+        }
+        Span span = expr->GetSpan();
+        expr = MakeBox<CastExpression>(to, std::move(expr), conversionKind, span);
+        return true;
+    }
+
+    ConversionKind SemanticAnalyzer::CanConvert(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
+    {
+        return m_Conversion.CanConvert(from, to);
+    }
+
+    Ref<TypeSpecifier> SemanticAnalyzer::UnifyArithmeticTypes(Ref<TypeSpecifier> a, Ref<TypeSpecifier> b)
+    {
+        if (*a == *b)
+        {
+            return a;
+        }
+        int rankA = RankTypes(a->GetType());
+        int rankB = RankTypes(b->GetType());
+        return (rankA >= rankB) ? a : b;
+    }
+
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const Generics *generics)
     {
-        ASSERT_A(generics != nullptr, "Generic must be provided");
-        return InstantiateGenerics(name, generics->Types());
+        // ASSERT_A(generics != nullptr, "Generic must be provided");
+        // return InstantiateGenerics(name, generics->Types());
     }
 
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs)
@@ -114,38 +156,6 @@ namespace Marble
         // UNREACHABLE();
     }
 
-    bool SemanticAnalyzer::TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
-    {
-        ConversionKind conversionKind = m_Conversion.CanConvert(from, to);
-        if (conversionKind == ConversionKind::None)
-        {
-            return false;
-        }
-        if (conversionKind == ConversionKind::Identity)
-        {
-            return true;
-        }
-        Span span = expr->GetSpan();
-        expr = MakeBox<CastExpression>(to, std::move(expr), conversionKind, span);
-        return true;
-    }
-
-    ConversionKind SemanticAnalyzer::CanConvert(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
-    {
-        return m_Conversion.CanConvert(from, to);
-    }
-
-    Ref<TypeSpecifier> SemanticAnalyzer::UnifyArithmeticTypes(Ref<TypeSpecifier> a, Ref<TypeSpecifier> b)
-    {
-        if (*a == *b)
-        {
-            return a;
-        }
-        int rankA = RankTypes(a->GetType());
-        int rankB = RankTypes(b->GetType());
-        return (rankA >= rankB) ? a : b;
-    }
-
     const std::string &SemanticAnalyzer::ConvertMethodIntoFunction(Definition *definition, const std::string &structName, SymbolNode *currentScope)
     {
         // MemberFunctionDefinition *memberFunctionDefinition = definition->TryInto<MemberFunctionDefinition>();
@@ -193,58 +203,58 @@ namespace Marble
 
     Box<Identifier> SemanticAnalyzer::CreateExpandedName(const Identifier &id, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
-        std::string finalName = id.Id();
-        for (auto &type : typeArgs)
-        {
-            finalName += "_" + type->ToString();
-        }
-        finalName += "_" + IDGenerator::Generate();
+        // std::string finalName = id.Id();
+        // for (auto &type : typeArgs)
+        // {
+        //     finalName += "_" + type->ToString();
+        // }
+        // finalName += "_" + IDGenerator::Generate();
 
-        return MakeBox<Identifier>(finalName, id.GetSpan());
+        // return MakeBox<Identifier>(finalName, id.GetSpan());
     }
 
     void SemanticAnalyzer::AddExpandedDefinition(Box<Definition> definition)
     {
-        auto &definitions = m_Program->Definitions();
-        for (auto &def : definitions)
-        {
-            if (def->GetName() == definition->GetName() && definition->DefinitionType() == def->DefinitionType())
-            {
-                return;
-            }
-        }
-        definitions.push_back(std::move(definition));
+        // auto &definitions = m_Program->Definitions();
+        // for (auto &def : definitions)
+        // {
+        //     if (def->GetName() == definition->GetName() && definition->DefinitionType() == def->DefinitionType())
+        //     {
+        //         return;
+        //     }
+        // }
+        // definitions.push_back(std::move(definition));
     }
 
     void SemanticAnalyzer::GenerateGenericKey(GenericInstanceKey &key, const Definition *definition, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
-        key.Name = definition->GetName();
-        key.KeyType = GenericInstanceKey::FromDefinitionType((int)definition->DefinitionType());
-        for (auto &type : typeArgs)
-        {
-            key.TypeArgumentNames.emplace_back(type->ToString());
-        }
+        // key.Name = definition->GetName();
+        // key.KeyType = GenericInstanceKey::FromDefinitionType((int)definition->DefinitionType());
+        // for (auto &type : typeArgs)
+        // {
+        //     key.TypeArgumentNames.emplace_back(type->ToString());
+        // }
     }
 
     void SemanticAnalyzer::ExpandNestedGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
-        auto &vector = const_cast<std::vector<Ref<TypeSpecifier>> &>(typeArgs);
-        size_t size = typeArgs.size();
-        for (int i = 0; i < size; i++)
-        {
-            auto &type = vector[i];
-            if (type->GetType() != Types::GenericType)
-            {
-                continue;
-            }
-            auto &nestedGeneric = type->Generic();
-            const std::string &name = InstantiateGenerics(nestedGeneric.OuterType.Id(), nestedGeneric.InnerType);
-            Span span;
-            span.Start = nestedGeneric.OuterType.GetSpan().Start;
-            span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
-            auto expanded = MakeRef<TypeSpecifier>(Identifier{name, span}, span);
-            vector[i].swap(expanded);
-        }
+        // auto &vector = const_cast<std::vector<Ref<TypeSpecifier>> &>(typeArgs);
+        // size_t size = typeArgs.size();
+        // for (int i = 0; i < size; i++)
+        // {
+        //     auto &type = vector[i];
+        //     if (type->GetType() != Types::GenericType)
+        //     {
+        //         continue;
+        //     }
+        //     auto &nestedGeneric = type->Generic();
+        //     const std::string &name = InstantiateGenerics(nestedGeneric.OuterType.Id(), nestedGeneric.InnerType);
+        //     Span span;
+        //     span.Start = nestedGeneric.OuterType.GetSpan().Start;
+        //     span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
+        //     auto expanded = MakeRef<TypeSpecifier>(Identifier{name, span}, span);
+        //     vector[i].swap(expanded);
+        // }
     }
 
     int RankTypes(Types t)

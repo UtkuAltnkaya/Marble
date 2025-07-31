@@ -258,8 +258,6 @@ namespace Marble
         ~MemberFunctionPrototypeDefinition() = default;
 
         static Box<MemberFunctionPrototypeDefinition> Parse(Parser &parser);
-        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
         Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
@@ -296,8 +294,6 @@ namespace Marble
 
         static Box<MemberFunctionDefinition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
-        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
         Box<Definition> Clone() override;
 
         inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
@@ -322,7 +318,6 @@ namespace Marble
         ~ImplDefinition() = default;
         static Box<Definition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
-        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
 
         inline const std::string &GetName() const override { return m_ImplName->ToString(); }
@@ -333,13 +328,6 @@ namespace Marble
         inline bool IsGeneric() const override { return m_Generics != nullptr; }
         inline void SetImplName(Ref<TypeSpecifier> implName) { m_ImplName = implName; }
         inline void SetName(Box<Identifier> name) override { ASSERT_A(false, "Use SetImplName function"); }
-
-        void CreateSymbol();
-        void AddMemberFunction(Box<MemberFunctionDefinition> memberFunction);
-
-    private:
-        SymbolNode *HandleRoot(SymbolNode *node);
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         Ref<TypeSpecifier> m_ImplName;

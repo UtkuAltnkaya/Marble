@@ -31,6 +31,7 @@ namespace Marble
 
         inline bool operator==(const Identifier &obj) const { return m_Id == obj.m_Id; }
         inline bool operator!=(const Identifier &obj) const { return m_Id != obj.m_Id; }
+        inline const std::string &operator*() const { return m_Id; }
 
     private:
         std::string m_Id;

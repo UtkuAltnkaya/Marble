@@ -11,13 +11,13 @@ namespace Marble
 {
     class File;
 
-    struct MethodInstanceKey
+    struct MemberFunctionInstanceKey
     {
         std::string MethodName;
         std::string StructName;
         std::vector<std::string> Params;
 
-        bool operator==(const MethodInstanceKey &obj) const
+        bool operator==(const MemberFunctionInstanceKey &obj)
         {
             if (obj.Params.size() != Params.size())
             {
@@ -35,9 +35,9 @@ namespace Marble
         }
     };
 
-    struct MethodInstanceKeyHasher
+    struct MemberFunctionInstanceKeyHasher
     {
-        std::size_t operator()(const MethodInstanceKey &key) const
+        std::size_t operator()(const MemberFunctionInstanceKey &key) const
         {
             size_t result = std::hash<std::string>()(key.MethodName);
             result ^= std::hash<std::string>()(key.StructName) + 0x9e3779b9 + (result << 6) + (result >> 2);
@@ -58,14 +58,17 @@ namespace Marble
         ~SemanticAnalyzer() = default;
 
         void Analyze();
-        const std::string &InstantiateGenerics(const std::string &name, const Generics *generics);
-        const std::string &InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
         bool TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
         ConversionKind CanConvert(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
         Ref<TypeSpecifier> UnifyArithmeticTypes(Ref<TypeSpecifier> a, Ref<TypeSpecifier> b);
+        inline const Marble::File &File() const { return m_File; }
+        void RegisterFunction(Box<FunctionDefinition> functionDefinition);
+        void RegisterMethod(const std::string &implName, const MemberFunctionDefinition &memberFunctionDefinition, const std::string &functionName);
+
+        const std::string &InstantiateGenerics(const std::string &name, const Generics *generics);
+        const std::string &InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
         const std::string &ConvertMethodIntoFunction(Definition *definition, const std::string &structName, SymbolNode *currectScope);
         void AddExpandedDefinition(Box<Definition> definition);
-        inline const Marble::File &File() const { return m_File; }
 
     private:
         void GenerateGenericKey(GenericInstanceKey &key, const Definition *definition, const std::vector<Ref<TypeSpecifier>> &typeArgs);
@@ -78,7 +81,7 @@ namespace Marble
         Conversion m_Conversion;
         Ref<Program> m_Program;
         std::unordered_map<GenericInstanceKey, std::string, GenericInstanceKeyHasher> m_Generis;
-        std::unordered_map<MethodInstanceKey, std::string, MethodInstanceKeyHasher> m_ConvertedMethodsName;
+        std::unordered_map<MemberFunctionInstanceKey, std::string, MemberFunctionInstanceKeyHasher> m_ConvertedMemberFunctionsName;
     };
 
 } // namespace Marble

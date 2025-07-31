@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <optional>
 #include <vector>
 
 #include "Ast/Definitions.hpp"
@@ -80,10 +81,12 @@ namespace Marble
         StructSymbolNode(const StructDefinition &structDefinition);
         ~StructSymbolNode() = default;
 
-        inline const std::unordered_set<std::string> &Methods() const { return m_Methods; }
+        inline const std::unordered_map<std::string, std::string> &Methods() const { return m_Methods; }
+        void InsertMethod(const std::string &methodName, const std::string &functionName);
+        std::optional<std::reference_wrapper<const std::string>> LookFunctionName(const std::string &methodName);
 
     private:
-        std::unordered_set<std::string> m_Methods;
+        std::unordered_map<std::string, std::string> m_Methods;
     };
 
     class EnumSymbolNode : public SymbolNode
@@ -93,9 +96,13 @@ namespace Marble
         EnumSymbolNode(const EnumDefinition &enumDefinition);
         ~EnumSymbolNode() = default;
 
+        inline const std::unordered_map<std::string, std::string> &Methods() const { return m_Methods; }
+        void InsertMethod(const std::string &methodName, const std::string &functionName);
+        std::optional<std::reference_wrapper<const std::string>> LookFunctionName(const std::string &methodName);
+
     private:
         std::unordered_set<std::string> m_EnumFields;
-        std::unordered_set<std::string> m_Methods;
+        std::unordered_map<std::string, std::string> m_Methods;
     };
 
     class FunctionSymbolNode : public SymbolNode
@@ -103,14 +110,16 @@ namespace Marble
     public:
         static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Function;
 
-        FunctionSymbolNode(const FunctionDefinition &fnDefinition);
+        FunctionSymbolNode(const FunctionDefinition &fnDefinition, bool isMethod);
         ~FunctionSymbolNode() = default;
 
         inline const Ref<TypeSpecifier> ReturnType() const { return m_ReturnType; }
         inline const std::vector<Ref<TypeSpecifier>> &Params() const { return m_Params; }
         inline void ReturnType(Ref<TypeSpecifier> returnType) { m_ReturnType = returnType; }
+        inline bool IsMethod() const { return m_IsMethod; }
 
     private:
+        bool m_IsMethod;
         Ref<TypeSpecifier> m_ReturnType;
         std::vector<Ref<TypeSpecifier>> m_Params;
     };

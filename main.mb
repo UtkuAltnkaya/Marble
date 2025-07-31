@@ -1,5 +1,5 @@
 struct Person {
-    pub name: char*
+    name: char*
 }
 
 struct ClassRoom {
@@ -13,15 +13,26 @@ impl Person {
     }
 }
 
+impl ClassRoom {
+    pub fn (c:ClassRoom*) start_course() -> void {
+        let t = &c->teacher;
+    }
+
+    pub fn (c:ClassRoom*) get_teacher() -> Person {
+        return c->teacher;
+    }
+}
+
+
 
 fn main() -> int {
-    let classRoom =  ClassRoom {
+    let classRoom  = ClassRoom {
         teacher: Person {
-            name: null
+            name: null,
         }
     };
 
-    let name = classRoom.teacher.get_name();
+    let teacher_name = classRoom.get_teacher().get_name();
 
-    return 1;
+    return 0;
 }

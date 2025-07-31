@@ -7,32 +7,7 @@ namespace Marble
     Ref<TypeSpecifier> ReturnStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
         SymbolTable &table = SymbolTable::Get();
-        BlockSymbolNode *parent = table.CurrentScope()->Into<BlockSymbolNode>();
-        FunctionSymbolNode *fnNode = nullptr;
-
-        while (parent)
-        {
-            auto node = parent->Parent();
-            if (!node)
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function which return statement used into.", true);
-            }
-            auto &data = node->GetSymbolData();
-            if (data.NodeType() == SymbolNodeTypes::Function)
-            {
-                fnNode = node->Into<FunctionSymbolNode>();
-                break;
-            }
-            else if (data.NodeType() == SymbolNodeTypes::Block)
-            {
-                parent = node->Into<BlockSymbolNode>();
-            }
-            else
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "(Cast error) Cannot find function which return statement used into.", true);
-            }
-        }
-
+        FunctionSymbolNode *fnNode = SymbolIterator(table.CurrentScope()).Function();
         if (!fnNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function which return statement used into.", true);

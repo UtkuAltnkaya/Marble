@@ -25,7 +25,7 @@ namespace Marble
 
     void SymbolNode::Insert(SymbolNode *node)
     {
-        ASSERT_A(m_SymbolData.NodeType() != SymbolNodeTypes::Block, "Node must be block type");
+        ASSERT_A(m_SymbolData.NodeType() == SymbolNodeTypes::Block, "Node must be block type");
         Into<BlockSymbolNode>()->Insert(node);
     }
 
@@ -37,8 +37,30 @@ namespace Marble
         for (auto &field : structDefinition.GetFields())
         {
             auto fieldDefinition = field->Into<StructFieldDefinition>();
-            m_Block->Insert(new VariableSymbolNode{fieldDefinition->GetField()});
+            auto node = new VariableSymbolNode(
+                fieldDefinition->GetIdentifier().Id(),
+                SymbolData::FromAccessSpecifier(fieldDefinition->GetAccessSpecifier()),
+                fieldDefinition->GetField().GetTypeSpecifier());
+            m_Block->Insert(node);
         }
+    }
+
+    void StructSymbolNode::InsertMethod(const std::string &methodName, const std::string &functionName)
+    {
+        if (m_Methods.contains(methodName))
+        {
+            ErrorSystem::AddError("Function already inserted");
+        }
+        m_Methods[methodName] = functionName;
+    }
+
+    std::optional<std::reference_wrapper<const std::string>> StructSymbolNode::LookFunctionName(const std::string &methodName)
+    {
+        if (m_Methods.contains(methodName))
+        {
+            return m_Methods[methodName];
+        }
+        return std::nullopt;
     }
 
     EnumSymbolNode::EnumSymbolNode(const EnumDefinition &enumDefinition)
@@ -55,9 +77,28 @@ namespace Marble
         }
     }
 
-    FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition)
+    void EnumSymbolNode::InsertMethod(const std::string &methodName, const std::string &functionName)
+    {
+        if (m_Methods.contains(methodName))
+        {
+            ErrorSystem::AddError("Function already inserted");
+        }
+        m_Methods[methodName] = functionName;
+    }
+
+    std::optional<std::reference_wrapper<const std::string>> EnumSymbolNode::LookFunctionName(const std::string &methodName)
+    {
+        if (m_Methods.contains(methodName))
+        {
+            return m_Methods[methodName];
+        }
+        return std::nullopt;
+    }
+
+    FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition, bool isMethod)
         : SymbolNode{SymbolData{fnDefinition.GetName(), SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()),
-                                SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}}
+                                SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}},
+          m_IsMethod{isMethod}
     {
         m_ReturnType = fnDefinition.GetReturnType()->Clone();
         Block();

@@ -10,6 +10,7 @@ namespace Marble
     SymbolTable::SymbolTable()
     {
         m_Root = new BlockSymbolNode{"Global", nullptr};
+        EnterScope(m_Root);
     }
 
     SymbolTable::~SymbolTable()
@@ -61,9 +62,9 @@ namespace Marble
         root->Insert(node);
     }
 
-    void SymbolTable::Insert(const FunctionDefinition &functionDefinition)
+    void SymbolTable::Insert(const FunctionDefinition &functionDefinition, bool isMethod)
     {
-        Insert(new FunctionSymbolNode{functionDefinition});
+        Insert(new FunctionSymbolNode{functionDefinition, isMethod});
     }
 
     void SymbolTable::Insert(const StructDefinition &structDefinition)

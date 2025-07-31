@@ -9,175 +9,63 @@ namespace Marble
 
     Ref<TypeSpecifier> ImplDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::Get();
-        SymbolNode *node = table.Root();
-
-        if (!m_ImplName->IsPrimitive())
+        SymbolNode *node;
+        node = SymbolIterator().Struct(GetName());
+        if (!node)
         {
-            node = HandleRoot(node);
-        }
-
-        table.EnterScope(node);
-        for (auto &memberFunction : m_MemberFunctions)
-        {
-            if (!memberFunction->IsGeneric() && !memberFunction->IsAnalyzed())
+            node = SymbolIterator().Enum(GetName());
+            if (!node)
             {
-                memberFunction->Analyze(semanticAnalyzer);
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find related struct or enum", true);
             }
         }
-        table.LeaveScope();
-
+        SymbolScopeGuard guard{node};
+        for (auto &memberFunction : m_MemberFunctions)
+        {
+            memberFunction->Analyze(semanticAnalyzer);
+        }
         return TypeSpecifierOk;
     }
 
     Ref<TypeSpecifier> MemberFunctionDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::Get();
-        SymbolNode *node = table.CurrentScope();
-        SymbolNode *fnNode = SymbolIterator(node)
-                                 .Function(m_Prototype->GetName());
-        if (!fnNode)
-        {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function in this scope", true);
-        }
+        SymbolNode *node = SymbolTable::Get().CurrentScope();
 
+        Box<Identifier> functionName = MakeBox<Identifier>(node->GetSymbolData().Name() + "_" + m_Prototype->GetName() + "_" + IDGenerator::Generate(), Span{});
+
+        size_t paramSize = m_Prototype->m_Params.size();
+        std::vector<Box<VariableType>> params;
+        params.reserve(paramSize);
+        if (m_Prototype->m_Method)
+        {
+            params.push_back(std::move(m_Prototype->m_Method));
+        }
         for (auto &param : m_Prototype->m_Params)
         {
-            Ref<TypeSpecifier> paramType = param->GetTypeSpecifier();
-            if (paramType->IsPrimitive())
-            {
-                continue;
-            }
-            CheckParametersType(semanticAnalyzer, paramType);
+            params.push_back(std::move(param));
         }
 
-        table.EnterScope(fnNode);
-        m_Block->Analyze(semanticAnalyzer);
-        table.LeaveScope();
-
-        if (m_Prototype->GetReturnType()->GetType() == Types::Void)
+        if (auto structNode = node->TryInto<StructSymbolNode>(); structNode)
         {
-            return TypeSpecifierOk;
+            structNode->InsertMethod(m_Prototype->m_Name->Id(), functionName->Id());
+        }
+        else
+        {
+            auto enumNode = node->Into<EnumSymbolNode>();
+            enumNode->InsertMethod(m_Prototype->m_Name->Id(), functionName->Id());
         }
 
-        BlockStatement *block = static_cast<BlockStatement *>(m_Block.get());
+        AccessSpecifier accessSpecifier = m_Prototype->GetAccessSpecifier();
+        Box<Generics> generics = std::move(m_Prototype->m_Generics);
+        Ref<TypeSpecifier> returnType = m_Prototype->m_ReturnType;
+        Box<Statement> block = std::move(m_Block);
+        Box<FunctionDefinition> fnDefinition =
+            MakeBox<FunctionDefinition>(accessSpecifier, std::move(functionName), std::move(generics), std::move(params), returnType, std::move(block), m_Span);
 
-        const std::vector<Box<Statement>> &statements = block->Statements();
-        if (statements.size() == 0)
-        {
-            ErrorSystem::AddWarn(semanticAnalyzer, this, "Empty function body");
-        }
-        else if (statements.back()->StatementType() == StatementType::Return)
-        {
-            return TypeSpecifierOk;
-        }
-        ErrorSystem::AddError(semanticAnalyzer, this, "Return statement expected");
+        SymbolTable::Get().Insert(*fnDefinition, true);
+        semanticAnalyzer.RegisterFunction(std::move(fnDefinition));
+
         return TypeSpecifierOk;
-    }
-
-    Box<Definition> ImplDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-        Box<Definition> clonedImplDef = Clone();
-        ImplDefinition *castedImplDef = clonedImplDef->Into<ImplDefinition>();
-        auto map = m_Generics->ToMap(typeArgs);
-        castedImplDef->SubstituteGenerics(semanticAnalyzer, map);
-        castedImplDef->m_Generics.reset();
-        m_IsExpanded = true;
-        return clonedImplDef;
-    }
-
-    void ImplDefinition::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
-    {
-        for (auto &memberFunction : m_MemberFunctions)
-        {
-            memberFunction->SubstituteGenerics(semanticAnalyzer, map);
-        }
-    }
-
-    void ImplDefinition::CreateSymbol()
-    {
-        // SymbolTable &table = SymbolTable::GetInstance();
-        // SymbolNode *node = table.Root();
-
-        // if (!m_ImplName->IsPrimitive())
-        // {
-        //     node = HandleRoot(node);
-        // }
-
-        // for (auto &memberFunction : m_MemberFunctions)
-        // {
-        //     node->Insert(memberFunction->GetPrototype().GetName(), new FunctionSymbolNode{*memberFunction.get(), node});
-        // }
-    }
-
-    Box<Definition> MemberFunctionDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-        Box<MemberFunctionDefinition> clonedMemberFn = MakeBox<MemberFunctionDefinition>(*this);
-        auto map = m_Prototype->GetGenerics()->ToMap(typeArgs);
-        clonedMemberFn->SubstituteGenerics(semanticAnalyzer, map);
-        clonedMemberFn->m_Prototype->m_Generics.reset();
-        m_IsExpanded = true;
-        m_Prototype->m_IsExpanded = true;
-        return Box<Definition>(clonedMemberFn.release());
-    }
-
-    void MemberFunctionDefinition::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
-    {
-        m_Prototype->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
-    }
-
-    Box<Definition> MemberFunctionPrototypeDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-        Box<MemberFunctionPrototypeDefinition> clonedMemberFnPrototype = MakeBox<MemberFunctionPrototypeDefinition>(*this);
-        auto map = m_Generics->ToMap(typeArgs);
-        clonedMemberFnPrototype->SubstituteGenerics(semanticAnalyzer, map);
-
-        std::string name = clonedMemberFnPrototype->GetName();
-        for (auto &type : typeArgs)
-        {
-            name += "_" + type->ToString();
-        }
-        name += "_" + IDGenerator::Generate();
-        clonedMemberFnPrototype->m_Name = MakeBox<Identifier>(name, clonedMemberFnPrototype->m_Name->GetSpan());
-        clonedMemberFnPrototype->m_Generics.reset();
-        m_IsExpanded = true;
-        return Box<Definition>(clonedMemberFnPrototype.release());
-    }
-
-    void MemberFunctionPrototypeDefinition::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
-    {
-        if (m_Method)
-        {
-            m_Method->GetTypeSpecifier()->SubstituteGenerics(semanticAnalyzer, map);
-        }
-        for (auto &param : m_Params)
-        {
-            param->GetTypeSpecifier()->SubstituteGenerics(semanticAnalyzer, map);
-        }
-        m_ReturnType->SubstituteGenerics(semanticAnalyzer, map);
-    }
-
-    SymbolNode *ImplDefinition::HandleRoot(SymbolNode *node)
-    {
-        // SymbolIterator iter = node->Iter();
-        // const std::string &name = m_ImplName->UserDefine().Id();
-
-        // if (auto symbolNode = iter.Struct(name).Find(); symbolNode)
-        // {
-        //     auto structNode = static_cast<StructDefinition *>(symbolNode->GetAstPtr());
-        //     if (structNode && !structNode->GetImplDefinition())
-        //     {
-        //         structNode->SetImplDefinition(this);
-        //     }
-        //     return symbolNode;
-        // }
-        // if (auto symbolNode = iter.Reset().Enum(name).Find(); symbolNode)
-        // {
-        //     return symbolNode;
-        // }
-        // ErrorSystem::AddError("No such struct or enum", nullptr, true);
-        // UNREACHABLE();
     }
 
     Box<Definition> ImplDefinition::Clone()

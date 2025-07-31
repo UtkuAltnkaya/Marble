@@ -11,15 +11,16 @@ namespace Marble
         case ExpressionType::NameSpace:
         case ExpressionType::FunctionCall:
         {
-            llvm::Value *result = m_Object->Codegen(codegenContext);
-            IdentifierExpression *tempIdentifier = GetTempIdentifier();
-            if (!tempIdentifier)
-            {
-                throw "Temp oject call must have temp variable";
-            }
-            llvm::Value *tempAddr = tempIdentifier->Address(codegenContext);
-            codegenContext.Builder().CreateStore(result, tempAddr);
-            break;
+            TODO("TEMP IDENTIFIER");
+            // llvm::Value *result = m_Object->Codegen(codegenContext);
+            // IdentifierExpression *tempIdentifier = GetTempIdentifier();
+            // if (!tempIdentifier)
+            // {
+            //     throw "Temp oject call must have temp variable";
+            // }
+            // llvm::Value *tempAddr = tempIdentifier->Address(codegenContext);
+            // codegenContext.Builder().CreateStore(result, tempAddr);
+            // break;
         }
         default:
             break;
@@ -106,12 +107,4 @@ namespace Marble
         }
     }
 
-    IdentifierExpression *MemberAccessExpression::GetTempIdentifier()
-    {
-        if (!m_TempValue)
-        {
-            return nullptr;
-        }
-        return m_TempValue->TryInto<IdentifierExpression>();
-    }
 } // namespace Marble

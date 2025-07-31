@@ -11,7 +11,6 @@ namespace Marble
         case Types::UserDefine:
         {
             SymbolIterator iter;
-
             if (auto node = iter.Struct(paramType->ToString()); node)
             {
                 return;

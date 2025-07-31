@@ -8,37 +8,35 @@ namespace Marble
 {
     Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        CheckObjectExpressionType(semanticAnalyzer);
-        Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
-        bool constFlag = objectType->GetType() == Types::ConstantType;
-        objectType = TypeSpecifier::PassConst(objectType);
-
+        Ref<TypeSpecifier> objectType = AnalyzeObject(semanticAnalyzer);
         const Identifier &structName = FindStructName(semanticAnalyzer, objectType);
-
         StructSymbolNode *structNode = SymbolIterator().Struct(structName.Id());
-
         if (!structNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find struct in this scope", true);
         }
-
-        return nullptr;
+        BlockSymbolNode *properties = structNode->Block();
+        bool isPublic = AnalyzeProperty(semanticAnalyzer, properties, structNode);
+        return CheckVisibility(semanticAnalyzer, isPublic);
     }
 
-    void MemberAccessExpression::CheckObjectExpressionType(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeObject(SemanticAnalyzer &semanticAnalyzer)
     {
         switch (m_Object->ExpressionType())
         {
-
         case ExpressionType::FunctionCall:
         case ExpressionType::Identifier:
         case ExpressionType::ArrayIndex:
         case ExpressionType::NameSpace:
+        case ExpressionType::MemberAccess:
             break;
         default:
             ErrorSystem::AddError(semanticAnalyzer, this, "Invalid object expression", true);
             break;
         }
+        Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
+        bool constFlag = objectType->GetType() == Types::ConstantType;
+        return TypeSpecifier::PassConst(objectType);
     }
 
     const Identifier &MemberAccessExpression::FindStructName(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> objectType)
@@ -72,6 +70,98 @@ namespace Marble
         UNREACHABLE();
     }
 
+    bool MemberAccessExpression::AnalyzeProperty(
+        SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, StructSymbolNode *structNode)
+    {
+        bool isPublic = false;
+        switch (m_Property->ExpressionType())
+        {
+        case ExpressionType::Identifier:
+            AnalyzeIdentifier(semanticAnalyzer, properties, isPublic);
+            break;
+        case ExpressionType::FunctionCall:
+            AnalyzeMethod(semanticAnalyzer, structNode, isPublic);
+            break;
+        default:
+            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid property expression", true);
+            break;
+        }
+        return isPublic;
+    }
+
+    void MemberAccessExpression::AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, bool &isPublic)
+    {
+        const IdentifierExpression *identifier = m_Property->Into<IdentifierExpression>();
+        VariableSymbolNode *field = SymbolIterator(properties).Variable(identifier->GetIdentifier().Id());
+        if (!field)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find property of the struct", true);
+        }
+        m_ValueType = field->GetTypeSpecifier();
+        isPublic = field->GetSymbolData().Access() == SymbolAccess::Public;
+    }
+
+    void MemberAccessExpression::AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, StructSymbolNode *structNode, bool &isPublic)
+    {
+        FunctionCallExpression *fnCall = m_Property->Into<FunctionCallExpression>();
+        IdentifierExpression *identifier = fnCall->FnName().TryInto<IdentifierExpression>();
+        if (!identifier)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Function name must be identifier expression", true);
+        }
+        auto fnName = structNode->LookFunctionName(identifier->GetIdentifier().Id());
+        if (!fnName)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find related function name with given method name", true);
+        }
+        identifier->SetId(*fnName);
+        Box<Expression> pointerToStruct = CreateObjectPointer(structNode);
+        fnCall->AddArg(std::move(pointerToStruct), 0);
+        m_ValueType = fnCall->Analyze(semanticAnalyzer);
+        isPublic = SymbolIterator().Function(*fnName)->GetSymbolData().Access() == SymbolAccess::Public;
+    }
+
+    Box<Expression> MemberAccessExpression::CreateObjectPointer(StructSymbolNode *structNode)
+    {
+        auto iter = m_Object.get();
+        Marble::ExpressionType objectType = iter->ExpressionType();
+        Box<Expression> firstArg;
+        if (objectType == ExpressionType::MemberAccess)
+        {
+            Identifier tempName("temp_" + structNode->GetSymbolData().Name() + "_" + IDGenerator::Generate(), Span{});
+            Identifier structName(structNode->GetSymbolData().Name(), Span{});
+            Ref<TypeSpecifier> ts = MakeRef<TypeSpecifier>(structName, Span{});
+            VariableSymbolNode *tempNode = new VariableSymbolNode(*tempName, SymbolAccess::Local, ts);
+            SymbolTable::Get().CurrentScope()->Insert(tempNode);
+            firstArg = MakeBox<IdentifierExpression>(std::move(tempName), Span{});
+        }
+        else
+        {
+            firstArg = m_Object->Clone();
+        }
+        Span span = firstArg->GetSpan();
+        return MakeBox<UnaryExpression>(UnaryOperators::Address, std::move(firstArg), UnaryExpressionType::Prefix, span);
+    }
+
+    Ref<TypeSpecifier> MemberAccessExpression::CheckVisibility(SemanticAnalyzer &semanticAnalyzer, bool isPublic)
+    {
+        if (isPublic)
+        {
+            return m_ValueType;
+        }
+
+        FunctionSymbolNode *parentFnNode = SymbolIterator(SymbolTable::Get().CurrentScope()).Function();
+        ASSERT_D(parentFnNode != nullptr, "Cannot find the parent function node");
+
+        if (parentFnNode->IsMethod())
+        {
+            return m_ValueType;
+        }
+
+        ErrorSystem::AddError(semanticAnalyzer, this, "Property is private");
+        return m_ValueType;
+    }
+
     void MemberAccessExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         m_Object->SubstituteGenerics(semanticAnalyzer, map);
@@ -84,198 +174,3 @@ namespace Marble
     }
 
 } // namespace Marble
-
-/*
-namespace Marble
-{
-    // TODO It marks the property value as constat if is the case
-    // TODO This restrict to return or create new value as const to underlying type
-    // TODO It can be bypass by casting to non-const version but gives warning
-    Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
-    {
-
-        CheckObjectExpressionType(semanticAnalyzer);
-        Ref<TypeSpecifier> objectType = m_Object->Analyze(semanticAnalyzer);
-
-        bool constFlag = objectType->GetType() == Types::ConstantType;
-        objectType = TypeSpecifier::PassConst(objectType);
-
-        const Identifier *identifier = nullptr;
-        if (objectType->GetType() == Types::UserDefine)
-        {
-            if (m_AccessType != TokenType::Dot)
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Use dot('.') operator to access member");
-            }
-            identifier = &objectType->UserDefine();
-        }
-        else if (objectType->GetType() == Types::Pointer)
-        {
-            const PointerType &pointer = objectType->Pointer();
-            Ref<TypeSpecifier> pointerType = pointer.TypeSpecifier;
-            if (pointerType->GetType() != Types::UserDefine)
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type");
-            }
-            if (m_AccessType != TokenType::Arrow)
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Use arrow('->') operator to access member with pointer type");
-            }
-            identifier = &pointerType->UserDefine();
-        }
-        else
-        {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Member access only can use with user define type", true);
-        }
-
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *iter = table.Iter().Struct(identifier->Id()).Find();
-
-        if (!iter)
-        {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find struct in this scope", true);
-        }
-
-        table.EnterScope(iter);
-        bool isPublic = false;
-        switch (m_Property->ExpressionType())
-        {
-        case ExpressionType::Identifier:
-        {
-            IdentifierExpression *identifierExpression = m_Property->Into<IdentifierExpression>();
-            m_ValueType = AnalyzeIdentifier(semanticAnalyzer, identifierExpression, isPublic);
-            if (constFlag)
-                m_ValueType = TypeSpecifier::ConvertToConst(m_ValueType);
-            table.LeaveScope();
-            break;
-        }
-        case ExpressionType::FunctionCall:
-        {
-            FunctionCallExpression *fnCallExpression = m_Property->Into<FunctionCallExpression>();
-            m_ValueType = AnalyzeMethod(semanticAnalyzer, fnCallExpression, identifier, isPublic);
-            break;
-        }
-        case ExpressionType::MemberAccess:
-        case ExpressionType::ArrayIndex:
-        {
-            m_ValueType = m_Property->Analyze(semanticAnalyzer);
-            if (constFlag)
-                m_ValueType = TypeSpecifier::ConvertToConst(m_ValueType);
-            return m_ValueType;
-        }
-        default:
-        {
-            table.LeaveScope();
-            ErrorSystem::AddError(semanticAnalyzer, this, "Invalid property expression", true);
-        }
-        }
-        if (isPublic)
-        {
-            return m_ValueType;
-        }
-
-        auto parentNode = table.CurrentScope()->Iter().Parent().Find();
-        while (parentNode)
-        {
-            if (parentNode == iter)
-            {
-                return m_ValueType;
-            }
-            parentNode = parentNode->Iter().Parent().Find();
-        }
-        ErrorSystem::AddError(semanticAnalyzer, this, "Property is private");
-        return m_ValueType;
-    }
-
-
-
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeMethod(
-        SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, bool &isPublic)
-    {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *structSymbol = table.CurrentScope();
-        IdentifierExpression *identifierExpression = fnCallExpression->FnName().TryInto<IdentifierExpression>();
-        if (!identifierExpression)
-        {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Function name must be identifier expression", true);
-        }
-        SymbolNode *fnNode = structSymbol->Iter()
-                                 .Function(identifierExpression->GetIdentifier().Id())
-                                 .Find();
-        if (!fnNode)
-        {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find method", true);
-        }
-
-        isPublic = CheckAccessSpecifier(fnNode->GetSymbolData().Access());
-        Ref<TypeSpecifier> ts = fnCallExpression->Analyze(semanticAnalyzer);
-        DeSugar(semanticAnalyzer, fnCallExpression, structName, fnNode, structSymbol);
-        return ts;
-    }
-
-    Ref<TypeSpecifier> MemberAccessExpression::AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, IdentifierExpression *identifierExpression, bool &isPublic)
-    {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *structSymbol = table.CurrentScope();
-        SymbolNode *fieldNode = structSymbol->Iter()
-                                    .StructField(identifierExpression->GetIdentifier().Id())
-                                    .Find();
-        if (!fieldNode)
-        {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find member", true);
-        }
-        isPublic = CheckAccessSpecifier(fieldNode->GetSymbolData().Access());
-        VariableSymbolNode *variableNode = fieldNode->Into<VariableSymbolNode>();
-        return variableNode->GetTypeSpecifier();
-    }
-
-
-
-    void MemberAccessExpression::DeSugar(
-        SemanticAnalyzer &semanticAnalyzer, FunctionCallExpression *fnCallExpression, const Identifier *structName, SymbolNode *fnNode, SymbolNode *currentScope)
-    {
-        SymbolTable &table = SymbolTable::GetInstance();
-        IdentifierExpression *identifierExpression = fnCallExpression->FnName().Into<IdentifierExpression>();
-        const std::string &fnDefName = semanticAnalyzer.ConvertMethodIntoFunction(static_cast<Definition *>(fnNode->GetAstPtr()), structName->Id(), currentScope);
-
-        Box<Expression> firstArg;
-
-        switch (m_Object->ExpressionType())
-        {
-        case ExpressionType::FunctionCall:
-        case ExpressionType::NameSpace:
-        {
-            SymbolNode *node = table.CurrentScope();
-            Identifier tempName{"temp_" + structName->Id() + "_" + IDGenerator::Generate(), Span{}};
-            Ref<TypeSpecifier> ts = MakeRef<TypeSpecifier>(*structName, Span{});
-            VariableSymbolNode *variableNode = new VariableSymbolNode{tempName, node, ts, SymbolNodeTypes::Variable};
-            variableNode->SetTempVariable(true);
-            node->Insert(tempName.Id(), variableNode);
-            firstArg = MakeBox<IdentifierExpression>(std::move(tempName), Span{});
-            break;
-        }
-        default:
-        {
-            firstArg = m_Object->Clone();
-            break;
-        }
-        }
-
-        identifierExpression->SetId(fnDefName);
-        Span span = firstArg->GetSpan();
-        m_TempValue = firstArg->Clone();
-        Box<Expression> pointerToStruct = MakeBox<UnaryExpression>(UnaryOperators::Address, std::move(firstArg), UnaryExpressionType::Prefix, span);
-        fnCallExpression->AddArg(std::move(pointerToStruct), 0);
-    }
-
-    bool MemberAccessExpression::CheckAccessSpecifier(SymbolAccess access)
-    {
-        return access == SymbolAccess::Public;
-    }
-
-    Box<Expression> MemberAccessExpression::Clone()
-    {
-        return MakeBox<MemberAccessExpression>(*this);
-    }
-} // namespace Marble
-*/

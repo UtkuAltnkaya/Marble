@@ -23,11 +23,13 @@ namespace Marble
         ~SymbolIterator() = default;
 
         FunctionSymbolNode *Function(const std::string &name);
+        FunctionSymbolNode *Function();
         StructSymbolNode *Struct(const std::string &name);
         VariableSymbolNode *Variable(const std::string &name);
         EnumSymbolNode *Enum(const std::string &name);
 
     private:
+        FunctionSymbolNode *Function(BlockSymbolNode *blockNode);
         VariableSymbolNode *Variable(BlockSymbolNode *blockNode, const std::string &name);
         SymbolNode *Find(BlockSymbolNode *node, const std::string &name, SymbolNodeTypes type);
 
