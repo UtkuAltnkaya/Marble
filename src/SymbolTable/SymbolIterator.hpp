@@ -11,8 +11,7 @@ namespace Marble
     class BlockSymbolNode;
     class FunctionSymbolNode;
     class VariableSymbolNode;
-    class StructSymbolNode;
-    class EnumSymbolNode;
+    class StructOrEnumSymbolNode;
     enum class SymbolNodeTypes;
 
     class SymbolIterator
@@ -24,9 +23,10 @@ namespace Marble
 
         FunctionSymbolNode *Function(const std::string &name);
         FunctionSymbolNode *Function();
-        StructSymbolNode *Struct(const std::string &name);
+        StructOrEnumSymbolNode *Struct(const std::string &name);
         VariableSymbolNode *Variable(const std::string &name);
-        EnumSymbolNode *Enum(const std::string &name);
+        StructOrEnumSymbolNode *Enum(const std::string &name);
+        StructOrEnumSymbolNode *StructOrEnum(const std::string &name);
 
     private:
         FunctionSymbolNode *Function(BlockSymbolNode *blockNode);

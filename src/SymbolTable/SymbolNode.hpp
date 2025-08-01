@@ -74,34 +74,19 @@ namespace Marble
         bool m_IsGeneric;
     };
 
-    class StructSymbolNode : public SymbolNode
+    class StructOrEnumSymbolNode : public SymbolNode
     {
     public:
-        static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Struct;
-        StructSymbolNode(const StructDefinition &structDefinition);
-        ~StructSymbolNode() = default;
+        static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::StructOrEnum;
+        StructOrEnumSymbolNode(const StructDefinition &structDefinition);
+        StructOrEnumSymbolNode(const EnumDefinition &enumDefinition);
+        ~StructOrEnumSymbolNode() = default;
 
         inline const std::unordered_map<std::string, std::string> &Methods() const { return m_Methods; }
         void InsertMethod(const std::string &methodName, const std::string &functionName);
         std::optional<std::reference_wrapper<const std::string>> LookFunctionName(const std::string &methodName);
 
     private:
-        std::unordered_map<std::string, std::string> m_Methods;
-    };
-
-    class EnumSymbolNode : public SymbolNode
-    {
-    public:
-        static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Enum;
-        EnumSymbolNode(const EnumDefinition &enumDefinition);
-        ~EnumSymbolNode() = default;
-
-        inline const std::unordered_map<std::string, std::string> &Methods() const { return m_Methods; }
-        void InsertMethod(const std::string &methodName, const std::string &functionName);
-        std::optional<std::reference_wrapper<const std::string>> LookFunctionName(const std::string &methodName);
-
-    private:
-        std::unordered_set<std::string> m_EnumFields;
         std::unordered_map<std::string, std::string> m_Methods;
     };
 

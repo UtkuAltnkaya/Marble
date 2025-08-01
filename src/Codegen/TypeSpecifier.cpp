@@ -40,8 +40,8 @@ namespace Marble
         }
         case Types::UserDefine:
         {
-            const Identifier &id = std::get<Identifier>(m_Variants);
-            SymbolNode *node = codegenContext.GetNamedUserDefinedType(id.Id());
+            const UserDefineType &id = std::get<UserDefineType>(m_Variants);
+            SymbolNode *node = codegenContext.GetNamedUserDefinedType(*id.Type);
             if (node->GetSymbolData().NodeType() == SymbolNodeTypes::Struct)
             {
                 TODO("HANDLE STRUCT TYPE");

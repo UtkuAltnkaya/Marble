@@ -13,7 +13,7 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Object name must be identifier expression", true);
         }
 
-        StructSymbolNode *structNode = SymbolIterator().Struct(name.Id());
+        StructOrEnumSymbolNode *structNode = SymbolIterator().Struct(name.Id());
         if (!structNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);
@@ -40,7 +40,7 @@ namespace Marble
             SymbolTable::Get().EnterScope(structNode);
             field->Analyze(semanticAnalyzer);
         }
-        m_ValueType = MakeRef<TypeSpecifier>(name, Span{});
+        m_ValueType = MakeRef<TypeSpecifier>(name, Span{}, UserDefineTypeKinds::Struct);
         return m_ValueType;
     }
 

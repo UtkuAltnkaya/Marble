@@ -33,6 +33,13 @@ namespace Marble
         END
     };
 
+    enum class UserDefineTypeKinds
+    {
+        Struct,
+        Enum,
+        Undefined,
+    };
+
     class TypeSpecifier;
     class SemanticAnalyzer;
     class CodegenContext;
@@ -53,6 +60,14 @@ namespace Marble
         Ref<Marble::TypeSpecifier> TypeSpecifier;
     };
 
+    struct UserDefineType
+    {
+        Identifier Type;
+        UserDefineTypeKinds Kind;
+
+        const Identifier &operator*() const { return Type; }
+    };
+
     struct GenericType
     {
         GenericType(const Identifier &outerType, std::vector<Ref<TypeSpecifier>> &&innerType);
@@ -71,6 +86,7 @@ namespace Marble
         TypeSpecifier(TypeSpecifier &&obj);
         TypeSpecifier(ArrayType array, const Span &span);
         TypeSpecifier(const Identifier &identifier, const Span &span);
+        TypeSpecifier(const Identifier &identifier, const Span &span, UserDefineTypeKinds kind);
         TypeSpecifier(PointerType pointer, const Span &span);
         TypeSpecifier(GenericType generic, const Span &span);
         TypeSpecifier(ConstantType constant, const Span &span);
@@ -81,13 +97,13 @@ namespace Marble
         static Ref<TypeSpecifier> PassConst(Ref<TypeSpecifier> ts);
         static Ref<TypeSpecifier> ConvertToConst(Ref<TypeSpecifier> ts);
 
-        const Identifier &UserDefine();
+        const UserDefineType &UserDefine();
         const ArrayType &Array();
         const PointerType &Pointer();
         const GenericType &Generic();
         const ConstantType &Constant();
 
-        const Identifier &UserDefineUnchecked() const;
+        const UserDefineType &UserDefineUnchecked() const;
         const ArrayType &ArrayUnchecked() const;
         const PointerType &PointerUnchecked() const;
         const GenericType &GenericUnchecked() const;
@@ -95,6 +111,7 @@ namespace Marble
 
         inline const Types GetType() const { return m_Type; }
         inline void SetType(Types type) { m_Type = type; }
+        void SetUserDefineTypeKind(UserDefineTypeKinds kind);
 
         bool IsPrimitive() const;
         static bool IsPrimitive(Types type);
@@ -123,7 +140,7 @@ namespace Marble
     private:
         std::string m_TypeName = "";
         Types m_Type;
-        std::variant<PointerType, Identifier, ArrayType, GenericType, ConstantType> m_Variants;
+        std::variant<PointerType, UserDefineType, ArrayType, GenericType, ConstantType> m_Variants;
     };
 
 } // namespace Marble

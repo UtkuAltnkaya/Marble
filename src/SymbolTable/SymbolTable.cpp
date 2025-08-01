@@ -64,17 +64,17 @@ namespace Marble
 
     void SymbolTable::Insert(const FunctionDefinition &functionDefinition, bool isMethod)
     {
-        Insert(new FunctionSymbolNode{functionDefinition, isMethod});
+        Insert(new FunctionSymbolNode(functionDefinition, isMethod));
     }
 
     void SymbolTable::Insert(const StructDefinition &structDefinition)
     {
-        Insert(new StructSymbolNode{structDefinition});
+        Insert(new StructOrEnumSymbolNode(structDefinition));
     }
 
     void SymbolTable::Insert(const EnumDefinition &enumDefinition)
     {
-        Insert(new EnumSymbolNode{enumDefinition});
+        Insert(new StructOrEnumSymbolNode(enumDefinition));
     }
 
     SymbolScopeGuard::SymbolScopeGuard(SymbolNode *node)

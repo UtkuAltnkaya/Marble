@@ -9,15 +9,10 @@ namespace Marble
 
     Ref<TypeSpecifier> ImplDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolNode *node;
-        node = SymbolIterator().Struct(GetName());
+        SymbolNode *node = SymbolIterator().StructOrEnum(GetName());
         if (!node)
         {
-            node = SymbolIterator().Enum(GetName());
-            if (!node)
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find related struct or enum", true);
-            }
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find related struct or enum", true);
         }
         SymbolScopeGuard guard{node};
         for (auto &memberFunction : m_MemberFunctions)
@@ -45,15 +40,8 @@ namespace Marble
             params.push_back(std::move(param));
         }
 
-        if (auto structNode = node->TryInto<StructSymbolNode>(); structNode)
-        {
-            structNode->InsertMethod(m_Prototype->m_Name->Id(), functionName->Id());
-        }
-        else
-        {
-            auto enumNode = node->Into<EnumSymbolNode>();
-            enumNode->InsertMethod(m_Prototype->m_Name->Id(), functionName->Id());
-        }
+        StructOrEnumSymbolNode *concreteNode = node->Into<StructOrEnumSymbolNode>();
+        concreteNode->InsertMethod(m_Prototype->m_Name->Id(), functionName->Id());
 
         AccessSpecifier accessSpecifier = m_Prototype->GetAccessSpecifier();
         Box<Generics> generics = std::move(m_Prototype->m_Generics);

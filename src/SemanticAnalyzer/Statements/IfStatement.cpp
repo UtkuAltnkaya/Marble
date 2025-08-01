@@ -54,7 +54,7 @@ namespace Marble
     {
         SymbolTable &table = SymbolTable::Get();
         SymbolNode *parent = table.CurrentScope();
-        BlockSymbolNode *ifNode = new BlockSymbolNode(name, parent);
+        BlockSymbolNode *ifNode = new BlockSymbolNode(name + "_" + IDGenerator::Generate(), parent);
         parent->Insert(ifNode);
         table.EnterScope(ifNode);
         blockStatement.Analyze(semanticAnalyzer);

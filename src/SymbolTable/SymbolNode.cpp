@@ -2,7 +2,6 @@
 #include "SymbolTable/SymbolTable.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
 #include "Utils/IDGenerator.hpp"
-#include "SymbolNode.hpp"
 
 namespace Marble
 {
@@ -29,9 +28,9 @@ namespace Marble
         Into<BlockSymbolNode>()->Insert(node);
     }
 
-    StructSymbolNode::StructSymbolNode(const StructDefinition &structDefinition)
+    StructOrEnumSymbolNode::StructOrEnumSymbolNode(const StructDefinition &structDefinition)
         : SymbolNode{SymbolData{structDefinition.GetName(), SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()),
-                                SymbolNodeTypes::Struct, SymbolNodeBaseTypes::Struct}}
+                                SymbolNodeTypes::Struct, SymbolNodeBaseTypes::StructOrEnum}}
     {
         Block();
         for (auto &field : structDefinition.GetFields())
@@ -45,39 +44,20 @@ namespace Marble
         }
     }
 
-    void StructSymbolNode::InsertMethod(const std::string &methodName, const std::string &functionName)
-    {
-        if (m_Methods.contains(methodName))
-        {
-            ErrorSystem::AddError("Function already inserted");
-        }
-        m_Methods[methodName] = functionName;
-    }
-
-    std::optional<std::reference_wrapper<const std::string>> StructSymbolNode::LookFunctionName(const std::string &methodName)
-    {
-        if (m_Methods.contains(methodName))
-        {
-            return m_Methods[methodName];
-        }
-        return std::nullopt;
-    }
-
-    EnumSymbolNode::EnumSymbolNode(const EnumDefinition &enumDefinition)
+    StructOrEnumSymbolNode::StructOrEnumSymbolNode(const EnumDefinition &enumDefinition)
         : SymbolNode{SymbolData{enumDefinition.GetName(), SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()),
-                                SymbolNodeTypes::Enum, SymbolNodeBaseTypes::Enum}}
+                                SymbolNodeTypes::Enum, SymbolNodeBaseTypes::StructOrEnum}}
     {
+        Block();
         for (auto &field : enumDefinition.GetFields())
         {
-            if (m_EnumFields.contains(field->Id()))
-            {
-                ErrorSystem::AddError("Duplicate enum field");
-            }
-            m_EnumFields.insert(field->Id());
+            VariableSymbolNode *node =
+                new VariableSymbolNode(field->Id(), SymbolAccess::Public, MakeRef<TypeSpecifier>(Types::Int, Span{}));
+            m_Block->Insert(node);
         }
     }
 
-    void EnumSymbolNode::InsertMethod(const std::string &methodName, const std::string &functionName)
+    void StructOrEnumSymbolNode::InsertMethod(const std::string &methodName, const std::string &functionName)
     {
         if (m_Methods.contains(methodName))
         {
@@ -86,7 +66,7 @@ namespace Marble
         m_Methods[methodName] = functionName;
     }
 
-    std::optional<std::reference_wrapper<const std::string>> EnumSymbolNode::LookFunctionName(const std::string &methodName)
+    std::optional<std::reference_wrapper<const std::string>> StructOrEnumSymbolNode::LookFunctionName(const std::string &methodName)
     {
         if (m_Methods.contains(methodName))
         {
@@ -143,7 +123,7 @@ namespace Marble
         auto &symbolData = node->GetSymbolData();
         if (m_Children.contains(symbolData.Name()))
         {
-            ErrorSystem::AddError("Duplicate Identifier");
+            ErrorSystem::AddError("Duplicate Identifier:" + symbolData.Name());
         }
         m_Children[symbolData.Name()] = node;
     }

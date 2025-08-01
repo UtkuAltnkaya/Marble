@@ -1,6 +1,7 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "ErrorSystem/CompilerError.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {
@@ -15,7 +16,7 @@ namespace Marble
             bool r1 = semanticAnalyzer.TryImplicitConversion(m_Left, leftType, resultType);
             bool r2 = semanticAnalyzer.TryImplicitConversion(m_Right, rightType, resultType);
 
-            if (!r1 && !r2)
+            if (!r1 || !r2)
             {
                 ErrorSystem::AddError(semanticAnalyzer, this, "Left and Right hand-side types are not compatible: " + leftType->ToString() + " and " + rightType->ToString());
                 return leftType;
@@ -23,10 +24,18 @@ namespace Marble
             leftType = resultType;
         }
 
-        // TODO: Decide, allow operator overloading
         if (!leftType->IsPrimitive())
         {
-            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
+            if (leftType->GetType() != Types::UserDefine)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
+            }
+            // TODO: Decide, allow operator overloading
+            UserDefineTypeKinds kind = leftType->UserDefineUnchecked().Kind;
+            if (kind != UserDefineTypeKinds::Enum)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
+            }
         }
 
         m_ValueType = leftType;

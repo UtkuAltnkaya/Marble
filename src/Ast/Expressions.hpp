@@ -13,7 +13,7 @@ namespace Marble
   class IdentifierExpression;
   class SymbolNode;
   class BlockSymbolNode;
-  class StructSymbolNode;
+  class StructOrEnumSymbolNode;
   enum class SymbolAccess;
   enum class ConversionKind;
 
@@ -357,12 +357,12 @@ namespace Marble
     bool IsAssignable() const override { return m_Object->IsAssignable(); }
 
   private:
-    const Identifier &FindStructName(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> objectType);
+    const Identifier &FindConcreteName(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> objectType);
     Ref<TypeSpecifier> AnalyzeObject(SemanticAnalyzer &semanticAnalyzer);
-    bool AnalyzeProperty(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, StructSymbolNode *structNode);
+    bool AnalyzeProperty(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, StructOrEnumSymbolNode *node);
     void AnalyzeIdentifier(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, bool &isPublic);
-    void AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, StructSymbolNode *structNode, bool &isPublic);
-    Box<Expression> CreateObjectPointer(StructSymbolNode *structNode);
+    void AnalyzeMethod(SemanticAnalyzer &semanticAnalyzer, StructOrEnumSymbolNode *node, bool &isPublic);
+    Box<Expression> CreateObjectPointer(StructOrEnumSymbolNode *node);
     Ref<TypeSpecifier> CheckVisibility(SemanticAnalyzer &semanticAnalyzer, bool isPublic);
 
   private:
@@ -444,8 +444,11 @@ namespace Marble
 
     virtual Box<Expression> Clone() override;
     void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
-    void DeSugar(SemanticAnalyzer &semanticAnalyzer, SymbolNode *node, const std::string &namespaceName);
     const Expression *GetValue() { return m_Value.get(); }
+
+  private:
+    void AnalyzeMemberFunction(SemanticAnalyzer &semanticAnalyzer, StructOrEnumSymbolNode *node);
+    Ref<TypeSpecifier> AnalyzeEnumField(SemanticAnalyzer &semanticAnalyzer, StructOrEnumSymbolNode *node);
 
   private:
     Box<Expression> m_Namespace;

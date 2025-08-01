@@ -23,8 +23,7 @@ namespace Marble
     {
         Variable,
         Function,
-        Struct,
-        Enum,
+        StructOrEnum,
         Block,
         None,
     };

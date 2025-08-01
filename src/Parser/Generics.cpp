@@ -62,7 +62,7 @@ namespace Marble
             {
                 throw "Type arguments must be user define type";
             }
-            const Identifier &id = m_Types[i]->UserDefine();
+            const Identifier &id = m_Types[i]->UserDefine().Type;
             map[id.Id()] = typeArgs[i];
         }
         return map;

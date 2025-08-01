@@ -13,7 +13,7 @@ namespace Marble
         case Types::UserDefine:
         {
             auto &userDefine = UserDefineUnchecked();
-            auto iter = map.find(userDefine.Id());
+            auto iter = map.find(*userDefine.Type);
             if (iter == map.end())
             {
                 return;
@@ -54,7 +54,7 @@ namespace Marble
             Span span;
             span.Start = gen.OuterType.GetSpan().Start;
             span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
-            m_Variants = Identifier(name, span);
+            m_Variants = UserDefineType{Identifier(name, span), UserDefineTypeKinds::Struct};
             m_Span = span;
             m_Type = Types::UserDefine;
             break;
@@ -124,9 +124,9 @@ namespace Marble
 
         if (m_Type == Types::UserDefine)
         {
-            const Identifier &tsLeft = UserDefineUnchecked();
-            const Identifier &tsRight = obj.UserDefineUnchecked();
-            return tsLeft == tsRight;
+            const UserDefineType &tsLeft = UserDefineUnchecked();
+            const UserDefineType &tsRight = obj.UserDefineUnchecked();
+            return tsLeft.Type == tsRight.Type && tsLeft.Kind == tsRight.Kind;
         }
 
         if (m_Type == Types::ArrayType)
@@ -224,7 +224,7 @@ namespace Marble
         case Types::UserDefine:
         {
             const auto &id = UserDefineUnchecked();
-            m_TypeName = id.Id();
+            m_TypeName = *id.Type;
             break;
         }
         case Types::GenericType:

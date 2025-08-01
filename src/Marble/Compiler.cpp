@@ -50,9 +50,14 @@ namespace Marble
         {
             throw CompilationTerminatedException();
         }
-        // CodegenContext codegenContext{file.FileName()};
-        // codegenContext.Generate(program);
-        // codegenContext.Print();
+
+        if (false)
+        {
+            CodegenContext codegenContext{file.FileName()};
+            codegenContext.Generate(program);
+            codegenContext.Print();
+        }
+
         if (errorSystem.IsWarning())
         {
             errorSystem.PrintWarning();

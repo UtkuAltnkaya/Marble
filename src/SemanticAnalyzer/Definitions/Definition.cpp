@@ -10,16 +10,13 @@ namespace Marble
         {
         case Types::UserDefine:
         {
-            SymbolIterator iter;
-            if (auto node = iter.Struct(paramType->ToString()); node)
+            if (auto node = SymbolIterator().StructOrEnum(paramType->ToString()); node)
             {
+                UserDefineTypeKinds kind = node->GetSymbolData().NodeType() == SymbolNodeTypes::Struct ? UserDefineTypeKinds::Struct : UserDefineTypeKinds::Enum;
+                paramType->SetUserDefineTypeKind(kind);
                 return;
             }
-            if (auto node = iter.Enum(paramType->ToString()); node)
-            {
-                return;
-            }
-            ErrorSystem::AddError(analyzer, this, "Cannot find the type named " + paramType->ToString(), false);
+            ErrorSystem::AddError(analyzer, this, "Cannot find the type named " + paramType->ToString());
             break;
         }
         case Types::Pointer:

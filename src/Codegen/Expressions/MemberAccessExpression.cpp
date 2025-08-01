@@ -65,13 +65,13 @@ namespace Marble
         {
             auto &ptr = objectTypeSpecifier->Pointer();
             objectType = llvm::cast<llvm::StructType>(ptr.TypeSpecifier->ToLLVMType(codegenContext));
-            identifier = &ptr.TypeSpecifier->UserDefine();
+            identifier = &ptr.TypeSpecifier->UserDefine().Type;
             objPtr = builder.CreateLoad(llvm::PointerType::get(objectType, 0), objPtr);
         }
         else
         {
             objectType = llvm::cast<llvm::StructType>(objectTypeSpecifier->ToLLVMType(codegenContext));
-            identifier = &objectTypeSpecifier->UserDefine();
+            identifier = &objectTypeSpecifier->UserDefine().Type;
         }
 
         TODO("Find struct index");

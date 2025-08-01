@@ -35,14 +35,14 @@ namespace Marble
         return Function(m_Node);
     }
 
-    StructSymbolNode *SymbolIterator::Struct(const std::string &name)
+    StructOrEnumSymbolNode *SymbolIterator::Struct(const std::string &name)
     {
         SymbolNode *node = Find(m_Node, name, SymbolNodeTypes::Struct);
         if (!node)
         {
             return nullptr;
         }
-        return node->Into<StructSymbolNode>();
+        return node->Into<StructOrEnumSymbolNode>();
     }
 
     VariableSymbolNode *SymbolIterator::Variable(const std::string &name)
@@ -50,14 +50,29 @@ namespace Marble
         return Variable(m_Node, name);
     }
 
-    EnumSymbolNode *SymbolIterator::Enum(const std::string &name)
+    StructOrEnumSymbolNode *SymbolIterator::Enum(const std::string &name)
     {
         SymbolNode *node = Find(m_Node, name, SymbolNodeTypes::Enum);
         if (!node)
         {
             return nullptr;
         }
-        return node->Into<EnumSymbolNode>();
+        return node->Into<StructOrEnumSymbolNode>();
+    }
+
+    StructOrEnumSymbolNode *SymbolIterator::StructOrEnum(const std::string &name)
+    {
+        if (auto structNode = Struct(name); structNode)
+        {
+            return structNode;
+        }
+
+        if (auto enumNode = Enum(name); enumNode)
+        {
+            return enumNode;
+        }
+
+        return nullptr;
     }
 
     FunctionSymbolNode *SymbolIterator::Function(BlockSymbolNode *blockNode)

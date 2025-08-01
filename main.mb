@@ -1,38 +1,25 @@
-struct Person {
-    name: char*
-}
-
-struct ClassRoom {
-    pub teacher: Person
+enum ExpressionTypes {
+    Binary,
+    Unary
 }
 
 
-impl Person {
-    pub fn (p:Person*) get_name() -> char* {
-        return p->name;
+impl ExpressionTypes {
+    pub fn (e:ExpressionTypes) to_int() -> int {
+        if (e == ExpressionTypes::Binary) {
+            return 0;
+        }
+        return 1;
     }
 }
-
-impl ClassRoom {
-    pub fn (c:ClassRoom*) start_course() -> void {
-        let t = &c->teacher;
-    }
-
-    pub fn (c:ClassRoom*) get_teacher() -> Person {
-        return c->teacher;
-    }
-}
-
 
 
 fn main() -> int {
-    let classRoom  = ClassRoom {
-        teacher: Person {
-            name: null,
-        }
-    };
+    let expressionType = ExpressionTypes::Binary;
 
-    let teacher_name = classRoom.get_teacher().get_name();
+    let x = expressionType.to_int();
+
+    let y = x + 1;
 
     return 0;
 }

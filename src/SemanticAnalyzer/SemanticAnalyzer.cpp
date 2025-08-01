@@ -35,11 +35,6 @@ namespace Marble
         m_Program->Definitions().push_back(std::move(functionDefinition));
     }
 
-    void SemanticAnalyzer::RegisterMethod(const std::string &implName, const MemberFunctionDefinition &memberFunctionDefinition, const std::string &functionName)
-    {
-        MemberFunctionInstanceKey key;
-    }
-
     bool SemanticAnalyzer::TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
     {
         ConversionKind conversionKind = m_Conversion.CanConvert(from, to);
@@ -156,35 +151,6 @@ namespace Marble
         // UNREACHABLE();
     }
 
-    const std::string &SemanticAnalyzer::ConvertMethodIntoFunction(Definition *definition, const std::string &structName, SymbolNode *currentScope)
-    {
-        // MemberFunctionDefinition *memberFunctionDefinition = definition->TryInto<MemberFunctionDefinition>();
-        // if (!memberFunctionDefinition)
-        // {
-        //     ErrorSystem::AddError(*this, definition, "MemberFunction definition expected", true);
-        // }
-        // MethodInstanceKey key;
-        // key.StructName = structName;
-        // key.MethodName = definition->GetName();
-        // for (auto &param : memberFunctionDefinition->GetPrototype().GetParams())
-        // {
-        //     key.Params.push_back(param->GetTypeSpecifier()->ToString());
-        // }
-        // if (m_ConvertedMethodsName.contains(key))
-        // {
-        //     return m_ConvertedMethodsName[key];
-        // }
-
-        // FunctionDefinition *functionDefinition = new FunctionDefinition((*memberFunctionDefinition), structName);
-        // SymbolTable &table = SymbolTable::GetInstance();
-        // FunctionSymbolNode *fnSymbol = new FunctionSymbolNode{*functionDefinition, table.Root()};
-        // table.Insert(functionDefinition->GetName(), fnSymbol);
-        // currentScope->Insert(functionDefinition->GetName(), new FunctionSymbolNode{*functionDefinition, table.Root()});
-        // m_ConvertedMethodsName[key] = functionDefinition->GetName();
-        // AddExpandedDefinition(Box<Definition>(functionDefinition));
-        // return m_ConvertedMethodsName[key];
-    }
-
     Box<Definition> SemanticAnalyzer::Instantiate(SymbolNode *node, GenericInstanceKey &key, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
 
@@ -213,20 +179,7 @@ namespace Marble
         // return MakeBox<Identifier>(finalName, id.GetSpan());
     }
 
-    void SemanticAnalyzer::AddExpandedDefinition(Box<Definition> definition)
-    {
-        // auto &definitions = m_Program->Definitions();
-        // for (auto &def : definitions)
-        // {
-        //     if (def->GetName() == definition->GetName() && definition->DefinitionType() == def->DefinitionType())
-        //     {
-        //         return;
-        //     }
-        // }
-        // definitions.push_back(std::move(definition));
-    }
-
-    void SemanticAnalyzer::GenerateGenericKey(GenericInstanceKey &key, const Definition *definition, const std::vector<Ref<TypeSpecifier>> &typeArgs)
+      void SemanticAnalyzer::GenerateGenericKey(GenericInstanceKey &key, const Definition *definition, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
         // key.Name = definition->GetName();
         // key.KeyType = GenericInstanceKey::FromDefinitionType((int)definition->DefinitionType());
