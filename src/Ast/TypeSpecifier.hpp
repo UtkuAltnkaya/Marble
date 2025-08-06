@@ -118,7 +118,7 @@ namespace Marble
         bool operator==(const TypeSpecifier &obj) const;
         bool operator!=(const TypeSpecifier &obj) const;
         const std::string &ToString();
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
 
         bool IsIntegerType();
         bool IsFloatingPointType();

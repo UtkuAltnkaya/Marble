@@ -16,6 +16,12 @@
 
 namespace Marble
 {
+    template <typename T>
+    concept SymbolAstVariableNodeType = std::is_base_of_v<Marble::Ast, T> && (std::is_same_v<T, VariableType> || std::is_same_v<T, LetStatement>);
+
+    template <typename T>
+    concept SymbolAstStructOrEnumNodeType = std::is_base_of_v<Marble::Ast, T> && (std::is_same_v<T, StructDefinition> || std::is_same_v<T, EnumDefinition>);
+
     class BlockSymbolNode;
     class SymbolNode
     {
@@ -69,6 +75,7 @@ namespace Marble
         }
 
     protected:
+        const Ast *m_AstNode;
         BlockSymbolNode *m_Block;
         SymbolData m_SymbolData;
         bool m_IsGeneric;
@@ -86,6 +93,19 @@ namespace Marble
         void InsertMethod(const std::string &methodName, const std::string &functionName);
         std::optional<std::reference_wrapper<const std::string>> LookFunctionName(const std::string &methodName);
 
+        template <SymbolAstStructOrEnumNodeType T>
+        T *Ast()
+        {
+            Marble::Ast *node = const_cast<Marble::Ast *>(m_AstNode);
+            bool structCondition = m_SymbolData.NodeType() == SymbolNodeTypes::Struct && std::is_same_v<T, StructDefinition>;
+            bool enumCondition = m_SymbolData.NodeType() == SymbolNodeTypes::Enum && std::is_same_v<T, EnumDefinition>;
+            if (structCondition || enumCondition)
+            {
+                return static_cast<T *>(node);
+            }
+            return nullptr;
+        }
+
     private:
         std::unordered_map<std::string, std::string> m_Methods;
     };
@@ -97,6 +117,7 @@ namespace Marble
 
         FunctionSymbolNode(const FunctionDefinition &fnDefinition, bool isMethod);
         ~FunctionSymbolNode() = default;
+        FunctionDefinition *Ast();
 
         inline const Ref<TypeSpecifier> ReturnType() const { return m_ReturnType; }
         inline const std::vector<Ref<TypeSpecifier>> &Params() const { return m_Params; }
@@ -120,6 +141,23 @@ namespace Marble
         ~VariableSymbolNode() = default;
 
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+
+        template <SymbolAstVariableNodeType T>
+        T *Ast()
+        {
+            if (!m_AstNode)
+            {
+                return nullptr;
+            }
+            Marble::Ast *node = const_cast<Marble::Ast *>(m_AstNode);
+            bool letStmtCondition = m_AstNode->GetAstType() == AstType::Statement && std::is_same_v<T, LetStatement>;
+            bool variableTypeCondition = m_AstNode->GetAstType() == AstType::VariableType && std::is_same_v<T, VariableType>;
+            if (letStmtCondition || variableTypeCondition)
+            {
+                return static_cast<T *>(node);
+            }
+            return nullptr;
+        }
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;

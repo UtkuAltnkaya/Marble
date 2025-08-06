@@ -21,9 +21,7 @@ namespace Marble
 
         if (structNode->IsGeneric())
         {
-            auto &newName = semanticAnalyzer.InstantiateGenerics(name.Id(), m_Generics.get());
-            name.Id(newName);
-            structNode = SymbolIterator().Struct(name.Id());
+            TODO("Object init struct generics");
         }
 
         size_t size = structNode->Block()->Size();
@@ -69,23 +67,23 @@ namespace Marble
         return m_ValueType;
     }
 
-    void ObjectInitExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ObjectInitExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Generics)
         {
-            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+            m_Generics->SubstituteGenerics(genericExpander, map);
         }
 
-        m_Object->SubstituteGenerics(semanticAnalyzer, map);
+        m_Object->SubstituteGenerics(genericExpander, map);
         for (auto &field : m_Fields)
         {
-            field->SubstituteGenerics(semanticAnalyzer, map);
+            field->SubstituteGenerics(genericExpander, map);
         }
     }
 
-    void FieldExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void FieldExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Value->SubstituteGenerics(semanticAnalyzer, map);
+        m_Value->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Expression> ObjectInitExpression::Clone()

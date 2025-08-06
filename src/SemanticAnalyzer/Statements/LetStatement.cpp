@@ -45,15 +45,15 @@ namespace Marble
     }
 
     void LetStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_TypeSpecifier)
         {
-            m_TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            m_TypeSpecifier->SubstituteGenerics(genericExpander, map);
         }
         if (m_Value)
         {
-            m_Value->SubstituteGenerics(semanticAnalyzer, map);
+            m_Value->SubstituteGenerics(genericExpander, map);
         }
     }
 

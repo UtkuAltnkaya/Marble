@@ -172,10 +172,10 @@ namespace Marble
         return m_ValueType;
     }
 
-    void MemberAccessExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void MemberAccessExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Object->SubstituteGenerics(semanticAnalyzer, map);
-        m_Property->SubstituteGenerics(semanticAnalyzer, map);
+        m_Object->SubstituteGenerics(genericExpander, map);
+        m_Property->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Expression> MemberAccessExpression::Clone()

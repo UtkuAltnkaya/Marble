@@ -37,11 +37,11 @@ namespace Marble
     }
 
     void ReturnStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Expression)
         {
-            m_Expression->SubstituteGenerics(semanticAnalyzer, map);
+            m_Expression->SubstituteGenerics(genericExpander, map);
         }
     }
 

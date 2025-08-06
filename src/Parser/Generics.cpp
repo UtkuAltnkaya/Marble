@@ -68,11 +68,11 @@ namespace Marble
         return map;
     }
 
-    void Generics::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void Generics::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &type : m_Types)
         {
-            type->SubstituteGenerics(semanticAnalyzer, map);
+            type->SubstituteGenerics(genericExpander, map);
         }
     }
 } // namespace Marble

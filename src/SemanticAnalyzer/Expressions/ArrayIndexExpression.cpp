@@ -67,13 +67,13 @@ namespace Marble
         ErrorSystem::AddError(semanticAnalyzer, this, "Array index must be usize");
     }
 
-    void ArrayIndexExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ArrayIndexExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Array->SubstituteGenerics(semanticAnalyzer, map);
-        m_Index->SubstituteGenerics(semanticAnalyzer, map);
+        m_Array->SubstituteGenerics(genericExpander, map);
+        m_Index->SubstituteGenerics(genericExpander, map);
         if (m_SecondIndex)
         {
-            m_SecondIndex->SubstituteGenerics(semanticAnalyzer, map);
+            m_SecondIndex->SubstituteGenerics(genericExpander, map);
         }
     }
 

@@ -5,7 +5,7 @@
 
 namespace Marble
 {
-    SymbolNode::SymbolNode(SymbolData symbolData) : m_SymbolData{symbolData}, m_IsGeneric{false}, m_Block{nullptr}
+    SymbolNode::SymbolNode(SymbolData symbolData) : m_SymbolData{symbolData}, m_IsGeneric{false}, m_Block{nullptr}, m_AstNode{nullptr}
     {
     }
 
@@ -32,6 +32,8 @@ namespace Marble
         : SymbolNode{SymbolData{structDefinition.GetName(), SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()),
                                 SymbolNodeTypes::Struct, SymbolNodeBaseTypes::StructOrEnum}}
     {
+        m_AstNode = &structDefinition;
+        m_IsGeneric = structDefinition.GetGenerics() != nullptr;
         Block();
         for (auto &field : structDefinition.GetFields())
         {
@@ -48,6 +50,7 @@ namespace Marble
         : SymbolNode{SymbolData{enumDefinition.GetName(), SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()),
                                 SymbolNodeTypes::Enum, SymbolNodeBaseTypes::StructOrEnum}}
     {
+        m_AstNode = &enumDefinition;
         Block();
         for (auto &field : enumDefinition.GetFields())
         {
@@ -80,6 +83,8 @@ namespace Marble
                                 SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}},
           m_IsMethod{isMethod}
     {
+        m_AstNode = &fnDefinition;
+        m_IsGeneric = fnDefinition.GetGenerics() != nullptr;
         m_ReturnType = fnDefinition.GetReturnType()->Clone();
         Block();
         for (auto &param : fnDefinition.GetParams())
@@ -87,6 +92,12 @@ namespace Marble
             m_Block->Insert(new VariableSymbolNode{*param});
             m_Params.push_back(param->GetTypeSpecifier()->Clone());
         }
+    }
+
+    FunctionDefinition *FunctionSymbolNode::Ast()
+    {
+        Marble::Ast *node = const_cast<Marble::Ast *>(m_AstNode);
+        return static_cast<FunctionDefinition *>(node);
     }
 
     VariableSymbolNode::VariableSymbolNode(const std::string &name, SymbolAccess access, Ref<TypeSpecifier> typeSpecifier)
@@ -97,11 +108,13 @@ namespace Marble
     VariableSymbolNode::VariableSymbolNode(const VariableType &variableType)
         : VariableSymbolNode{variableType.GetIdentifier().Id(), SymbolAccess::Local, variableType.GetTypeSpecifier()}
     {
+        m_AstNode = &variableType;
     }
 
     VariableSymbolNode::VariableSymbolNode(const LetStatement &letStmt)
         : VariableSymbolNode{letStmt.GetIdentifier().Id(), SymbolAccess::Local, letStmt.GetTypeSpecifier()}
     {
+        m_AstNode = &letStmt;
     }
 
     BlockSymbolNode::BlockSymbolNode(const std::string &name, SymbolNode *parent)

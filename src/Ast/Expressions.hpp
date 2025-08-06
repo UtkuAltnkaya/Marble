@@ -119,7 +119,7 @@ namespace Marble
 
     virtual ~Expression() = default;
     virtual Box<Expression> Clone() = 0;
-    virtual void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
+    virtual void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
     virtual llvm::Value *Address(CodegenContext &codegenContext) { return nullptr; }
     inline virtual bool IsAssignable() const { return false; }
 
@@ -197,7 +197,7 @@ namespace Marble
     inline const Expression &Right() const { return *m_Right.get(); }
 
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     static Box<Expression> ParseOr(Parser &parser, Precedence precedence, BinaryPrecedence binaryPrecedence);
@@ -232,7 +232,7 @@ namespace Marble
     inline const Expression &Value() const { return *m_Value.get(); }
     inline UnaryExpressionType GetUnaryExpressionType() const { return m_UnaryExpressionType; }
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     static Box<Expression> ParsePrefix(Parser &parser, Precedence precedence);
@@ -271,7 +271,7 @@ namespace Marble
     Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
     llvm::Value *Codegen(CodegenContext &codegenContext) override;
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
     inline const Expression &GetExpression() const { return *m_Expression.get(); }
@@ -305,7 +305,7 @@ namespace Marble
     inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
     inline const std::string &GetValue() const { return m_Value; }
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override {}
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override {}
 
   private:
     static Box<Expression> ParseParenthesis(Parser &parser);
@@ -329,7 +329,7 @@ namespace Marble
     llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     void CheckVariableExpressionTypes(SemanticAnalyzer &semanticAnalyzer) const;
@@ -353,7 +353,7 @@ namespace Marble
     llvm::Value *Codegen(CodegenContext &codegenContext) override;
     llvm::Value *Address(CodegenContext &codegenContext) override;
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
     bool IsAssignable() const override { return m_Object->IsAssignable(); }
 
   private:
@@ -392,7 +392,7 @@ namespace Marble
     inline void FnName(Box<Expression> fnName) { m_FnName = std::move(fnName); }
     inline const Generics *const GetGenerics() { return m_Generics.get(); }
     inline const std::vector<Box<Expression>> &GetArgs() const { return m_Args; }
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
     void AddArg(Box<Expression> arg, int index);
 
   private:
@@ -418,7 +418,7 @@ namespace Marble
     bool IsAssignable() const override { return m_Array->IsAssignable(); }
 
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     void AnalyzeIndex(SemanticAnalyzer &semanticAnalyzer, Expression *indexExpression);
@@ -443,7 +443,7 @@ namespace Marble
     llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
     const Expression *GetValue() { return m_Value.get(); }
 
   private:
@@ -471,7 +471,7 @@ namespace Marble
     void CodegenInPlace(CodegenContext &codegenContext, llvm::AllocaInst *alloca);
 
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     std::vector<Box<Expression>> m_Array;
@@ -493,7 +493,7 @@ namespace Marble
     void CodegenInPlace(CodegenContext &codegenContext, llvm::AllocaInst *alloca);
 
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     Box<Expression> m_Object;
@@ -514,7 +514,7 @@ namespace Marble
     Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
     llvm::Value *Codegen(CodegenContext &codegenContext) override;
     virtual Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
   private:
     Identifier m_Name;
@@ -537,7 +537,7 @@ namespace Marble
     llvm::Value *Address(CodegenContext &codegenContext) override;
     bool IsAssignable() const override { return true; }
     Box<Expression> Clone() override;
-    void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override {}
+    void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override {}
     inline const Identifier &GetIdentifier() const { return m_Identifier; }
     inline Identifier &GetIdentifier() { return m_Identifier; }
     inline void SetId(const std::string &id) { m_Identifier.Id(id); }

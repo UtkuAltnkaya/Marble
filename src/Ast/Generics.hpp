@@ -18,7 +18,7 @@ namespace Marble
         static Box<Generics> Parse(Parser &parser);
         inline const std::vector<Ref<TypeSpecifier>> &Types() const { return m_Types; }
         std::unordered_map<std::string, Ref<TypeSpecifier>> ToMap(const std::vector<Ref<TypeSpecifier>> &typeArgs) const;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map);
 
         bool operator==(const Generics &obj) const
         {

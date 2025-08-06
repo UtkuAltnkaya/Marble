@@ -45,9 +45,9 @@ namespace Marble
         inline virtual void SetName(Box<Identifier> name) = 0;
 
         virtual Box<Definition> InstantiateWith(
-            SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) { return nullptr; };
+            GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs) { return nullptr; };
         virtual void SubstituteGenerics(
-            SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) {};
+            GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) {};
         virtual llvm::Value *DeclareSignature(CodegenContext &codegenContext) { return nullptr; }
 
         // TODO
@@ -123,8 +123,7 @@ namespace Marble
         llvm::Value *DeclareSignature(CodegenContext &codegenContext) override;
         llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
-        Box<Definition> InstantiateWith(
-            SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
@@ -143,7 +142,7 @@ namespace Marble
 
     private:
         void SubstituteGenerics(
-            SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+            GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;
@@ -190,7 +189,7 @@ namespace Marble
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
-        Box<Definition> InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        Box<Definition> InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
         Box<Definition> Clone() override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
@@ -206,7 +205,7 @@ namespace Marble
         int GetFieldIndex(const std::string &fieldName);
 
     private:
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         AccessSpecifier m_AccessSpecifier;

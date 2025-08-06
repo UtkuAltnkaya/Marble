@@ -28,11 +28,11 @@ namespace Marble
     }
 
     void BlockStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &statement : m_Statements)
         {
-            statement->SubstituteGenerics(semanticAnalyzer, map);
+            statement->SubstituteGenerics(genericExpander, map);
         }
     }
 

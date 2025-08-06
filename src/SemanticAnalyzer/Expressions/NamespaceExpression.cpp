@@ -20,8 +20,13 @@ namespace Marble
 
         const Identifier &identifier = identifierExpression->GetIdentifier();
 
-        SymbolIterator iter;
+        if (m_Generics)
+        {
+            semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
+            TODO("NAMESPACE GENERICS");
+        }
 
+        SymbolIterator iter;
         if (auto node = iter.Struct(identifier.Id()); node)
         {
             AnalyzeMemberFunction(semanticAnalyzer, node);
@@ -42,14 +47,14 @@ namespace Marble
         UNREACHABLE();
     }
 
-    void NamespaceExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void NamespaceExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Generics)
         {
-            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+            m_Generics->SubstituteGenerics(genericExpander, map);
         }
-        m_Namespace->SubstituteGenerics(semanticAnalyzer, map);
-        m_Value->SubstituteGenerics(semanticAnalyzer, map);
+        m_Namespace->SubstituteGenerics(genericExpander, map);
+        m_Value->SubstituteGenerics(genericExpander, map);
     }
 
     void NamespaceExpression::AnalyzeMemberFunction(SemanticAnalyzer &semanticAnalyzer, StructOrEnumSymbolNode *node)

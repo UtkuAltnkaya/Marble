@@ -31,11 +31,11 @@ namespace Marble
 
         auto optionalFileName = argParser.GetValue<std::string>("file");
 
-        if (!optionalFileName.has_value())
+        if (!optionalFileName)
         {
             ErrorSystem::AddError("Filename required");
         }
-        File file{optionalFileName.value()};
+        File file{*optionalFileName};
         Ref<Program> program = nullptr;
         {
             Lexer lexer{file};

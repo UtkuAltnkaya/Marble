@@ -6,7 +6,7 @@
 
 namespace Marble
 {
-    void TypeSpecifier::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void TypeSpecifier::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         switch (m_Type)
         {
@@ -28,35 +28,24 @@ namespace Marble
         case Types::Pointer:
         {
             auto &ptr = PointerUnchecked();
-            ptr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            ptr.TypeSpecifier->SubstituteGenerics(genericExpander, map);
             break;
         }
         case Types::ArrayType:
         {
             auto &arr = ArrayUnchecked();
-            arr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            arr.TypeSpecifier->SubstituteGenerics(genericExpander, map);
             break;
         }
         case Types::ConstantType:
         {
             auto &constant = ConstantUnchecked();
-            constant.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            constant.TypeSpecifier->SubstituteGenerics(genericExpander, map);
             break;
         }
         case Types::GenericType:
         {
-            auto &gen = GenericUnchecked();
-            for (auto &arg : gen.InnerType)
-            {
-                arg->SubstituteGenerics(semanticAnalyzer, map);
-            }
-            const std::string &name = semanticAnalyzer.InstantiateGenerics(gen.OuterType.Id(), gen.InnerType);
-            Span span;
-            span.Start = gen.OuterType.GetSpan().Start;
-            span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
-            m_Variants = UserDefineType{Identifier(name, span), UserDefineTypeKinds::Struct};
-            m_Span = span;
-            m_Type = Types::UserDefine;
+            TODO("Expand generic typespecifier");
             break;
         }
         default:

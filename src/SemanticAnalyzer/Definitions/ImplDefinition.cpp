@@ -9,10 +9,15 @@ namespace Marble
 
     Ref<TypeSpecifier> ImplDefinition::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
+        m_IsAnalyzed = true;
         SymbolNode *node = SymbolIterator().StructOrEnum(GetName());
         if (!node)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find related struct or enum", true);
+        }
+        if (m_Generics)
+        {
+            TODO("HANDLE IMPL GENERICS");
         }
         SymbolScopeGuard guard{node};
         for (auto &memberFunction : m_MemberFunctions)
