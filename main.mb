@@ -1,3 +1,11 @@
+struct Math {}
+struct std {}
+
+enum AllocatorType {
+    Page,
+    Arena,
+}
+
 struct Vec<T> {
     data: T*,
     size: usize,
@@ -7,37 +15,78 @@ struct Vec<T> {
 impl Vec<T> {
     pub fn init() -> Vec<T> {
         return Vec<T> {
-            data: null,
+            data: std::allocate<T>(1),
             size: 0, 
             capacity: 1,
         };
     }
-
-
-    pub fn (v:Vec<T>*) add<U>(x:U,y:U) -> U {
-        return x + y;
-    }
-
+    
     pub fn (v: Vec<T>*) push (data: T) -> void {
         
     } 
+}
 
-    pub fn square<U>(x:U) -> U {
+
+impl Math {
+    pub fn add<T>(x:T, y:T) -> T {
+        return x + y;
+    }
+
+    pub fn square<T>(x:T) -> T {
         return x * x;
     }
 }
 
+impl std {
+    pub fn allocate<T>(size:usize) -> T* {
+        return null;
+    }
+}
 
-pub fn add<T>(x:T,y:T) -> T {
-    return x + y;
+impl AllocatorType {
+    pub fn init() -> AllocatorType {
+        return AllocatorType::Page;
+    }
+
+    pub fn (a:AllocatorType) to_int() -> int {
+        if (a == AllocatorType::Page) {
+            return 0;
+        }
+        if (a == AllocatorType::Arena) {
+            return 1;
+        }
+        return -1;
+    }
+
+    pub fn from_int(type:int) -> AllocatorType {
+        if (type == 0) {
+            return AllocatorType::Page;
+        }
+
+        if (type == 1) {
+            return AllocatorType::Arena;
+        }
+
+        return AllocatorType::init();
+    }
 }
 
 
 fn main() -> int {
     let vec = Vec<int>::init();
-    let r = vec.add<int>(1,2);
-    r = add<float>(1.2,2.1);
-    r = Vec<int>::square<int>(1);
-    r = Vec<int>::square<int>(2);
+    vec.push(1);
+    vec.push(2);
+
+
+    let r = Math::add<int>(1,2);
+
+    r = Math::square<float>(2.0);
+    r = Math::square<int>(2.0);
+
+
+    let allocatorType = AllocatorType::Page;
+
+    allocatorType = AllocatorType::from_int(allocatorType.to_int());
+
     return 0;
 }

@@ -97,7 +97,7 @@ namespace Marble
             }
         }
 
-        if (toNode == fromNode)
+        if (fromNode && toNode && toNode == fromNode)
         {
             return ConversionKind::Identity;
         }
