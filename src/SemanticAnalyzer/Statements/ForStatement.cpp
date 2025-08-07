@@ -36,20 +36,20 @@ namespace Marble
     }
 
     void ForStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_LetStatement)
         {
-            m_LetStatement->SubstituteGenerics(semanticAnalyzer, map);
+            m_LetStatement->SubstituteGenerics(genericExpander, map);
         }
         else
         {
-            m_AssignmentExpression->SubstituteGenerics(semanticAnalyzer, map);
+            m_AssignmentExpression->SubstituteGenerics(genericExpander, map);
         }
 
-        m_Condition->SubstituteGenerics(semanticAnalyzer, map);
-        m_Increment->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_Condition->SubstituteGenerics(genericExpander, map);
+        m_Increment->SubstituteGenerics(genericExpander, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Statement> ForStatement::Clone()

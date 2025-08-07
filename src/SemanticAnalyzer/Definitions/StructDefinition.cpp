@@ -20,22 +20,22 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
-    Box<Definition> StructDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    Box<Definition> StructDefinition::InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
         Box<Definition> clonedStructDef = Clone();
         StructDefinition *castedStruct = clonedStructDef->Into<StructDefinition>();
         auto map = m_Generics->ToMap(typeArgs);
-        castedStruct->SubstituteGenerics(semanticAnalyzer, map);
+        castedStruct->SubstituteGenerics(genericExpander, map);
         castedStruct->m_Generics.reset();
         m_IsExpanded = true;
         return clonedStructDef;
     }
 
-    void StructDefinition::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void StructDefinition::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &field : m_Field)
         {
-            field->GetField().GetTypeSpecifier()->SubstituteGenerics(semanticAnalyzer, map);
+            field->GetField().GetTypeSpecifier()->SubstituteGenerics(genericExpander, map);
         }
     }
 

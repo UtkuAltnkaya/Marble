@@ -32,7 +32,7 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser);
         inline Marble::StatementType StatementType() const { return m_StatementType; }
         virtual Box<Statement> Clone() = 0;
-        virtual void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
+        virtual void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) = 0;
 
         template <typename T>
         T *TryInto()
@@ -93,7 +93,7 @@ namespace Marble
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
         inline const Expression &GetValue() const { return *m_Value.get(); }
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         static Ref<TypeSpecifier> HandleTypeSpecifier(Parser &parser);
@@ -119,7 +119,7 @@ namespace Marble
 
         inline const Expression *const GetExpression() const { return m_Expression.get(); }
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         Box<Expression> m_Expression;
@@ -138,7 +138,7 @@ namespace Marble
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         inline const Expression &GetExpression() const { return *m_Expression.get(); }
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         Box<Expression> m_Expression;
@@ -159,7 +159,7 @@ namespace Marble
         llvm::Value *Codegen(CodegenContext &codegenContext) override;
 
         inline const std::vector<Box<Statement>> &Statements() const { return m_Statements; }
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         std::vector<Box<Statement>> m_Statements;
@@ -178,7 +178,7 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline const Statement *const GetLetStatement() const { return m_LetStatement.get(); }
         inline const Expression *const GetAssignmentExpression() const { return m_AssignmentExpression.get(); }
@@ -206,7 +206,7 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline const Expression &GetCondition() const { return *m_Condition.get(); }
         inline const Statement &GetBlock() const { return *m_Block.get(); }
@@ -229,7 +229,7 @@ namespace Marble
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         inline const Statement &GetBlock() const { return *m_Block.get(); };
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
     private:
         Box<Statement> m_Block;
@@ -247,7 +247,7 @@ namespace Marble
         static void Parse(Parser &parser, std::vector<Box<Statement>> &elseIfStatements);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline const Expression &GetCondition() const { return *m_Condition.get(); };
         inline const Statement &GetBlock() const { return *m_Block.get(); };
@@ -270,7 +270,7 @@ namespace Marble
         static Box<Statement> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         virtual Box<Statement> Clone() override;
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline const Expression &GetCondition() const { return *m_Condition.get(); };
         inline const Statement &GetBlock() const { return *m_Block.get(); }
@@ -313,9 +313,9 @@ namespace Marble
             return MakeBox<ExpressionStatement>(*this);
         }
 
-        void SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override
         {
-            m_Expression->SubstituteGenerics(semanticAnalyzer, map);
+            m_Expression->SubstituteGenerics(genericExpander, map);
         }
 
         inline const Expression &GetExpression() const { return *m_Expression.get(); }

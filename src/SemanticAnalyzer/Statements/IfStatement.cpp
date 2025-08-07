@@ -62,31 +62,31 @@ namespace Marble
     }
 
     void IfStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Condition->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_Condition->SubstituteGenerics(genericExpander, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
         for (auto &elseIf : m_ElseIfStatements)
         {
-            elseIf->SubstituteGenerics(semanticAnalyzer, map);
+            elseIf->SubstituteGenerics(genericExpander, map);
         }
         if (m_ElseStatement)
         {
-            m_ElseStatement->SubstituteGenerics(semanticAnalyzer, map);
+            m_ElseStatement->SubstituteGenerics(genericExpander, map);
         }
     }
 
     void ElseIfStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Condition->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_Condition->SubstituteGenerics(genericExpander, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
     }
 
     void ElseStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Statement> IfStatement::Clone()

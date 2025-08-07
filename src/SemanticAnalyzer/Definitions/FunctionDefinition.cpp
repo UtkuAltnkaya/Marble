@@ -65,26 +65,26 @@ namespace Marble
         return TypeSpecifierOk;
     }
 
-    Box<Definition> FunctionDefinition::InstantiateWith(SemanticAnalyzer &semanticAnalyzer, const std::vector<Ref<TypeSpecifier>> &typeArgs)
+    Box<Definition> FunctionDefinition::InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
         Box<Definition> clonedFnDef = Clone();
         FunctionDefinition *castFnDef = clonedFnDef->Into<FunctionDefinition>();
         auto map = m_Generics->ToMap(typeArgs);
-        castFnDef->SubstituteGenerics(semanticAnalyzer, map);
+        castFnDef->SubstituteGenerics(genericExpander, map);
         castFnDef->m_Generics.reset();
         m_IsExpanded = true;
         return clonedFnDef;
     }
 
     void FunctionDefinition::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &param : m_Params)
         {
-            param->GetTypeSpecifier()->SubstituteGenerics(semanticAnalyzer, map);
+            param->GetTypeSpecifier()->SubstituteGenerics(genericExpander, map);
         }
-        m_ReturnType->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_ReturnType->SubstituteGenerics(genericExpander, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
     }
 
     bool FunctionDefinition::operator==(const FunctionDefinition &obj) const

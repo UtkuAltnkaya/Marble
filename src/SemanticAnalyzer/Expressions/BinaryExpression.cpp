@@ -34,7 +34,10 @@ namespace Marble
             UserDefineTypeKinds kind = leftType->UserDefineUnchecked().Kind;
             if (kind != UserDefineTypeKinds::Enum)
             {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
+                if (!SymbolIterator().Enum(*leftType->UserDefineUnchecked().Type))
+                {
+                    ErrorSystem::AddError(semanticAnalyzer, this, "Cannot apply binary operation to complex type");
+                }
             }
         }
 
@@ -50,10 +53,10 @@ namespace Marble
         return m_ValueType;
     }
 
-    void BinaryExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void BinaryExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Left->SubstituteGenerics(semanticAnalyzer, map);
-        m_Right->SubstituteGenerics(semanticAnalyzer, map);
+        m_Left->SubstituteGenerics(genericExpander, map);
+        m_Right->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Expression> BinaryExpression::Clone()

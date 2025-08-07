@@ -26,11 +26,11 @@ namespace Marble
 
         if (fnNode->IsGeneric())
         {
-            // const std::string &name = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
-            // node = GetFunctionNode(semanticAnalyzer, scope, name);
-            // fnNode = node->Into<FunctionSymbolNode>();
-            // m_Generics.reset();
-            // identifierExpression->GetIdentifier().Id(name);
+            const std::string name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
+            fnNode = SymbolIterator().Function(name);
+            ASSERT_A(fnNode != nullptr, "Cannot find the related function");
+            m_Generics.reset();
+            identifierExpression->GetIdentifier().Id(name);
         }
 
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();
@@ -70,16 +70,16 @@ namespace Marble
         return m_ValueType;
     }
 
-    void FunctionCallExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void FunctionCallExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Generics)
         {
-            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+            m_Generics->SubstituteGenerics(genericExpander, map);
         }
-        m_FnName->SubstituteGenerics(semanticAnalyzer, map);
+        m_FnName->SubstituteGenerics(genericExpander, map);
         for (auto &arg : m_Args)
         {
-            arg->SubstituteGenerics(semanticAnalyzer, map);
+            arg->SubstituteGenerics(genericExpander, map);
         }
     }
 

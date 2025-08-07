@@ -7,7 +7,7 @@ namespace Marble
 {
 
     EnumDefinition::EnumDefinition(AccessSpecifier accessSpecifier, Box<Identifier> enumName, std::vector<Box<Identifier>> &&fields, const Span &span)
-        : Definition{span, DefinitionType::Enum}, m_AccessSpecifier{accessSpecifier}, m_EnumName{std::move(enumName)}, m_Fields{std::move(fields)}
+        : Definition{span, DefinitionType::Enum}, m_AccessSpecifier{accessSpecifier}, m_EnumName{std::move(enumName)}, m_Fields{std::move(fields)}, m_ImplDefinition{nullptr}
     {
     }
 

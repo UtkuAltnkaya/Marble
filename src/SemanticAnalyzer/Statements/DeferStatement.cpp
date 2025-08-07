@@ -9,9 +9,9 @@ namespace Marble
         return TypeSpecifierOk;
     }
     void DeferStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Expression->SubstituteGenerics(semanticAnalyzer, map);
+        m_Expression->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Statement> DeferStatement::Clone()
