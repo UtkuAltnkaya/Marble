@@ -8,8 +8,8 @@ namespace Marble
 {
     static int RankTypes(Types t);
 
-    SemanticAnalyzer::SemanticAnalyzer(Ref<Program> program, const Marble::File &file)
-        : m_Program{program}, m_File{file}, m_GenericExpander{program}
+    SemanticAnalyzer::SemanticAnalyzer(Ref<Marble::Program> program, const Marble::File &file)
+        : m_Program{program}, m_File{file}, m_GenericExpander{*this}
     {
     }
 

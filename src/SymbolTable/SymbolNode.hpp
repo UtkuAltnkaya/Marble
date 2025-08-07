@@ -115,7 +115,7 @@ namespace Marble
     public:
         static constexpr SymbolNodeBaseTypes StaticType = SymbolNodeBaseTypes::Function;
 
-        FunctionSymbolNode(const FunctionDefinition &fnDefinition, bool isMethod);
+        FunctionSymbolNode(const FunctionDefinition &fnDefinition);
         ~FunctionSymbolNode() = default;
         FunctionDefinition *Ast();
 

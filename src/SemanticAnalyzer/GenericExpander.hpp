@@ -9,16 +9,22 @@ namespace Marble
     class GenericExpander
     {
     public:
-        GenericExpander(Ref<Program> program);
+        using TypeArgs = std::vector<Ref<TypeSpecifier>>;
+
+        GenericExpander(SemanticAnalyzer &semanticAnalyzer);
         ~GenericExpander() = default;
 
-        const std::string &Expand(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
+        const std::string &Expand(const std::string &name, const TypeArgs &typeArgs);
 
     private:
-        Box<Identifier> GenerateConcreteName(const Identifier &id, const std::vector<Ref<TypeSpecifier>> &typeArgs);
+        void HandleNested(const TypeArgs &typeArgs);
+        void GenerateKey(GenericInstanceKey &key, const Definition *definition, const TypeArgs &typeArgs);
+        Box<Identifier> GenerateConcreteName(const Identifier &id, const TypeArgs &typeArgs);
+        Box<Definition> Instantiate(Definition *definition, const GenericInstanceKey &key, const TypeArgs &typeArgs);
+        void InsertDefinition(Box<Definition> definition);
 
     private:
-        Ref<Program> m_Program;
+        SemanticAnalyzer &m_SemanticAnalyzer;
         std::unordered_map<GenericInstanceKey, std::string, GenericInstanceKeyHasher> m_Generis;
     };
 

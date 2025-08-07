@@ -114,6 +114,7 @@ namespace Marble
             Box<Statement> block,
             const Span &span);
         FunctionDefinition(const MemberFunctionDefinition &obj, const std::string &structName);
+        FunctionDefinition(MemberFunctionDefinition &&obj, const std::string &structName);
         FunctionDefinition(const FunctionDefinition &obj);
         ~FunctionDefinition() = default;
 
@@ -133,6 +134,7 @@ namespace Marble
         inline const std::vector<Box<VariableType>> &GetParams() const { return m_Params; }
         inline const Ref<TypeSpecifier> &GetReturnType() const { return m_ReturnType; }
         inline const Statement &GetBody() const { return *m_Block.get(); }
+        inline bool IsMethod() const { return m_IsMethod; }
         bool operator==(const FunctionDefinition &obj) const;
 
         inline void SetName(Box<Identifier> name) override { m_FunctionName = std::move(name); }
@@ -151,6 +153,7 @@ namespace Marble
         std::vector<Box<VariableType>> m_Params;
         Ref<TypeSpecifier> m_ReturnType;
         Box<Statement> m_Block;
+        bool m_IsMethod;
     };
 
     class StructFieldDefinition : public Definition
@@ -230,12 +233,16 @@ namespace Marble
         inline const std::string &GetName() const override { return m_EnumName->Id(); }
         inline const Identifier &GetIdentifier() const override { return *m_EnumName.get(); }
         inline const std::vector<Box<Identifier>> &GetFields() const { return m_Fields; }
+        inline ImplDefinition *GetImplDefinition() const { return m_ImplDefinition; }
+
         inline void SetName(Box<Identifier> name) override { m_EnumName = std::move(name); }
+        inline void SetImplDefinition(ImplDefinition *implDefinition) { m_ImplDefinition = implDefinition; }
 
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<Identifier> m_EnumName;
         std::vector<Box<Identifier>> m_Fields;
+        ImplDefinition *m_ImplDefinition;
     };
 
     class MemberFunctionPrototypeDefinition : public Definition
@@ -258,6 +265,8 @@ namespace Marble
 
         static Box<MemberFunctionPrototypeDefinition> Parse(Parser &parser);
         Box<Definition> Clone() override;
+        Box<Definition> InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline AccessSpecifier GetAccessSpecifier() const { return m_AccessSpecifier; }
         inline const VariableType *GetMethod() const { return m_Method.get(); }
@@ -294,6 +303,8 @@ namespace Marble
         static Box<MemberFunctionDefinition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         Box<Definition> Clone() override;
+        Box<Definition> InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline const MemberFunctionPrototypeDefinition &GetPrototype() const { return *m_Prototype.get(); }
         inline const Statement &GetBody() const { return *m_Block.get(); }
@@ -318,6 +329,8 @@ namespace Marble
         static Box<Definition> Parse(Parser &parser);
         Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) override;
         Box<Definition> Clone() override;
+        Box<Definition> InstantiateWith(GenericExpander &genericExpander, const std::vector<Ref<TypeSpecifier>> &typeArgs) override;
+        void SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map) override;
 
         inline const std::string &GetName() const override { return m_ImplName->ToString(); }
         inline const Ref<TypeSpecifier> GetImplName() const { return m_ImplName; }

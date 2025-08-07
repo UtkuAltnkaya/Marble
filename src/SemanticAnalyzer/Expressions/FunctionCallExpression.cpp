@@ -26,8 +26,11 @@ namespace Marble
 
         if (fnNode->IsGeneric())
         {
-            semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
-            TODO("FUNCTION GENERICS");
+            const std::string name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
+            fnNode = SymbolIterator().Function(name);
+            ASSERT_A(fnNode != nullptr, "Cannot find the related function");
+            m_Generics.reset();
+            identifierExpression->GetIdentifier().Id(name);
         }
 
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();

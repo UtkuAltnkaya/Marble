@@ -45,7 +45,18 @@ namespace Marble
         }
         case Types::GenericType:
         {
-            TODO("Expand generic typespecifier");
+            auto &generic = GenericUnchecked();
+            for (auto &arg : generic.InnerType)
+            {
+                arg->SubstituteGenerics(genericExpander, map);
+            }
+            const std::string &name = genericExpander.Expand(generic.OuterType.Id(), generic.InnerType);
+            Span span;
+            span.Start = generic.OuterType.GetSpan().Start;
+            span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
+            m_Variants = UserDefineType(Identifier(name, span), UserDefineTypeKinds::Struct);
+            m_Span = span;
+            m_Type = Types::UserDefine;
             break;
         }
         default:

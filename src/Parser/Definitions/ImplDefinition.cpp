@@ -2,6 +2,7 @@
 #include "Ast/Definitions.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Parenthesis.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 namespace Marble
 {
 
@@ -59,8 +60,22 @@ namespace Marble
         } while (true);
 
         const Span &end = parser.Current().Span();
+        Box<ImplDefinition> implDefinition = MakeBox<ImplDefinition>(implName, std::move(generics), std::move(memberFunctions), Span{start.Start, end.Start});
 
-        return MakeBox<ImplDefinition>(implName, std::move(generics), std::move(memberFunctions), Span{start.Start, end.Start});
+        StructOrEnumSymbolNode *node = SymbolIterator().StructOrEnum(implDefinition->GetName());
+        if (!node)
+        {
+            ErrorSystem::AddError(parser, "Cannot find related struct or enum for impl definition", true);
+        }
+        if (node->GetSymbolData().NodeType() == SymbolNodeTypes::Struct)
+        {
+            node->Ast<StructDefinition>()->SetImplDefinition(implDefinition.get());
+        }
+        else
+        {
+            node->Ast<EnumDefinition>()->SetImplDefinition(implDefinition.get());
+        }
+        return implDefinition;
     }
 
     MemberFunctionDefinition::MemberFunctionDefinition(Box<MemberFunctionPrototypeDefinition> prototype, Box<Statement> block, const Span &span)

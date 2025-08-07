@@ -38,5 +38,6 @@ fn main() -> int {
     let r = vec.add<int>(1,2);
     r = add<float>(1.2,2.1);
     r = Vec<int>::square<int>(1);
+    r = Vec<int>::square<int>(2);
     return 0;
 }

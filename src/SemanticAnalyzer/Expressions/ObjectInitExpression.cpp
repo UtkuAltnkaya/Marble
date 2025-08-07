@@ -6,14 +6,13 @@ namespace Marble
 {
     Ref<TypeSpecifier> ObjectInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        const IdentifierExpression *structName = m_Object->TryInto<IdentifierExpression>();
-        Identifier name = structName->GetIdentifier();
+        IdentifierExpression *structName = m_Object->TryInto<IdentifierExpression>();
         if (!structName)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Object name must be identifier expression", true);
         }
 
-        StructOrEnumSymbolNode *structNode = SymbolIterator().Struct(name.Id());
+        StructOrEnumSymbolNode *structNode = SymbolIterator().Struct(*structName->GetIdentifier());
         if (!structNode)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the struct", true);
@@ -21,7 +20,9 @@ namespace Marble
 
         if (structNode->IsGeneric())
         {
-            TODO("Object init struct generics");
+            const std::string &expandedName = semanticAnalyzer.InstantiateGenerics(*structName->GetIdentifier(), m_Generics.get());
+            structNode = SymbolIterator().Struct(expandedName);
+            structName->GetIdentifier().Id(expandedName);
         }
 
         size_t size = structNode->Block()->Size();
@@ -38,7 +39,7 @@ namespace Marble
             SymbolTable::Get().EnterScope(structNode);
             field->Analyze(semanticAnalyzer);
         }
-        m_ValueType = MakeRef<TypeSpecifier>(name, Span{}, UserDefineTypeKinds::Struct);
+        m_ValueType = MakeRef<TypeSpecifier>(structName->GetIdentifier(), Span{}, UserDefineTypeKinds::Struct);
         return m_ValueType;
     }
 

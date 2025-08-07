@@ -21,7 +21,8 @@ namespace Marble
 
         void Insert(SymbolNode *node);
 
-        void Insert(const FunctionDefinition &functionDefinition, bool isMethod);
+        void Insert(Definition *definition);
+        void Insert(const FunctionDefinition &functionDefinition);
         void Insert(const StructDefinition &structDefinition);
         void Insert(const EnumDefinition &enumDefinition);
 

@@ -17,23 +17,21 @@ namespace Marble
         }
 
         IdentifierExpression *identifierExpression = m_Namespace->Into<IdentifierExpression>();
-
-        const Identifier &identifier = identifierExpression->GetIdentifier();
+        std::string name = *identifierExpression->GetIdentifier();
 
         if (m_Generics)
         {
-            semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
-            TODO("NAMESPACE GENERICS");
+            name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
         }
 
         SymbolIterator iter;
-        if (auto node = iter.Struct(identifier.Id()); node)
+        if (auto node = iter.Struct(name); node)
         {
             AnalyzeMemberFunction(semanticAnalyzer, node);
             m_ValueType = m_Value->Analyze(semanticAnalyzer);
             return m_ValueType;
         }
-        if (auto node = iter.Enum(identifier.Id()); node)
+        if (auto node = iter.Enum(name); node)
         {
             m_ValueType = AnalyzeEnumField(semanticAnalyzer, node);
             if (!m_ValueType)

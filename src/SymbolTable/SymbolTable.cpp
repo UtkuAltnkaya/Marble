@@ -2,6 +2,7 @@
 #include "SymbolTable/SymbolTable.hpp"
 #include "Utils/Macros.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
+#include "SymbolTable.hpp"
 
 namespace Marble
 {
@@ -62,9 +63,29 @@ namespace Marble
         root->Insert(node);
     }
 
-    void SymbolTable::Insert(const FunctionDefinition &functionDefinition, bool isMethod)
+    void SymbolTable::Insert(Definition *definition)
     {
-        Insert(new FunctionSymbolNode(functionDefinition, isMethod));
+        if (auto f = definition->TryInto<FunctionDefinition>(); f)
+        {
+            return Insert(*f);
+        }
+
+        if (auto s = definition->TryInto<StructDefinition>(); s)
+        {
+            return Insert(*s);
+        }
+
+        if (auto e = definition->TryInto<EnumDefinition>())
+        {
+            return Insert(*e);
+        }
+
+        ASSERT_A(false, "Cannot Insert given definition to symbol table");
+    }
+
+    void SymbolTable::Insert(const FunctionDefinition &functionDefinition)
+    {
+        Insert(new FunctionSymbolNode(functionDefinition));
     }
 
     void SymbolTable::Insert(const StructDefinition &structDefinition)

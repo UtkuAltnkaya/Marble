@@ -78,14 +78,14 @@ namespace Marble
         return std::nullopt;
     }
 
-    FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition, bool isMethod)
+    FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition)
         : SymbolNode{SymbolData{fnDefinition.GetName(), SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()),
-                                SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}},
-          m_IsMethod{isMethod}
+                                SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}}
     {
         m_AstNode = &fnDefinition;
         m_IsGeneric = fnDefinition.GetGenerics() != nullptr;
         m_ReturnType = fnDefinition.GetReturnType()->Clone();
+        m_IsMethod = fnDefinition.IsMethod();
         Block();
         for (auto &param : fnDefinition.GetParams())
         {
