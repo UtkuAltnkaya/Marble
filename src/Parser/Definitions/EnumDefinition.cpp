@@ -7,7 +7,7 @@ namespace Marble
 {
 
     EnumDefinition::EnumDefinition(AccessSpecifier accessSpecifier, Box<Identifier> enumName, std::vector<Box<Identifier>> &&fields, const Span &span)
-        : Definition{span, DefinitionType::Enum}, m_AccessSpecifier{accessSpecifier}, m_EnumName{std::move(enumName)}, m_Fields{std::move(fields)}
+        : Definition{span, DefinitionType::Enum}, m_AccessSpecifier{accessSpecifier}, m_EnumName{std::move(enumName)}, m_Fields{std::move(fields)}, m_ImplDefinition{nullptr}
     {
     }
 
@@ -26,8 +26,7 @@ namespace Marble
         Box<EnumDefinition> enumDefinition = MakeBox<EnumDefinition>(
             accessSpecifier, std::move(enumName), std::move(fields), Span{start.Start, end.Start});
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        table.Insert(enumDefinition->m_EnumName->Id(), new SymbolNode{*enumDefinition.get(), table.Root()});
+        SymbolTable::Get().Insert(*enumDefinition);
 
         return enumDefinition;
     }

@@ -40,19 +40,20 @@ namespace Marble
         }
         case Types::UserDefine:
         {
-            const Identifier &id = std::get<Identifier>(m_Variants);
-            SymbolNode *node = codegenContext.GetNamedUserDefinedType(id.Id());
+            const UserDefineType &id = std::get<UserDefineType>(m_Variants);
+            SymbolNode *node = codegenContext.GetNamedUserDefinedType(*id.Type);
             if (node->GetSymbolData().NodeType() == SymbolNodeTypes::Struct)
             {
-                StructSymbolNode *structSymbol = node->Into<StructSymbolNode>();
-                llvm::StructType *structType = structSymbol->StructType();
-                if (!structType)
-                {
-                    structSymbol->GetAstPtr()->Codegen(codegenContext);
-                    structType = structSymbol->StructType();
-                    ASSERT_D(structType != nullptr, "Cannot declare struct");
-                }
-                return structType;
+                TODO("HANDLE STRUCT TYPE");
+                // StructSymbolNode *structSymbol = node->Into<StructSymbolNode>();
+                // llvm::StructType *structType = structSymbol->StructType();
+                // if (!structType)
+                // {
+                //     structSymbol->GetAstPtr()->Codegen(codegenContext);
+                //     structType = structSymbol->StructType();
+                //     ASSERT_D(structType != nullptr, "Cannot declare struct");
+                // }
+                // return structType;
             }
             return llvm::Type::getInt32Ty(context);
         }

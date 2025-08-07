@@ -17,52 +17,45 @@ namespace Marble
         }
 
         IdentifierExpression *identifierExpression = m_Namespace->Into<IdentifierExpression>();
+        std::string name = *identifierExpression->GetIdentifier();
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *root = table.Root();
-
-        const Identifier &identifier = identifierExpression->GetIdentifier();
-
-        SymbolIterator iter = root->Iter();
-
-        if (auto node = iter.Struct(identifier.Id()).Find(); node)
+        if (m_Generics)
         {
-            if (node->IsGeneric())
-            {
-                const std::string &name = semanticAnalyzer.InstantiateGenerics(identifier.Id(), m_Generics.get());
-                node = root->Iter().Struct(name).Find();
-            }
-            table.EnterScope(node);
+            name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
+        }
+
+        SymbolIterator iter;
+        if (auto node = iter.Struct(name); node)
+        {
+            AnalyzeMemberFunction(semanticAnalyzer, node);
             m_ValueType = m_Value->Analyze(semanticAnalyzer);
-            DeSugar(semanticAnalyzer, node, identifier.Id());
             return m_ValueType;
         }
-        if (auto node = iter.Reset().Enum(identifier.Id()).Find(); node)
+        if (auto node = iter.Enum(name); node)
         {
-            table.EnterScope(node);
-            m_ValueType = m_Value->Analyze(semanticAnalyzer);
-            if (m_Value->ExpressionType() == ExpressionType::Identifier)
+            m_ValueType = AnalyzeEnumField(semanticAnalyzer, node);
+            if (!m_ValueType)
             {
-                table.LeaveScope();
+                AnalyzeMemberFunction(semanticAnalyzer, node);
+                m_ValueType = m_Value->Analyze(semanticAnalyzer);
             }
-            DeSugar(semanticAnalyzer, node, identifier.Id());
             return m_ValueType;
         }
         ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the namespace", true);
         UNREACHABLE();
     }
 
-    void NamespaceExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void NamespaceExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Generics)
         {
-            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+            m_Generics->SubstituteGenerics(genericExpander, map);
         }
-        m_Namespace->SubstituteGenerics(semanticAnalyzer, map);
-        m_Value->SubstituteGenerics(semanticAnalyzer, map);
+        m_Namespace->SubstituteGenerics(genericExpander, map);
+        m_Value->SubstituteGenerics(genericExpander, map);
     }
 
-    void NamespaceExpression::DeSugar(SemanticAnalyzer &semanticAnalyzer, SymbolNode *node, const std::string &namespaceName)
+    void NamespaceExpression::AnalyzeMemberFunction(SemanticAnalyzer &semanticAnalyzer, StructOrEnumSymbolNode *node)
     {
         if (m_Value->ExpressionType() != ExpressionType::FunctionCall)
         {
@@ -70,10 +63,30 @@ namespace Marble
         }
         FunctionCallExpression *fnCallExpression = m_Value->Into<FunctionCallExpression>();
         IdentifierExpression *identifierExpression = fnCallExpression->FnName().Into<IdentifierExpression>();
-        SymbolNode *fnNode = node->Iter().Function(identifierExpression->GetIdentifier().Id()).Find();
-        ASSERT_D(fnNode != nullptr, "Cannot find function " + identifierExpression->GetIdentifier().Id());
-        const std::string &fnName = semanticAnalyzer.ConvertMethodIntoFunction(static_cast<Definition *>(fnNode->GetAstPtr()), namespaceName, node);
-        identifierExpression->SetId(fnName);
+        auto fnName = node->LookFunctionName(*identifierExpression->GetIdentifier());
+        if (!fnName)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find related function name with given method name", true);
+        }
+        identifierExpression->SetId(*fnName);
+    }
+
+    Ref<TypeSpecifier> NamespaceExpression::AnalyzeEnumField(SemanticAnalyzer &semanticAnalyzer, StructOrEnumSymbolNode *node)
+    {
+        IdentifierExpression *identifierExpr = nullptr;
+        if (identifierExpr = m_Value->TryInto<IdentifierExpression>(); !identifierExpr)
+        {
+            return nullptr;
+        }
+        BlockSymbolNode *fields = node->Block();
+
+        VariableSymbolNode *variable = SymbolIterator(fields).Variable(*identifierExpr->GetIdentifier());
+        if (!variable)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find enum field");
+        }
+        Identifier name(node->GetSymbolData().Name(), Span{});
+        return MakeRef<TypeSpecifier>(name, Span{}, UserDefineTypeKinds::Enum);
     }
 
     Box<Expression> NamespaceExpression::Clone()

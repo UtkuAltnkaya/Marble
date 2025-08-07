@@ -31,11 +31,11 @@ namespace Marble
 
         auto optionalFileName = argParser.GetValue<std::string>("file");
 
-        if (!optionalFileName.has_value())
+        if (!optionalFileName)
         {
             ErrorSystem::AddError("Filename required");
         }
-        File file{optionalFileName.value()};
+        File file{*optionalFileName};
         Ref<Program> program = nullptr;
         {
             Lexer lexer{file};
@@ -50,9 +50,14 @@ namespace Marble
         {
             throw CompilationTerminatedException();
         }
-        CodegenContext codegenContext{file.FileName()};
-        codegenContext.Generate(program);
-        codegenContext.Print();
+
+        if (false)
+        {
+            CodegenContext codegenContext{file.FileName()};
+            codegenContext.Generate(program);
+            codegenContext.Print();
+        }
+
         if (errorSystem.IsWarning())
         {
             errorSystem.PrintWarning();

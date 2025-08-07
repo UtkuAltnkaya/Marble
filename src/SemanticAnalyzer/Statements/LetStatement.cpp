@@ -39,21 +39,21 @@ namespace Marble
                 ErrorSystem::AddError(semanticAnalyzer, this, "Const variable \"" + m_Identifier->Id() + "\" requires an initializer");
             }
         }
-        SymbolNode *node = SymbolTable::GetInstance().CurrentScope();
-        node->Insert(m_Identifier->Id(), new VariableSymbolNode{*this, node});
+        SymbolNode *node = SymbolTable::Get().CurrentScope();
+        node->Insert(new VariableSymbolNode{*this});
         return TypeSpecifierOk;
     }
 
     void LetStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_TypeSpecifier)
         {
-            m_TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            m_TypeSpecifier->SubstituteGenerics(genericExpander, map);
         }
         if (m_Value)
         {
-            m_Value->SubstituteGenerics(semanticAnalyzer, map);
+            m_Value->SubstituteGenerics(genericExpander, map);
         }
     }
 

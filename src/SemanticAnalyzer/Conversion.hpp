@@ -12,6 +12,7 @@ namespace Marble
         WideningNumeric,
         NarrowingNumeric,
         ConstConversion,
+        EnumConversion,
         Invalid
     };
 
@@ -35,6 +36,7 @@ namespace Marble
     private:
         bool HandleConstConversion(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
         bool HandleNullConversion(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
+        ConversionKind HandleEnumConversion(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to);
 
     private:
         std::unordered_map<std::pair<Types, Types>, ConversionKind, PairHash> m_ConversionMap;

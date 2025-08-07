@@ -14,10 +14,10 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Condition type must be boolean");
         }
 
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         SymbolNode *parent = table.CurrentScope();
-        SymbolNode *whileNode = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, parent};
-        parent->Insert("while-" + IDGenerator::Generate(), whileNode);
+        SymbolNode *whileNode = new BlockSymbolNode{"while_" + IDGenerator::Generate(), parent};
+        parent->Insert(whileNode);
 
         table.EnterScope(whileNode);
         m_Block->Analyze(semanticAnalyzer);
@@ -26,10 +26,10 @@ namespace Marble
     }
 
     void WhileStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Condition->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_Condition->SubstituteGenerics(genericExpander, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Statement> WhileStatement::Clone()

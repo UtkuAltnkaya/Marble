@@ -17,6 +17,7 @@ namespace Marble
     class Parser;
     class TypeSpecifier;
     class SemanticAnalyzer;
+    class GenericExpander;
     class CodegenContext;
 
     enum class AstType

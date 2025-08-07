@@ -1,3 +1,4 @@
+set(CMAKE_CXX_STANDARD 20)
 file(GLOB SYMBOL_TABLE_SRC_FILES "${PROJECT_DIR}/SymbolTable/*.cpp")
 file(GLOB SYMBOL_TABLE_HEADER_FILES "${PROJECT_DIR}/SymbolTable/*.hpp" )
 

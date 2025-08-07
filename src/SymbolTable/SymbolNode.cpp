@@ -1,141 +1,148 @@
 #include "SymbolTable/SymbolNode.hpp"
-#include "SymbolNode.hpp"
-#include "SymbolTable.hpp"
+#include "SymbolTable/SymbolTable.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
+#include "Utils/IDGenerator.hpp"
 
 namespace Marble
 {
-    SymbolNode::SymbolNode(SymbolData symbolData, SymbolNode *parent)
-        : m_SymbolData{symbolData}, m_Parent{parent}, m_AstPtr{nullptr}
+    SymbolNode::SymbolNode(SymbolData symbolData) : m_SymbolData{symbolData}, m_IsGeneric{false}, m_Block{nullptr}, m_AstNode{nullptr}
     {
-    }
-
-    SymbolNode::SymbolNode(const EnumDefinition &enumDefinition, SymbolNode *parent)
-        : SymbolNode{SymbolData{SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()),
-                                SymbolNodeTypes::Enum, SymbolNodeBaseTypes::None},
-                     parent}
-    {
-        m_AstPtr = &enumDefinition;
-        for (auto &enumField : enumDefinition.GetFields())
-        {
-            Insert(enumField->Id(), new VariableSymbolNode{*enumField.get(), this, MakeRef<TypeSpecifier>(Types::Int), SymbolNodeTypes::EnumField});
-        }
     }
 
     SymbolNode::~SymbolNode()
+    {
+    }
+
+    BlockSymbolNode *SymbolNode::Block()
+    {
+        if (!m_Block)
+        {
+            m_Block = new BlockSymbolNode{m_SymbolData.Name() + "_block_" + IDGenerator::Generate(), this};
+        }
+        return m_Block;
+    }
+
+    void SymbolNode::Insert(SymbolNode *node)
+    {
+        ASSERT_A(m_SymbolData.NodeType() == SymbolNodeTypes::Block, "Node must be block type");
+        Into<BlockSymbolNode>()->Insert(node);
+    }
+
+    StructOrEnumSymbolNode::StructOrEnumSymbolNode(const StructDefinition &structDefinition)
+        : SymbolNode{SymbolData{structDefinition.GetName(), SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()),
+                                SymbolNodeTypes::Struct, SymbolNodeBaseTypes::StructOrEnum}}
+    {
+        m_AstNode = &structDefinition;
+        m_IsGeneric = structDefinition.GetGenerics() != nullptr;
+        Block();
+        for (auto &field : structDefinition.GetFields())
+        {
+            auto fieldDefinition = field->Into<StructFieldDefinition>();
+            auto node = new VariableSymbolNode(
+                fieldDefinition->GetIdentifier().Id(),
+                SymbolData::FromAccessSpecifier(fieldDefinition->GetAccessSpecifier()),
+                fieldDefinition->GetField().GetTypeSpecifier());
+            m_Block->Insert(node);
+        }
+    }
+
+    StructOrEnumSymbolNode::StructOrEnumSymbolNode(const EnumDefinition &enumDefinition)
+        : SymbolNode{SymbolData{enumDefinition.GetName(), SymbolData::FromAccessSpecifier(enumDefinition.GetAccessSpecifier()),
+                                SymbolNodeTypes::Enum, SymbolNodeBaseTypes::StructOrEnum}}
+    {
+        m_AstNode = &enumDefinition;
+        Block();
+        for (auto &field : enumDefinition.GetFields())
+        {
+            VariableSymbolNode *node =
+                new VariableSymbolNode(field->Id(), SymbolAccess::Public, MakeRef<TypeSpecifier>(Types::Int, Span{}));
+            m_Block->Insert(node);
+        }
+    }
+
+    void StructOrEnumSymbolNode::InsertMethod(const std::string &methodName, const std::string &functionName)
+    {
+        if (m_Methods.contains(methodName))
+        {
+            ErrorSystem::AddError("Function already inserted");
+        }
+        m_Methods[methodName] = functionName;
+    }
+
+    std::optional<std::reference_wrapper<const std::string>> StructOrEnumSymbolNode::LookFunctionName(const std::string &methodName)
+    {
+        if (m_Methods.contains(methodName))
+        {
+            return m_Methods[methodName];
+        }
+        return std::nullopt;
+    }
+
+    FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition)
+        : SymbolNode{SymbolData{fnDefinition.GetName(), SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()),
+                                SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}}
+    {
+        m_AstNode = &fnDefinition;
+        m_IsGeneric = fnDefinition.GetGenerics() != nullptr;
+        m_ReturnType = fnDefinition.GetReturnType()->Clone();
+        m_IsMethod = fnDefinition.IsMethod();
+        Block();
+        for (auto &param : fnDefinition.GetParams())
+        {
+            m_Block->Insert(new VariableSymbolNode{*param});
+            m_Params.push_back(param->GetTypeSpecifier()->Clone());
+        }
+    }
+
+    FunctionDefinition *FunctionSymbolNode::Ast()
+    {
+        Marble::Ast *node = const_cast<Marble::Ast *>(m_AstNode);
+        return static_cast<FunctionDefinition *>(node);
+    }
+
+    VariableSymbolNode::VariableSymbolNode(const std::string &name, SymbolAccess access, Ref<TypeSpecifier> typeSpecifier)
+        : SymbolNode{SymbolData{name, access, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}}, m_TypeSpecifier{typeSpecifier}
+    {
+    }
+
+    VariableSymbolNode::VariableSymbolNode(const VariableType &variableType)
+        : VariableSymbolNode{variableType.GetIdentifier().Id(), SymbolAccess::Local, variableType.GetTypeSpecifier()}
+    {
+        m_AstNode = &variableType;
+    }
+
+    VariableSymbolNode::VariableSymbolNode(const LetStatement &letStmt)
+        : VariableSymbolNode{letStmt.GetIdentifier().Id(), SymbolAccess::Local, letStmt.GetTypeSpecifier()}
+    {
+        m_AstNode = &letStmt;
+    }
+
+    BlockSymbolNode::BlockSymbolNode(const std::string &name, SymbolNode *parent)
+        : SymbolNode{SymbolData{name, SymbolAccess::Public, SymbolNodeTypes::Block, SymbolNodeBaseTypes::Block}}, m_Parent{parent}
+    {
+    }
+
+    BlockSymbolNode::~BlockSymbolNode()
     {
         for (auto &[key, value] : m_Children)
         {
             delete value;
         }
+        m_Children.clear();
     }
 
-    SymbolIterator SymbolNode::Iter() const
+    void BlockSymbolNode::Insert(SymbolNode *node)
+    {
+        auto &symbolData = node->GetSymbolData();
+        if (m_Children.contains(symbolData.Name()))
+        {
+            ErrorSystem::AddError("Duplicate Identifier:" + symbolData.Name());
+        }
+        m_Children[symbolData.Name()] = node;
+    }
+
+    SymbolIterator BlockSymbolNode::Iter()
     {
         return SymbolIterator(this);
     }
-
-    void SymbolNode::Insert(const std::string &name, SymbolNode *node)
-    {
-        if (m_Children.find(name) == m_Children.end())
-        {
-            m_Children.insert({name, node});
-            return;
-        }
-        // TODO Pretty print error
-        throw "Duplicate identifier";
-    }
-
-    StructSymbolNode::StructSymbolNode(const StructDefinition &structDefinition, SymbolNode *parent)
-        : SymbolNode{
-              SymbolData{
-                  SymbolData::FromAccessSpecifier(structDefinition.GetAccessSpecifier()),
-                  SymbolNodeTypes::Struct, SymbolNodeBaseTypes::Struct},
-              parent}
-    {
-        m_StructType = nullptr;
-        m_AstPtr = &structDefinition;
-        m_IsGeneric = structDefinition.GetGenerics() != nullptr;
-        for (auto &structField : structDefinition.GetFields())
-        {
-            Insert(structField->GetField().GetIdentifier().Id(), new VariableSymbolNode{*structField.get(), this});
-        }
-    }
-
-    FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition, SymbolNode *parent)
-        : SymbolNode{
-              SymbolData{SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()),
-                         SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function},
-              parent}
-    {
-        m_AstPtr = &fnDefinition;
-        m_ReturnType = fnDefinition.GetReturnType();
-        const std::vector<Box<VariableType>> &params = fnDefinition.GetParams();
-        m_Params.reserve(params.size());
-        m_IsGeneric = fnDefinition.GetGenerics() != nullptr;
-        for (auto &param : params)
-        {
-            m_Params.push_back(param->GetTypeSpecifier());
-            Insert(param->GetIdentifier().Id(), new VariableSymbolNode{*param, this});
-        }
-    }
-
-    FunctionSymbolNode::FunctionSymbolNode(const MemberFunctionDefinition &memberFunction, SymbolNode *parent)
-        : SymbolNode{SymbolData{
-                         SymbolData::FromAccessSpecifier(memberFunction.GetPrototype().GetAccessSpecifier()),
-                         SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function},
-                     parent}
-    {
-        m_AstPtr = &memberFunction;
-        const MemberFunctionPrototypeDefinition &prototype = memberFunction.GetPrototype();
-        m_ReturnType = prototype.GetReturnType();
-        const std::vector<Box<VariableType>> &params = prototype.GetParams();
-        m_Params.reserve(params.size());
-        m_IsGeneric = prototype.GetGenerics() != nullptr;
-        if (auto method = prototype.GetMethod(); method)
-        {
-            Insert(method->GetIdentifier().Id(), new VariableSymbolNode{*method, this});
-        }
-
-        for (auto &param : params)
-        {
-            m_Params.push_back(param->GetTypeSpecifier());
-            Insert(param->GetIdentifier().Id(), new VariableSymbolNode{*param, this});
-        }
-    }
-
-    VariableSymbolNode::VariableSymbolNode(SymbolAccess access, SymbolNode *parent, Ref<TypeSpecifier> typeSpecifier)
-        : SymbolNode{SymbolData{access, SymbolNodeTypes::Variable, SymbolNodeBaseTypes::Variable}, parent}, m_TypeSpecifier{typeSpecifier}, m_Alloca{nullptr}
-    {
-    }
-
-    VariableSymbolNode::VariableSymbolNode(const VariableType &variableType, SymbolNode *parent)
-        : VariableSymbolNode{SymbolAccess::Local, parent, variableType.GetTypeSpecifier()}
-    {
-        m_AstPtr = &variableType;
-    }
-
-    VariableSymbolNode::VariableSymbolNode(const StructFieldDefinition &structField, SymbolNode *parent)
-        : SymbolNode{
-              SymbolData{SymbolData::FromAccessSpecifier(structField.GetAccessSpecifier()),
-                         SymbolNodeTypes::StructField, SymbolNodeBaseTypes::Variable},
-              parent},
-          m_Alloca{nullptr}
-    {
-        m_AstPtr = &structField;
-        m_TypeSpecifier = structField.GetField().GetTypeSpecifier();
-    }
-
-    VariableSymbolNode::VariableSymbolNode(const LetStatement &letStmt, SymbolNode *parent)
-        : VariableSymbolNode{SymbolAccess::Local, parent, letStmt.GetTypeSpecifier()}
-    {
-        m_AstPtr = &letStmt;
-    }
-
-    VariableSymbolNode::VariableSymbolNode(const Identifier &identifier, SymbolNode *parent, Ref<TypeSpecifier> ts, SymbolNodeTypes nodeType)
-        : VariableSymbolNode{SymbolAccess::Public, parent, ts}
-    {
-        m_AstPtr = &identifier;
-        m_TypeSpecifier = ts;
-    }
-
 } // namespace Marble

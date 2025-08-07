@@ -7,11 +7,10 @@ namespace Marble
 {
     Ref<TypeSpecifier> ForStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         SymbolNode *parent = table.CurrentScope();
-        SymbolNode *forNode = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, parent};
-        parent->Insert("for-" + IDGenerator::Generate(), forNode);
-
+        BlockSymbolNode *forNode = new BlockSymbolNode("for_" + IDGenerator::Generate(), parent);
+        parent->Insert(forNode);
         table.EnterScope(forNode);
         if (m_LetStatement)
         {
@@ -37,20 +36,20 @@ namespace Marble
     }
 
     void ForStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_LetStatement)
         {
-            m_LetStatement->SubstituteGenerics(semanticAnalyzer, map);
+            m_LetStatement->SubstituteGenerics(genericExpander, map);
         }
         else
         {
-            m_AssignmentExpression->SubstituteGenerics(semanticAnalyzer, map);
+            m_AssignmentExpression->SubstituteGenerics(genericExpander, map);
         }
 
-        m_Condition->SubstituteGenerics(semanticAnalyzer, map);
-        m_Increment->SubstituteGenerics(semanticAnalyzer, map);
-        m_Block->SubstituteGenerics(semanticAnalyzer, map);
+        m_Condition->SubstituteGenerics(genericExpander, map);
+        m_Increment->SubstituteGenerics(genericExpander, map);
+        m_Block->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Statement> ForStatement::Clone()

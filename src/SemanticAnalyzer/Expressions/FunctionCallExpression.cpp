@@ -12,36 +12,25 @@ namespace Marble
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Function name must be an identifier expression", true);
         }
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *scope = table.CurrentScope();
-        SymbolNode *node = GetFunctionNode(semanticAnalyzer, scope, identifierExpression->GetIdentifier().Id());
-        FunctionSymbolNode *fnNode = node->Into<FunctionSymbolNode>();
+
+        FunctionSymbolNode *fnNode = SymbolIterator().Function(identifierExpression->GetIdentifier().Id());
+        if (!fnNode)
+        {
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the function", true);
+        }
 
         if (fnNode->GetSymbolData().Access() != SymbolAccess::Public)
         {
-            if (!node->IsParentRoot())
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Function declared as private");
-            }
+            ErrorSystem::AddError(semanticAnalyzer, this, "Function declared as private");
         }
 
         if (fnNode->IsGeneric())
         {
-            const std::string &name = semanticAnalyzer.InstantiateGenerics(identifierExpression->GetIdentifier().Id(), m_Generics.get());
-            node = GetFunctionNode(semanticAnalyzer, scope, name);
-            fnNode = node->Into<FunctionSymbolNode>();
+            const std::string name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
+            fnNode = SymbolIterator().Function(name);
+            ASSERT_A(fnNode != nullptr, "Cannot find the related function");
             m_Generics.reset();
             identifierExpression->GetIdentifier().Id(name);
-        }
-
-        switch (scope->GetSymbolData().NodeType())
-        {
-        case SymbolNodeTypes::Struct:
-        case SymbolNodeTypes::Enum:
-            table.LeaveScope();
-            break;
-        default:
-            break;
         }
 
         const std::vector<Ref<TypeSpecifier>> params = fnNode->Params();
@@ -81,32 +70,17 @@ namespace Marble
         return m_ValueType;
     }
 
-    void FunctionCallExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void FunctionCallExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Generics)
         {
-            m_Generics->SubstituteGenerics(semanticAnalyzer, map);
+            m_Generics->SubstituteGenerics(genericExpander, map);
         }
-        m_FnName->SubstituteGenerics(semanticAnalyzer, map);
+        m_FnName->SubstituteGenerics(genericExpander, map);
         for (auto &arg : m_Args)
         {
-            arg->SubstituteGenerics(semanticAnalyzer, map);
+            arg->SubstituteGenerics(genericExpander, map);
         }
-    }
-
-    SymbolNode *FunctionCallExpression::GetFunctionNode(SemanticAnalyzer &semanticAnalyzer, SymbolNode *scope, const std::string &name)
-    {
-        SymbolNode *node = scope->Iter().Function(name).Find();
-        if (!node)
-        {
-            SymbolTable &table = SymbolTable::GetInstance();
-            node = table.Root()->Iter().Function(name).Find();
-            if (!node)
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the function", true);
-            }
-        }
-        return node;
     }
 
     Box<Expression> FunctionCallExpression::Clone()

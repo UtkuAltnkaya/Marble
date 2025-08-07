@@ -1,6 +1,8 @@
 #include <iostream>
 #include "SymbolTable/SymbolTable.hpp"
 #include "Utils/Macros.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
+#include "SymbolTable.hpp"
 
 namespace Marble
 {
@@ -8,16 +10,13 @@ namespace Marble
 
     SymbolTable::SymbolTable()
     {
-        m_Root = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Global, SymbolNodeBaseTypes::None}, nullptr};
-        m_CurrentScope.push(m_Root);
+        m_Root = new BlockSymbolNode{"Global", nullptr};
+        EnterScope(m_Root);
     }
 
     SymbolTable::~SymbolTable()
     {
-        if (m_Root)
-        {
-            delete m_Root;
-        }
+        delete m_Root;
     }
 
     void SymbolTable::Init()
@@ -32,35 +31,80 @@ namespace Marble
         delete s_Instance;
     }
 
-    SymbolTable &SymbolTable::GetInstance()
+    SymbolTable &SymbolTable::Get()
     {
         ASSERT_A(s_Instance, "Singleton instance is not initalized");
         return *s_Instance;
     }
 
-    void SymbolTable::Insert(const std::string &name, SymbolNode *node)
-    {
-        m_Root->Insert(name, node);
-    }
-
-    SymbolNode *const SymbolTable::CurrentScope()
-    {
-        return m_CurrentScope.top();
-    }
-
     void SymbolTable::EnterScope(SymbolNode *node)
     {
-        m_CurrentScope.push(node);
+        m_Scope.push(node);
     }
 
     void SymbolTable::LeaveScope()
     {
-        m_CurrentScope.pop();
+        if (m_Scope.size() == 0)
+        {
+            ErrorSystem::AddError("Symbol stack underflow");
+        }
+        m_Scope.pop();
     }
 
-    SymbolIterator SymbolTable::Iter()
+    SymbolNode *SymbolTable::CurrentScope()
     {
-        return SymbolIterator(m_Root);
+        ASSERT_A(m_Scope.size() != 0, "Empty stack");
+        return m_Scope.top();
     }
 
+    void SymbolTable::Insert(SymbolNode *node)
+    {
+        BlockSymbolNode *root = m_Root->Into<BlockSymbolNode>();
+        root->Insert(node);
+    }
+
+    void SymbolTable::Insert(Definition *definition)
+    {
+        if (auto f = definition->TryInto<FunctionDefinition>(); f)
+        {
+            return Insert(*f);
+        }
+
+        if (auto s = definition->TryInto<StructDefinition>(); s)
+        {
+            return Insert(*s);
+        }
+
+        if (auto e = definition->TryInto<EnumDefinition>())
+        {
+            return Insert(*e);
+        }
+
+        ASSERT_A(false, "Cannot Insert given definition to symbol table");
+    }
+
+    void SymbolTable::Insert(const FunctionDefinition &functionDefinition)
+    {
+        Insert(new FunctionSymbolNode(functionDefinition));
+    }
+
+    void SymbolTable::Insert(const StructDefinition &structDefinition)
+    {
+        Insert(new StructOrEnumSymbolNode(structDefinition));
+    }
+
+    void SymbolTable::Insert(const EnumDefinition &enumDefinition)
+    {
+        Insert(new StructOrEnumSymbolNode(enumDefinition));
+    }
+
+    SymbolScopeGuard::SymbolScopeGuard(SymbolNode *node)
+    {
+        SymbolTable::Get().EnterScope(node);
+    }
+
+    SymbolScopeGuard::~SymbolScopeGuard()
+    {
+        SymbolTable::Get().LeaveScope();
+    }
 } // namespace Marble

@@ -1,3 +1,4 @@
+set(CMAKE_CXX_STANDARD 23)
 
 file(GLOB SEMANTIC_ANALYZER_SRC_FILES "${PROJECT_DIR}/SemanticAnalyzer/*.cpp" "${PROJECT_DIR}/SemanticAnalyzer/*/*.cpp")
 file(GLOB SEMANTIC_ANALYZER_HEADER_FILES "${PROJECT_DIR}/SemanticAnalyzer/*.hpp" )

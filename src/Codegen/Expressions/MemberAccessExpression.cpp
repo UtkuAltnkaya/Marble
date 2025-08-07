@@ -11,15 +11,16 @@ namespace Marble
         case ExpressionType::NameSpace:
         case ExpressionType::FunctionCall:
         {
-            llvm::Value *result = m_Object->Codegen(codegenContext);
-            IdentifierExpression *tempIdentifier = GetTempIdentifier();
-            if (!tempIdentifier)
-            {
-                throw "Temp oject call must have temp variable";
-            }
-            llvm::Value *tempAddr = tempIdentifier->Address(codegenContext);
-            codegenContext.Builder().CreateStore(result, tempAddr);
-            break;
+            TODO("TEMP IDENTIFIER");
+            // llvm::Value *result = m_Object->Codegen(codegenContext);
+            // IdentifierExpression *tempIdentifier = GetTempIdentifier();
+            // if (!tempIdentifier)
+            // {
+            //     throw "Temp oject call must have temp variable";
+            // }
+            // llvm::Value *tempAddr = tempIdentifier->Address(codegenContext);
+            // codegenContext.Builder().CreateStore(result, tempAddr);
+            // break;
         }
         default:
             break;
@@ -64,27 +65,28 @@ namespace Marble
         {
             auto &ptr = objectTypeSpecifier->Pointer();
             objectType = llvm::cast<llvm::StructType>(ptr.TypeSpecifier->ToLLVMType(codegenContext));
-            identifier = &ptr.TypeSpecifier->UserDefine();
+            identifier = &ptr.TypeSpecifier->UserDefine().Type;
             objPtr = builder.CreateLoad(llvm::PointerType::get(objectType, 0), objPtr);
         }
         else
         {
             objectType = llvm::cast<llvm::StructType>(objectTypeSpecifier->ToLLVMType(codegenContext));
-            identifier = &objectTypeSpecifier->UserDefine();
+            identifier = &objectTypeSpecifier->UserDefine().Type;
         }
 
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *node = table.Iter().Struct(identifier->Id()).Find();
-        StructDefinition *structDefinition = static_cast<StructDefinition *>(node->GetAstPtr());
+        TODO("Find struct index");
+        // SymbolTable &table = SymbolTable::GetInstance();
+        // SymbolNode *node = table.Iter().Struct(identifier->Id()).Find();
+        // StructDefinition *structDefinition = static_cast<StructDefinition *>(node->GetAstPtr());
 
         switch (m_Property->ExpressionType())
         {
         case ExpressionType::Identifier:
         {
-            auto identifier = m_Property->Into<IdentifierExpression>();
-            const std::string &fieldName = identifier->GetIdentifier().Id();
-            int index = structDefinition->GetFieldIndex(fieldName);
-            return builder.CreateStructGEP(objectType, objPtr, index);
+            // auto identifier = m_Property->Into<IdentifierExpression>();
+            // const std::string &fieldName = identifier->GetIdentifier().Id();
+            // int index = structDefinition->GetFieldIndex(fieldName);
+            // return builder.CreateStructGEP(objectType, objPtr, index);
         }
         case ExpressionType::ArrayIndex:
         {
@@ -105,12 +107,4 @@ namespace Marble
         }
     }
 
-    IdentifierExpression *MemberAccessExpression::GetTempIdentifier()
-    {
-        if (!m_TempValue)
-        {
-            return nullptr;
-        }
-        return m_TempValue->TryInto<IdentifierExpression>();
-    }
 } // namespace Marble

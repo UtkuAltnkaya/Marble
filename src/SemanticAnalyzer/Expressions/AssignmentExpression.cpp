@@ -49,10 +49,10 @@ namespace Marble
         ErrorSystem::AddError(semanticAnalyzer, this, "Expression must be modifiable value");
     }
 
-    void AssignmentExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void AssignmentExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Value->SubstituteGenerics(semanticAnalyzer, map);
-        m_Variable->SubstituteGenerics(semanticAnalyzer, map);
+        m_Value->SubstituteGenerics(genericExpander, map);
+        m_Variable->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Expression> AssignmentExpression::Clone()

@@ -1,5 +1,4 @@
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
-#include "SemanticAnalyzer.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
 #include "Utils/Macros.hpp"
 #include "Utils/IDGenerator.hpp"
@@ -9,7 +8,8 @@ namespace Marble
 {
     static int RankTypes(Types t);
 
-    SemanticAnalyzer::SemanticAnalyzer(Ref<Program> program, const Marble::File &file) : m_Program{program}, m_File{file}
+    SemanticAnalyzer::SemanticAnalyzer(Ref<Marble::Program> program, const Marble::File &file)
+        : m_Program{program}, m_File{file}, m_GenericExpander{*this}
     {
     }
 
@@ -30,6 +30,11 @@ namespace Marble
                   vec.end());
     }
 
+    void SemanticAnalyzer::RegisterFunction(Box<FunctionDefinition> functionDefinition)
+    {
+        m_Program->Definitions().push_back(std::move(functionDefinition));
+    }
+
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const Generics *generics)
     {
         ASSERT_A(generics != nullptr, "Generic must be provided");
@@ -38,80 +43,7 @@ namespace Marble
 
     const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs)
     {
-        ExpandNestedGenerics(typeArgs);
-
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *scope = table.CurrentScope();
-        SymbolNode *parent = scope->Iter().Parent().Find();
-
-        GenericInstanceKey key;
-
-        if (auto node = parent->Iter().Function(name).Find(); node)
-        {
-            Box<Definition> expandedFnDefinition = Instantiate(node, key, typeArgs);
-            if (!expandedFnDefinition)
-            {
-                return m_Generis[key];
-            }
-
-            FunctionSymbolNode *newFnSymbol = new FunctionSymbolNode{*expandedFnDefinition->Into<FunctionDefinition>(),
-                                                                     parent};
-            parent->Insert(expandedFnDefinition->GetName(), newFnSymbol);
-            AddExpandedDefinition(std::move(expandedFnDefinition));
-            return m_Generis[key];
-        }
-
-        if (auto node = table.Root()->Iter().Struct(name).Find(); node)
-        {
-            Box<Definition> expandedStructDefinition = Instantiate(node, key, typeArgs);
-            if (!expandedStructDefinition)
-            {
-                return m_Generis[key];
-            }
-            StructDefinition *newStructDefinition = expandedStructDefinition->Into<StructDefinition>();
-            SymbolNode *newStructNode = new StructSymbolNode{*newStructDefinition, table.Root()};
-            table.Insert(expandedStructDefinition->GetName(), newStructNode);
-
-            ImplDefinition *implDefinition = newStructDefinition->GetImplDefinition();
-            if (!implDefinition)
-            {
-                return m_Generis[key];
-            }
-            Box<Definition> expandedImplDefinition = implDefinition->InstantiateWith(*this, typeArgs);
-            ImplDefinition *newImplDefinition = expandedImplDefinition->Into<ImplDefinition>();
-
-            Ref<TypeSpecifier> implName = MakeRef<TypeSpecifier>(
-                Identifier{newStructDefinition->GetName(), newStructDefinition->GetIdentifier().GetSpan()},
-                newStructDefinition->GetIdentifier().GetSpan());
-
-            newImplDefinition->SetImplName(implName);
-            newImplDefinition->CreateSymbol();
-            AddExpandedDefinition(std::move(expandedStructDefinition));
-            AddExpandedDefinition(std::move(expandedImplDefinition));
-            return m_Generis[key];
-        }
-
-        if (auto node = scope->Iter().Function(name).Find(); node)
-        {
-            Box<Definition> expandedMethodDefinition = Instantiate(node, key, typeArgs);
-            if (!expandedMethodDefinition)
-            {
-                return m_Generis[key];
-            }
-            MemberFunctionDefinition *newMemberFunctionDefinition = expandedMethodDefinition->Into<MemberFunctionDefinition>();
-            FunctionSymbolNode *newFunctionNode = new FunctionSymbolNode{*newMemberFunctionDefinition, scope};
-            scope->Insert(newMemberFunctionDefinition->GetName(), newFunctionNode);
-
-            expandedMethodDefinition->Analyze(*this);
-
-            Definition *definition = static_cast<Definition *>(scope->GetAstPtr());
-            StructDefinition *structDefinition = definition->Into<StructDefinition>();
-            ImplDefinition *implDefinition = structDefinition->GetImplDefinition();
-            implDefinition->AddMemberFunction(Box<MemberFunctionDefinition>(expandedMethodDefinition.release()->Into<MemberFunctionDefinition>()));
-            return m_Generis[key];
-        }
-        ASSERT_D(false, "Something went wrong");
-        UNREACHABLE();
+        return m_GenericExpander.Expand(name, typeArgs);
     }
 
     bool SemanticAnalyzer::TryImplicitConversion(Box<Expression> &expr, Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
@@ -144,107 +76,6 @@ namespace Marble
         int rankA = RankTypes(a->GetType());
         int rankB = RankTypes(b->GetType());
         return (rankA >= rankB) ? a : b;
-    }
-
-    const std::string &SemanticAnalyzer::ConvertMethodIntoFunction(Definition *definition, const std::string &structName, SymbolNode *currentScope)
-    {
-        MemberFunctionDefinition *memberFunctionDefinition = definition->TryInto<MemberFunctionDefinition>();
-        if (!memberFunctionDefinition)
-        {
-            ErrorSystem::AddError(*this, definition, "MemberFunction definition expected", true);
-        }
-        MethodInstanceKey key;
-        key.StructName = structName;
-        key.MethodName = definition->GetName();
-        for (auto &param : memberFunctionDefinition->GetPrototype().GetParams())
-        {
-            key.Params.push_back(param->GetTypeSpecifier()->ToString());
-        }
-        if (m_ConvertedMethodsName.contains(key))
-        {
-            return m_ConvertedMethodsName[key];
-        }
-
-        FunctionDefinition *functionDefinition = new FunctionDefinition((*memberFunctionDefinition), structName);
-        SymbolTable &table = SymbolTable::GetInstance();
-        FunctionSymbolNode *fnSymbol = new FunctionSymbolNode{*functionDefinition, table.Root()};
-        table.Insert(functionDefinition->GetName(), fnSymbol);
-        currentScope->Insert(functionDefinition->GetName(), new FunctionSymbolNode{*functionDefinition, table.Root()});
-        m_ConvertedMethodsName[key] = functionDefinition->GetName();
-        AddExpandedDefinition(Box<Definition>(functionDefinition));
-        return m_ConvertedMethodsName[key];
-    }
-
-    Box<Definition> SemanticAnalyzer::Instantiate(SymbolNode *node, GenericInstanceKey &key, const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-
-        Definition *definition = static_cast<Definition *>(node->GetAstPtr());
-        GenerateGenericKey(key, definition, typeArgs);
-        if (m_Generis.contains(key))
-        {
-            return nullptr;
-        }
-        Box<Identifier> id = CreateExpandedName(definition->GetIdentifier(), typeArgs);
-        m_Generis[key] = id->Id();
-        Box<Definition> expandedDefinition = definition->InstantiateWith(*this, typeArgs);
-        expandedDefinition->SetName(std::move(id));
-        return expandedDefinition;
-    }
-
-    Box<Identifier> SemanticAnalyzer::CreateExpandedName(const Identifier &id, const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-        std::string finalName = id.Id();
-        for (auto &type : typeArgs)
-        {
-            finalName += "_" + type->ToString();
-        }
-        finalName += "_" + IDGenerator::Generate();
-
-        return MakeBox<Identifier>(finalName, id.GetSpan());
-    }
-
-    void SemanticAnalyzer::AddExpandedDefinition(Box<Definition> definition)
-    {
-        auto &definitions = m_Program->Definitions();
-        for (auto &def : definitions)
-        {
-            if (def->GetName() == definition->GetName() && definition->DefinitionType() == def->DefinitionType())
-            {
-                return;
-            }
-        }
-        definitions.push_back(std::move(definition));
-    }
-
-    void SemanticAnalyzer::GenerateGenericKey(GenericInstanceKey &key, const Definition *definition, const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-        key.Name = definition->GetName();
-        key.KeyType = GenericInstanceKey::FromDefinitionType((int)definition->DefinitionType());
-        for (auto &type : typeArgs)
-        {
-            key.TypeArgumentNames.emplace_back(type->ToString());
-        }
-    }
-
-    void SemanticAnalyzer::ExpandNestedGenerics(const std::vector<Ref<TypeSpecifier>> &typeArgs)
-    {
-        auto &vector = const_cast<std::vector<Ref<TypeSpecifier>> &>(typeArgs);
-        size_t size = typeArgs.size();
-        for (int i = 0; i < size; i++)
-        {
-            auto &type = vector[i];
-            if (type->GetType() != Types::GenericType)
-            {
-                continue;
-            }
-            auto &nestedGeneric = type->Generic();
-            const std::string &name = InstantiateGenerics(nestedGeneric.OuterType.Id(), nestedGeneric.InnerType);
-            Span span;
-            span.Start = nestedGeneric.OuterType.GetSpan().Start;
-            span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
-            auto expanded = MakeRef<TypeSpecifier>(Identifier{name, span}, span);
-            vector[i].swap(expanded);
-        }
     }
 
     int RankTypes(Types t)

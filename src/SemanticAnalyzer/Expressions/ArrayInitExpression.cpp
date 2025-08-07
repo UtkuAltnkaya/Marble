@@ -28,11 +28,11 @@ namespace Marble
         return m_ValueType;
     }
 
-    void ArrayInitExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ArrayInitExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &item : m_Array)
         {
-            item->SubstituteGenerics(semanticAnalyzer, map);
+            item->SubstituteGenerics(genericExpander, map);
         }
     }
 

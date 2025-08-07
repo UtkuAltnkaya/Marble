@@ -4,32 +4,30 @@
 
 namespace Marble
 {
-    void Definition::CheckParametersType(SemanticAnalyzer &analyzer, Ref<TypeSpecifier> paramType, SymbolIterator &iter)
+    void Definition::CheckParametersType(SemanticAnalyzer &analyzer, Ref<TypeSpecifier> paramType)
     {
         switch (paramType->GetType())
         {
         case Types::UserDefine:
         {
-            if (auto node = iter.Reset().Struct(paramType->ToString()).Find(); node)
+            if (auto node = SymbolIterator().StructOrEnum(paramType->ToString()); node)
             {
+                UserDefineTypeKinds kind = node->GetSymbolData().NodeType() == SymbolNodeTypes::Struct ? UserDefineTypeKinds::Struct : UserDefineTypeKinds::Enum;
+                paramType->SetUserDefineTypeKind(kind);
                 return;
             }
-            if (auto node = iter.Reset().Enum(paramType->ToString()).Find(); node)
-            {
-                return;
-            }
-            ErrorSystem::AddError(analyzer, this, "Cannot find the type named " + paramType->ToString(), false);
+            ErrorSystem::AddError(analyzer, this, "Cannot find the type named " + paramType->ToString());
             break;
         }
         case Types::Pointer:
         {
             auto &ptr = paramType->Pointer();
-            return CheckParametersType(analyzer, ptr.TypeSpecifier, iter);
+            return CheckParametersType(analyzer, ptr.TypeSpecifier);
         }
         case Types::ArrayType:
         {
             auto &arr = paramType->Array();
-            return CheckParametersType(analyzer, arr.TypeSpecifier, iter);
+            return CheckParametersType(analyzer, arr.TypeSpecifier);
         }
         case Types::GenericType:
         {

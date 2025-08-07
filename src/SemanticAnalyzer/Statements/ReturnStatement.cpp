@@ -6,22 +6,13 @@ namespace Marble
 {
     Ref<TypeSpecifier> ReturnStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *parent = table.CurrentScope();
-
-        while (parent && parent->GetSymbolData().NodeType() != SymbolNodeTypes::Function)
+        SymbolTable &table = SymbolTable::Get();
+        FunctionSymbolNode *fnNode = SymbolIterator(table.CurrentScope()).Function();
+        if (!fnNode)
         {
-            if (auto node = parent->Iter().Parent().Find(); node)
-            {
-                parent = node;
-            }
-            else
-            {
-                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find any parent of this symbol", true);
-            }
+            ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find function which return statement used into.", true);
         }
 
-        FunctionSymbolNode *fnNode = parent->Into<FunctionSymbolNode>();
         Ref<TypeSpecifier> returnType = fnNode->ReturnType();
 
         // TODO: Warn if local addresses returns
@@ -46,11 +37,11 @@ namespace Marble
     }
 
     void ReturnStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         if (m_Expression)
         {
-            m_Expression->SubstituteGenerics(semanticAnalyzer, map);
+            m_Expression->SubstituteGenerics(genericExpander, map);
         }
     }
 

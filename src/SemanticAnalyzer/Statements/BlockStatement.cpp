@@ -6,14 +6,14 @@ namespace Marble
 {
     Ref<TypeSpecifier> BlockStatement::Analyze(SemanticAnalyzer &semanticAnalyzer)
     {
-        SymbolTable &table = SymbolTable::GetInstance();
+        SymbolTable &table = SymbolTable::Get();
         for (auto &statement : m_Statements)
         {
             if (statement->StatementType() == StatementType::Block)
             {
                 SymbolNode *currentScope = table.CurrentScope();
-                SymbolNode *newScope = new SymbolNode{SymbolData{SymbolAccess::Local, SymbolNodeTypes::Block}, currentScope};
-                currentScope->Insert("block-" + IDGenerator::Generate(), newScope);
+                BlockSymbolNode *newScope = new BlockSymbolNode("block_" + IDGenerator::Generate(), currentScope);
+                currentScope->Insert(newScope);
                 table.EnterScope(newScope);
                 statement->Analyze(semanticAnalyzer);
                 table.LeaveScope();
@@ -28,11 +28,11 @@ namespace Marble
     }
 
     void BlockStatement::SubstituteGenerics(
-        SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+        GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         for (auto &statement : m_Statements)
         {
-            statement->SubstituteGenerics(semanticAnalyzer, map);
+            statement->SubstituteGenerics(genericExpander, map);
         }
     }
 

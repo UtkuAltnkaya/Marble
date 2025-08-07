@@ -28,7 +28,12 @@ namespace Marble
     {
     }
     TypeSpecifier::TypeSpecifier(const Identifier &identifier, const Span &span)
-        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::UserDefine}, m_Variants{identifier}
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::UserDefine}, m_Variants{UserDefineType{identifier, UserDefineTypeKinds::Undefined}}
+    {
+    }
+
+    TypeSpecifier::TypeSpecifier(const Identifier &identifier, const Span &span, UserDefineTypeKinds kind)
+        : Ast{span, AstType::TypeSpecifier}, m_Type{Types::UserDefine}, m_Variants{UserDefineType{identifier, kind}}
     {
     }
 
@@ -74,11 +79,11 @@ namespace Marble
         return *this;
     }
 
-    const Identifier &TypeSpecifier::UserDefine()
+    const UserDefineType &TypeSpecifier::UserDefine()
     {
-        if (std::holds_alternative<Identifier>(m_Variants))
+        if (std::holds_alternative<UserDefineType>(m_Variants))
         {
-            return std::get<Identifier>(m_Variants);
+            return std::get<UserDefineType>(m_Variants);
         }
         ErrorSystem::AddError("Cannot get the user define type");
         UNREACHABLE();
@@ -122,6 +127,36 @@ namespace Marble
         }
         ErrorSystem::AddError("Cannot get the constant type");
         UNREACHABLE();
+    }
+
+    const UserDefineType &TypeSpecifier::UserDefineUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::UserDefine, "Cannot get user define type");
+        return std::get<UserDefineType>(m_Variants);
+    }
+
+    const ArrayType &TypeSpecifier::ArrayUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::ArrayType, "Cannot get array type");
+        return std::get<ArrayType>(m_Variants);
+    }
+
+    const PointerType &TypeSpecifier::PointerUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::Pointer, "Cannot get pointer type");
+        return std::get<PointerType>(m_Variants);
+    }
+
+    const GenericType &TypeSpecifier::GenericUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::GenericType, "Cannot get generic type");
+        return std::get<GenericType>(m_Variants);
+    }
+
+    const ConstantType &TypeSpecifier::ConstantUnchecked() const
+    {
+        ASSERT_D(m_Type == Types::ConstantType, "Cannot get constant type");
+        return std::get<ConstantType>(m_Variants);
     }
 
     Ref<TypeSpecifier> TypeSpecifier::Parse(Parser &parser)
@@ -251,7 +286,7 @@ namespace Marble
 
         Span span{typeSpecifier->m_Span.Start, parser.Current().Span().End};
 
-        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine(), std::move(genericTypes)}, span);
+        return MakeRef<TypeSpecifier>(GenericType{typeSpecifier->UserDefine().Type, std::move(genericTypes)}, span);
     }
 
     Types TypeSpecifier::GetPrimitive(Parser &parser)
@@ -278,6 +313,13 @@ namespace Marble
             ErrorSystem::AddError(parser, "Unknown TypeSpecifier");
         }
         return Types::END;
+    }
+
+    void TypeSpecifier::SetUserDefineTypeKind(UserDefineTypeKinds kind)
+    {
+        ASSERT_A(m_Type == Types::UserDefine, "Type muse be user define");
+        UserDefineType &userDefine = std::get<UserDefineType>(m_Variants);
+        userDefine.Kind = kind;
     }
 
 } // namespace Marble

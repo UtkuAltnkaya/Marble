@@ -177,9 +177,9 @@ namespace Marble
         }
     }
 
-    void UnaryExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void UnaryExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Value->SubstituteGenerics(semanticAnalyzer, map);
+        m_Value->SubstituteGenerics(genericExpander, map);
     }
 
     Box<Expression> UnaryExpression::Clone()

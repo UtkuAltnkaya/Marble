@@ -24,22 +24,26 @@ namespace Marble
     {
 
         Box<Expression> left{Expression::Parse(parser, Expression::NextPrecedence(precedence))};
-        TokenType token_type = parser.Next().TokenType();
-
-        if (token_type != TokenType::Dot && token_type != TokenType::Arrow)
+        while (true)
         {
-            return left;
+            TokenType token_type = parser.Next().TokenType();
+
+            if (token_type != TokenType::Dot && token_type != TokenType::Arrow)
+            {
+                break;
+            }
+
+            const Span &start = left->GetSpan();
+            parser.NextToken();
+            parser.NextToken();
+
+            Box<Expression> property{Expression::Parse(parser, Expression::NextPrecedence(precedence))};
+
+            const Span &end = property->GetSpan();
+            Span span{start.Start, end.End};
+
+            left = MakeBox<MemberAccessExpression>(std::move(left), token_type, std::move(property), span);
         }
-
-        const Span &start = left->GetSpan();
-        parser.NextToken();
-        parser.NextToken();
-
-        Box<Expression> property{Expression::Parse(parser, precedence)};
-
-        const Span &end = property->GetSpan();
-        Span span{start.Start, end.End};
-
-        return MakeBox<MemberAccessExpression>(std::move(left), token_type, std::move(property), span);
+        return left;
     }
 } // namespace Marble

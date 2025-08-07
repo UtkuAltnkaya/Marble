@@ -6,14 +6,14 @@
 
 namespace Marble
 {
-    void TypeSpecifier::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void TypeSpecifier::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
         switch (m_Type)
         {
         case Types::UserDefine:
         {
-            auto &userDefine = std::get<Identifier>(m_Variants);
-            auto iter = map.find(userDefine.Id());
+            auto &userDefine = UserDefineUnchecked();
+            auto iter = map.find(*userDefine.Type);
             if (iter == map.end())
             {
                 return;
@@ -27,34 +27,34 @@ namespace Marble
         }
         case Types::Pointer:
         {
-            auto &ptr = std::get<PointerType>(m_Variants);
-            ptr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            auto &ptr = PointerUnchecked();
+            ptr.TypeSpecifier->SubstituteGenerics(genericExpander, map);
             break;
         }
         case Types::ArrayType:
         {
-            auto &arr = std::get<ArrayType>(m_Variants);
-            arr.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            auto &arr = ArrayUnchecked();
+            arr.TypeSpecifier->SubstituteGenerics(genericExpander, map);
             break;
         }
         case Types::ConstantType:
         {
-            auto &constant = std::get<ConstantType>(m_Variants);
-            constant.TypeSpecifier->SubstituteGenerics(semanticAnalyzer, map);
+            auto &constant = ConstantUnchecked();
+            constant.TypeSpecifier->SubstituteGenerics(genericExpander, map);
             break;
         }
         case Types::GenericType:
         {
-            GenericType &gen = std::get<GenericType>(m_Variants);
-            for (auto &arg : gen.InnerType)
+            auto &generic = GenericUnchecked();
+            for (auto &arg : generic.InnerType)
             {
-                arg->SubstituteGenerics(semanticAnalyzer, map);
+                arg->SubstituteGenerics(genericExpander, map);
             }
-            const std::string &name = semanticAnalyzer.InstantiateGenerics(gen.OuterType.Id(), gen.InnerType);
+            const std::string &name = genericExpander.Expand(generic.OuterType.Id(), generic.InnerType);
             Span span;
-            span.Start = gen.OuterType.GetSpan().Start;
+            span.Start = generic.OuterType.GetSpan().Start;
             span.End = Position{span.Start.Row, span.Start.Col + name.size(), span.Start.Cursor + name.size()};
-            m_Variants = Identifier(name, span);
+            m_Variants = UserDefineType(Identifier(name, span), UserDefineTypeKinds::Struct);
             m_Span = span;
             m_Type = Types::UserDefine;
             break;
@@ -117,36 +117,36 @@ namespace Marble
 
         if (m_Type == Types::Pointer)
         {
-            const PointerType &tsLeft = std::get<PointerType>(m_Variants);
-            const PointerType &tsRight = std::get<PointerType>(obj.m_Variants);
+            const PointerType &tsLeft = PointerUnchecked();
+            const PointerType &tsRight = obj.PointerUnchecked();
             return tsLeft.TypeSpecifier->operator==(*tsRight.TypeSpecifier);
         }
 
         if (m_Type == Types::UserDefine)
         {
-            const Identifier &tsLeft = std::get<Identifier>(m_Variants);
-            const Identifier &tsRight = std::get<Identifier>(obj.m_Variants);
-            return tsLeft == tsRight;
+            const UserDefineType &tsLeft = UserDefineUnchecked();
+            const UserDefineType &tsRight = obj.UserDefineUnchecked();
+            return tsLeft.Type == tsRight.Type && tsLeft.Kind == tsRight.Kind;
         }
 
         if (m_Type == Types::ArrayType)
         {
-            const ArrayType &tsLeft = std::get<ArrayType>(m_Variants);
-            const ArrayType &tsRight = std::get<ArrayType>(obj.m_Variants);
+            const ArrayType &tsLeft = ArrayUnchecked();
+            const ArrayType &tsRight = obj.ArrayUnchecked();
             return tsLeft.Size == tsRight.Size && tsLeft.TypeSpecifier->operator==(*tsRight.TypeSpecifier);
         }
 
         if (m_Type == Types::ConstantType)
         {
-            const ConstantType &tsLeft = std::get<ConstantType>(m_Variants);
-            const ConstantType &tsRight = std::get<ConstantType>(obj.m_Variants);
+            const ConstantType &tsLeft = ConstantUnchecked();
+            const ConstantType &tsRight = obj.ConstantUnchecked();
             return tsLeft.TypeSpecifier->operator==(*tsRight.TypeSpecifier);
         }
 
         if (m_Type == Types::GenericType)
         {
-            const GenericType &tsLeft = std::get<GenericType>(m_Variants);
-            const GenericType &tsRight = std::get<GenericType>(obj.m_Variants);
+            const GenericType &tsLeft = GenericUnchecked();
+            const GenericType &tsRight = obj.GenericUnchecked();
 
             if (tsLeft.OuterType != tsRight.OuterType)
             {
@@ -211,25 +211,25 @@ namespace Marble
             break;
         case Types::Pointer:
         {
-            const auto &ptr = std::get<PointerType>(m_Variants);
+            const auto &ptr = PointerUnchecked();
             m_TypeName = ptr.TypeSpecifier->ToString() + "*";
             break;
         }
         case Types::ArrayType:
         {
-            const auto &arr = std::get<ArrayType>(m_Variants);
-            m_TypeName = arr.TypeSpecifier->ToString() + "[]";
+            const auto &arr = ArrayUnchecked();
+            m_TypeName = arr.TypeSpecifier->ToString() + "[" + std::to_string(arr.Size) + "]";
             break;
         }
         case Types::UserDefine:
         {
-            const auto &id = std::get<Identifier>(m_Variants);
-            m_TypeName = id.Id();
+            const auto &id = UserDefineUnchecked();
+            m_TypeName = *id.Type;
             break;
         }
         case Types::GenericType:
         {
-            const auto &gen = std::get<GenericType>(m_Variants);
+            const auto &gen = GenericUnchecked();
             std::string result = gen.OuterType.Id() + "<";
             for (size_t i = 0; i < gen.InnerType.size(); ++i)
             {
@@ -243,7 +243,7 @@ namespace Marble
         }
         case Types::ConstantType:
         {
-            const auto &constant = std::get<ConstantType>(m_Variants);
+            const auto &constant = ConstantUnchecked();
             m_TypeName += "const " + constant.TypeSpecifier->ToString();
         }
         case Types::Null:
@@ -255,4 +255,8 @@ namespace Marble
         return m_TypeName;
     }
 
+    Ref<TypeSpecifier> TypeSpecifier::Clone()
+    {
+        return MakeRef<TypeSpecifier>(*this);
+    }
 } // namespace Marble

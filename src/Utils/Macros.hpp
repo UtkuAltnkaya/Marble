@@ -57,4 +57,15 @@ namespace Marble
         std::abort();                                     \
     } while (false)
 
+#define TODO(message)                                     \
+    do                                                    \
+    {                                                     \
+        std::cerr << "[TODO] "                            \
+                  << "function: " << __func__             \
+                  << ", file: " << __FILE__               \
+                  << ", line: " << __LINE__ << "\n"       \
+                  << "Message: " << message << std::endl; \
+        std::abort();                                     \
+    } while (false)
+
 } // namespace Marble

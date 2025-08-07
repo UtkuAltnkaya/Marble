@@ -12,7 +12,7 @@ namespace Marble
     {
         m_Identifier = MakeBox<Identifier>(*obj.m_Identifier.get());
         m_TypeSpecifier = MakeRef<TypeSpecifier>(*obj.m_TypeSpecifier.get());
-        }
+    }
 
     Box<VariableType> VariableType::Parse(Parser &parser)
     {
@@ -23,6 +23,11 @@ namespace Marble
         Ref<TypeSpecifier> typeSpecifier = TypeSpecifier::Parse(parser);
         const Span &end = parser.Current().Span();
         return MakeBox<VariableType>(std::move(identifier), typeSpecifier, Span{start.Start, end.End});
+    }
+
+    Box<VariableType> VariableType::Clone()
+    {
+        return MakeBox<VariableType>(*this);
     }
 
 } // namespace Marble

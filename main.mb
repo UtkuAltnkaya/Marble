@@ -1,15 +1,40 @@
+struct Math {}
 struct std {}
 
-struct Person {
-    pub name: String,
-    pub age: int,
-    pub job: str,
+enum AllocatorType {
+    Page,
+    Arena,
 }
 
-struct String{
-    data: char*,
+struct Vec<T> {
+    data: T*,
     size: usize,
     capacity: usize,
+}
+
+impl Vec<T> {
+    pub fn init() -> Vec<T> {
+        return Vec<T> {
+            data: std::allocate<T>(1),
+            size: 0, 
+            capacity: 1,
+        };
+    }
+    
+    pub fn (v: Vec<T>*) push (data: T) -> void {
+        
+    } 
+}
+
+
+impl Math {
+    pub fn add<T>(x:T, y:T) -> T {
+        return x + y;
+    }
+
+    pub fn square<T>(x:T) -> T {
+        return x * x;
+    }
 }
 
 impl std {
@@ -18,37 +43,50 @@ impl std {
     }
 }
 
-impl String {
-    pub fn init() -> String {
-        return String {
-            data: std::allocate<char>(1 as usize),
-            size: 0,
-            capacity: 1,
-        };
+impl AllocatorType {
+    pub fn init() -> AllocatorType {
+        return AllocatorType::Page;
+    }
+
+    pub fn (a:AllocatorType) to_int() -> int {
+        if (a == AllocatorType::Page) {
+            return 0;
+        }
+        if (a == AllocatorType::Arena) {
+            return 1;
+        }
+        return -1;
+    }
+
+    pub fn from_int(type:int) -> AllocatorType {
+        if (type == 0) {
+            return AllocatorType::Page;
+        }
+
+        if (type == 1) {
+            return AllocatorType::Arena;
+        }
+
+        return AllocatorType::init();
     }
 }
 
-impl Person {
-    pub fn init() -> Person {
-        return Person{
-            name: String::init(),
-            age: 24,
-            job: "Computer Engineer"
-        };
-    }
-
-    pub fn (p:Person*) get_name() -> str {
-        return p->name;
-    }
-    
-    pub fn (p:Person*) get_age() -> int {
-        return p->age;
-    }
-}
 
 fn main() -> int {
-    let person = Person::init();
+    let vec = Vec<int>::init();
+    vec.push(1);
+    vec.push(2);
 
 
-    return person.get_age();
+    let r = Math::add<int>(1,2);
+
+    r = Math::square<float>(2.0);
+    r = Math::square<int>(2.0);
+
+
+    let allocatorType = AllocatorType::Page;
+
+    allocatorType = AllocatorType::from_int(allocatorType.to_int());
+
+    return 0;
 }

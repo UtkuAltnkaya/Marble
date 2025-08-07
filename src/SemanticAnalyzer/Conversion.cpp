@@ -1,4 +1,5 @@
 #include "Conversion.hpp"
+#include "SymbolTable/SymbolTable.hpp"
 
 namespace Marble
 {
@@ -11,18 +12,17 @@ namespace Marble
             {
                 m_ConversionMap[{type, type}] = ConversionKind::Identity;
             }
-
-            m_ConversionMap[{Types::Bool, Types::Int}] = ConversionKind::WideningNumeric;
-            m_ConversionMap[{Types::Int, Types::Float}] = ConversionKind::WideningNumeric;
-            m_ConversionMap[{Types::Int, Types::Double}] = ConversionKind::WideningNumeric;
-            m_ConversionMap[{Types::Float, Types::Double}] = ConversionKind::WideningNumeric;
-            m_ConversionMap[{Types::Int, Types::Usize}] = ConversionKind::WideningNumeric;
-
-            m_ConversionMap[{Types::Double, Types::Float}] = ConversionKind::NarrowingNumeric;
-            m_ConversionMap[{Types::Double, Types::Int}] = ConversionKind::NarrowingNumeric;
-            m_ConversionMap[{Types::Float, Types::Int}] = ConversionKind::NarrowingNumeric;
-            m_ConversionMap[{Types::Usize, Types::Int}] = ConversionKind::NarrowingNumeric;
         }
+        m_ConversionMap[{Types::Bool, Types::Int}] = ConversionKind::WideningNumeric;
+        m_ConversionMap[{Types::Int, Types::Float}] = ConversionKind::WideningNumeric;
+        m_ConversionMap[{Types::Int, Types::Double}] = ConversionKind::WideningNumeric;
+        m_ConversionMap[{Types::Float, Types::Double}] = ConversionKind::WideningNumeric;
+        m_ConversionMap[{Types::Int, Types::Usize}] = ConversionKind::WideningNumeric;
+
+        m_ConversionMap[{Types::Double, Types::Float}] = ConversionKind::NarrowingNumeric;
+        m_ConversionMap[{Types::Double, Types::Int}] = ConversionKind::NarrowingNumeric;
+        m_ConversionMap[{Types::Float, Types::Int}] = ConversionKind::NarrowingNumeric;
+        m_ConversionMap[{Types::Usize, Types::Int}] = ConversionKind::NarrowingNumeric;
     }
 
     ConversionKind Conversion::CanConvert(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
@@ -47,7 +47,10 @@ namespace Marble
         {
             return ConversionKind::Identity;
         }
-
+        if (auto kind = HandleEnumConversion(from, to); kind != ConversionKind::None)
+        {
+            return kind;
+        }
         return ConversionKind::None;
     }
 
@@ -67,6 +70,38 @@ namespace Marble
     bool Conversion::HandleNullConversion(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
     {
         return from->GetType() == Types::Null && to->GetType() == Types::Pointer;
+    }
+
+    ConversionKind Conversion::HandleEnumConversion(Ref<TypeSpecifier> from, Ref<TypeSpecifier> to)
+    {
+        Types fromType = from->GetType();
+        Types toType = to->GetType();
+
+        StructOrEnumSymbolNode *fromNode = nullptr;
+        StructOrEnumSymbolNode *toNode = nullptr;
+
+        if (fromType == Types::UserDefine)
+        {
+            fromNode = SymbolIterator().Enum(**from->UserDefineUnchecked());
+            if (toType == Types::Int)
+            {
+                return ConversionKind::EnumConversion;
+            }
+        }
+        if (toType == Types::UserDefine)
+        {
+            toNode = SymbolIterator().Enum(**to->UserDefineUnchecked());
+            if (fromType == Types::Int)
+            {
+                return ConversionKind::EnumConversion;
+            }
+        }
+
+        if (fromNode && toNode && toNode == fromNode)
+        {
+            return ConversionKind::Identity;
+        }
+        return ConversionKind::None;
     }
 
 } // namespace Marble

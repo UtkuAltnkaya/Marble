@@ -1,7 +1,7 @@
 #include "Ast/Expressions.hpp"
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "ErrorSystem/CompilerError.hpp"
-#include "SymbolTable/SymbolTable.hpp"
+
 namespace Marble
 {
     Ref<TypeSpecifier> ArrayIndexExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
@@ -18,20 +18,6 @@ namespace Marble
         }
 
         Ref<TypeSpecifier> exprType = m_Array->Analyze(semanticAnalyzer);
-        if (arrayType != ExpressionType::FunctionCall)
-        {
-        }
-        SymbolTable &table = SymbolTable::GetInstance();
-        SymbolNode *scope = table.CurrentScope();
-        switch (scope->GetSymbolData().NodeType())
-        {
-        case SymbolNodeTypes::Struct:
-        case SymbolNodeTypes::Enum:
-            table.LeaveScope();
-            break;
-        default:
-            break;
-        }
 
         if (exprType->GetType() == Types::ArrayType)
         {
@@ -81,13 +67,13 @@ namespace Marble
         ErrorSystem::AddError(semanticAnalyzer, this, "Array index must be usize");
     }
 
-    void ArrayIndexExpression::SubstituteGenerics(SemanticAnalyzer &semanticAnalyzer, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
+    void ArrayIndexExpression::SubstituteGenerics(GenericExpander &genericExpander, const std::unordered_map<std::string, Ref<TypeSpecifier>> &map)
     {
-        m_Array->SubstituteGenerics(semanticAnalyzer, map);
-        m_Index->SubstituteGenerics(semanticAnalyzer, map);
+        m_Array->SubstituteGenerics(genericExpander, map);
+        m_Index->SubstituteGenerics(genericExpander, map);
         if (m_SecondIndex)
         {
-            m_SecondIndex->SubstituteGenerics(semanticAnalyzer, map);
+            m_SecondIndex->SubstituteGenerics(genericExpander, map);
         }
     }
 
