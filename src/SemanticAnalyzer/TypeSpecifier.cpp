@@ -126,7 +126,7 @@ namespace Marble
         {
             const UserDefineType &tsLeft = UserDefineUnchecked();
             const UserDefineType &tsRight = obj.UserDefineUnchecked();
-            return tsLeft.Type == tsRight.Type && tsLeft.Kind == tsRight.Kind;
+            return tsLeft.Type == tsRight.Type;
         }
 
         if (m_Type == Types::ArrayType)

@@ -1,0 +1,40 @@
+struct Rectangle {
+    width: int,
+    height: int,
+}
+
+impl Rectangle {
+    pub fn init(width: int, height: int) -> Rectangle {
+        return Rectangle { width, height };
+    }
+
+    pub fn (r: Rectangle*) area() -> int {
+        return r->width + r->height;
+    }
+
+    pub fn (r: Rectangle*) perimeter() -> int {
+        return (2 * r->width) + (2 * r->height);
+    }
+}
+
+fn max<T>(x: T, y: T) -> T {
+    if (x > y) {
+        return x;
+    }
+    return y;
+}
+
+
+fn main() -> int {
+    let r1 = Rectangle::init(10,5);
+    let r2 = Rectangle::init(9,6);
+
+    let area1 = r1.area();
+    let area2 = r2.area();
+
+    let max_area = max<int>(area1,area2);
+
+    let max_perimeter = max<int>(r1.perimeter(), r2.perimeter());
+
+    return 0;
+}

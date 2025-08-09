@@ -6,12 +6,12 @@
 namespace Marble
 {
     Definition::Definition(const Span &span, Marble::DefinitionType definitionType)
-        : Ast{span, AstType::Definition}, m_DefinitionType{definitionType}, m_IsAnalyzed{false}, m_IsExpanded{false}
+        : Ast{span, AstType::Definition}, m_DefinitionType{definitionType}, m_IsExpanded{false}
     {
     }
 
     Definition::Definition(Span &&span, Marble::DefinitionType definitionType)
-        : Ast{std::move(span), AstType::Definition}, m_DefinitionType{definitionType}, m_IsAnalyzed{false}, m_IsExpanded{false}
+        : Ast{std::move(span), AstType::Definition}, m_DefinitionType{definitionType}, m_IsExpanded{false}
     {
     }
 

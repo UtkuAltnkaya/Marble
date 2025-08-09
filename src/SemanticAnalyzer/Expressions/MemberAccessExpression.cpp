@@ -6,7 +6,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> MemberAccessExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         Ref<TypeSpecifier> objectType = AnalyzeObject(semanticAnalyzer);
         const Identifier &concreteName = FindConcreteName(semanticAnalyzer, objectType);
@@ -17,7 +17,9 @@ namespace Marble
         }
         BlockSymbolNode *properties = node->Block();
         bool isPublic = AnalyzeProperty(semanticAnalyzer, properties, node);
-        return CheckVisibility(semanticAnalyzer, isPublic);
+        m_ValueType = CheckVisibility(semanticAnalyzer, isPublic);
+        m_IsAnalyzed = true;
+        return m_ValueType;
     }
 
     Ref<TypeSpecifier> MemberAccessExpression::AnalyzeObject(SemanticAnalyzer &semanticAnalyzer)
@@ -82,6 +84,9 @@ namespace Marble
         case ExpressionType::FunctionCall:
             AnalyzeMethod(semanticAnalyzer, node, isPublic);
             break;
+        case ExpressionType::ArrayIndex:
+            AnalyzeArrayIndex(semanticAnalyzer, properties, isPublic);
+            break;
         default:
             ErrorSystem::AddError(semanticAnalyzer, this, "Invalid property expression", true);
             break;
@@ -123,7 +128,10 @@ namespace Marble
         if (firstArgType == Types::Pointer)
         {
             Span span = firstArg->GetSpan();
-            firstArg = MakeBox<UnaryExpression>(UnaryOperators::Address, std::move(firstArg), UnaryExpressionType::Prefix, span);
+            if (firstArg->ValueType()->GetType() != Types::Pointer)
+            {
+                firstArg = MakeBox<UnaryExpression>(UnaryOperators::Address, std::move(firstArg), UnaryExpressionType::Prefix, span);
+            }
         }
         else if (firstArgType != Types::UserDefine)
         {
@@ -132,6 +140,30 @@ namespace Marble
         fnCall->AddArg(std::move(firstArg), 0);
         m_ValueType = fnCall->Analyze(semanticAnalyzer);
         isPublic = functionSymbol->GetSymbolData().Access() == SymbolAccess::Public;
+    }
+
+    void MemberAccessExpression::AnalyzeArrayIndex(SemanticAnalyzer &semanticAnalyzer, BlockSymbolNode *properties, bool &isPublic)
+    {
+        ArrayIndexExpression *arrayIndexExpression = m_Property->Into<ArrayIndexExpression>();
+
+        Ref<TypeSpecifier> leftType;
+
+        if (auto identifier = arrayIndexExpression->Array().TryInto<IdentifierExpression>())
+        {
+            VariableSymbolNode *field = SymbolIterator(properties).Variable(*identifier->GetIdentifier());
+            if (!field)
+            {
+                ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find property of the struct", true);
+            }
+            leftType = field->GetTypeSpecifier();
+            isPublic = field->GetSymbolData().Access() == SymbolAccess::Public;
+        }
+        else
+        {
+            leftType = arrayIndexExpression->Array().Analyze(semanticAnalyzer);
+        }
+
+        m_ValueType = arrayIndexExpression->Analyze(semanticAnalyzer, leftType);
     }
 
     Box<Expression> MemberAccessExpression::CreateObjectPointer(StructOrEnumSymbolNode *node)
@@ -145,11 +177,13 @@ namespace Marble
             VariableSymbolNode *tempNode = new VariableSymbolNode(*tempName, SymbolAccess::Local, ts);
             SymbolTable::Get().CurrentScope()->Insert(tempNode);
             firstArg = MakeBox<IdentifierExpression>(std::move(tempName), Span{});
+            firstArg->ValueType(ts->Clone());
         }
         else
         {
             firstArg = m_Object->Clone();
         }
+
         return firstArg;
     }
 

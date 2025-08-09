@@ -5,7 +5,7 @@
 namespace Marble
 {
 
-    Ref<TypeSpecifier> AssignmentExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> AssignmentExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         CheckVariableExpressionTypes(semanticAnalyzer);
         Ref<TypeSpecifier> left = m_Variable->Analyze(semanticAnalyzer);

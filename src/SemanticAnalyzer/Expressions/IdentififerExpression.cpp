@@ -4,7 +4,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> IdentifierExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> IdentifierExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         SymbolNode *node = FindNode();
         if (!node)

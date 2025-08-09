@@ -5,7 +5,7 @@
 namespace Marble
 {
 
-    Ref<TypeSpecifier> FunctionCallExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> FunctionCallExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         IdentifierExpression *identifierExpression = m_FnName->TryInto<IdentifierExpression>();
         if (!identifierExpression)
@@ -19,7 +19,7 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Cannot find the function", true);
         }
 
-        if (fnNode->GetSymbolData().Access() != SymbolAccess::Public)
+        if (fnNode->IsMethod() && fnNode->GetSymbolData().Access() != SymbolAccess::Public)
         {
             ErrorSystem::AddError(semanticAnalyzer, this, "Function declared as private");
         }

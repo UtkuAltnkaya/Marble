@@ -37,7 +37,6 @@ namespace Marble
         static Box<Definition> Parse(Parser &parser);
         inline Marble::DefinitionType DefinitionType() const { return m_DefinitionType; }
         inline virtual bool IsGeneric() const { return false; }
-        inline virtual bool IsAnalyzed() const { return m_IsAnalyzed; }
         virtual bool IsExpanded() const { return m_IsExpanded; }
 
         inline virtual const std::string &GetName() const = 0;
@@ -96,7 +95,6 @@ namespace Marble
 
     protected:
         Marble::DefinitionType m_DefinitionType;
-        bool m_IsAnalyzed;
         bool m_IsExpanded;
     };
 

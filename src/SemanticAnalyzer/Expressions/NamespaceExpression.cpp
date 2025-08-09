@@ -5,7 +5,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> NamespaceExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> NamespaceExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         if (m_Namespace->ExpressionType() != ExpressionType::Identifier)
         {

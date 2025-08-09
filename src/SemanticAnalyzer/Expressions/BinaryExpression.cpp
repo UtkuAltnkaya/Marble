@@ -5,7 +5,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> BinaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> BinaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         Ref<TypeSpecifier> leftType = TypeSpecifier::PassConst(m_Left->Analyze(semanticAnalyzer));
         Ref<TypeSpecifier> rightType = TypeSpecifier::PassConst(m_Right->Analyze(semanticAnalyzer));

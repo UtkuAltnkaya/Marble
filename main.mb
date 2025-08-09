@@ -1,92 +1,66 @@
-struct Math {}
-struct std {}
-
-enum AllocatorType {
-    Page,
-    Arena,
-}
-
-struct Vec<T> {
-    data: T*,
-    size: usize,
-    capacity: usize,
-}
-
-impl Vec<T> {
-    pub fn init() -> Vec<T> {
-        return Vec<T> {
-            data: std::allocate<T>(1),
-            size: 0, 
-            capacity: 1,
-        };
-    }
-    
-    pub fn (v: Vec<T>*) push (data: T) -> void {
-        
-    } 
-}
-
-
-impl Math {
-    pub fn add<T>(x:T, y:T) -> T {
-        return x + y;
-    }
-
-    pub fn square<T>(x:T) -> T {
-        return x * x;
-    }
-}
+struct std{}
 
 impl std {
     pub fn allocate<T>(size:usize) -> T* {
         return null;
     }
+
+    pub fn deallocate<T>(ptr:T*) -> void {
+
+    }
 }
 
-impl AllocatorType {
-    pub fn init() -> AllocatorType {
-        return AllocatorType::Page;
+struct Vec<T> {
+    data: T*,
+    size: int,
+    capacity: int,
+}
+
+impl Vec<T> {
+
+    pub fn init() -> Vec<T> {
+        let capacity = 1;
+        let size = 0;
+        let obj =  Vec<T> {
+            capacity,
+            size,
+            data: std::allocate<T>(capacity as usize) 
+        };
+        return obj;
     }
 
-    pub fn (a:AllocatorType) to_int() -> int {
-        if (a == AllocatorType::Page) {
-            return 0;
-        }
-        if (a == AllocatorType::Arena) {
-            return 1;
-        }
-        return -1;
+    pub fn (v:Vec<T>*) deinit() -> void {
+        std::deallocate<T>(v->data);
+        v->size = 0; 
+        v->capacity = 0;
     }
 
-    pub fn from_int(type:int) -> AllocatorType {
-        if (type == 0) {
-            return AllocatorType::Page;
+    pub fn (v:Vec<T>*) push(element:T) -> void {
+        if (v->capacity == v->size) {
+            v->resize((v->capacity * 2) as usize);
         }
+        v->data[v->size as usize] = element;
+        v->size++;
+    }
 
-        if (type == 1) {
-            return AllocatorType::Arena;
+    pub fn (v:Vec<T>*) resize(new_capacity: usize) -> void {
+        let new_data = std::allocate<T>(new_capacity);
+        for (let i = 0; i < v->size; i++)
+        {   
+            let j = i as usize;
+            new_data[j] = v->data[j];
         }
-
-        return AllocatorType::init();
+        std::deallocate<T>(v->data);
+        v->capacity = new_capacity as int;
+        v->data = new_data;
     }
 }
 
 
 fn main() -> int {
-    let vec = Vec<int>::init();
-    vec.push(1);
-    vec.push(2);
+    let vector = Vec<int>::init();
+    defer vector.deinit();
 
-
-    let r = Math::add<int>(1,2);
-
-    r = Math::square<float>(2.0);
-    r = Math::square<int>(2.0);
-
-
-    let allocatorType = AllocatorType::Page;
-
-    allocatorType = AllocatorType::from_int(allocatorType.to_int());
-
+    vector.push(1);
     return 0;
 }

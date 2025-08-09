@@ -35,16 +35,18 @@ namespace Marble
     class Ast
     {
     public:
-        Ast(const Span &span, AstType type) : m_Span{span}, m_Type{type} {}
-        Ast(Span &&span, AstType type) : m_Span{std::move(span)}, m_Type{type} {}
+        Ast(const Span &span, AstType type) : m_Span{span}, m_Type{type}, m_IsAnalyzed{false} {}
+        Ast(Span &&span, AstType type) : m_Span{std::move(span)}, m_Type{type}, m_IsAnalyzed{false} {}
         virtual ~Ast() = default;
         virtual Ref<TypeSpecifier> Analyze(SemanticAnalyzer &semanticAnalyzer) { return nullptr; }
         virtual llvm::Value *Codegen(CodegenContext &codegenContext) { return nullptr; }
 
         inline const Span &GetSpan() const { return m_Span; }
         inline AstType GetAstType() const { return m_Type; }
+        inline virtual bool IsAnalyzed() const { return m_IsAnalyzed; }
 
     protected:
+        bool m_IsAnalyzed;
         Span m_Span;
         AstType m_Type;
     };

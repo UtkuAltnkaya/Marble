@@ -4,7 +4,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> ArrayIndexExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> ArrayIndexExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         AnalyzeIndex(semanticAnalyzer, m_Index.get());
         if (m_SecondIndex)
@@ -17,7 +17,15 @@ namespace Marble
             ErrorSystem::AddError(semanticAnalyzer, this, "Array type must be Identifier, Member Access or Function Call expression");
         }
 
-        Ref<TypeSpecifier> exprType = m_Array->Analyze(semanticAnalyzer);
+        Ref<TypeSpecifier> exprType;
+        if (baseType)
+        {
+            exprType = baseType;
+        }
+        else
+        {
+            exprType = m_Array->Analyze(semanticAnalyzer);
+        }
 
         if (exprType->GetType() == Types::ArrayType)
         {

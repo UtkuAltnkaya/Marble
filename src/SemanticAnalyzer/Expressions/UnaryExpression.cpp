@@ -5,7 +5,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> UnaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> UnaryExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         switch (m_UnaryExpressionType)
         {

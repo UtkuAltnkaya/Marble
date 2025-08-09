@@ -4,7 +4,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> ObjectInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> ObjectInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         IdentifierExpression *structName = m_Object->TryInto<IdentifierExpression>();
         if (!structName)
@@ -43,7 +43,7 @@ namespace Marble
         return m_ValueType;
     }
 
-    Ref<TypeSpecifier> FieldExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> FieldExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         SymbolNode *currentScope = SymbolTable::Get().CurrentScope();
         VariableSymbolNode *fieldNode = SymbolIterator(currentScope->Block()).Variable(m_Name.Id());

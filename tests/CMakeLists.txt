@@ -14,7 +14,8 @@ target_link_libraries(MarbleTests
     parser
     symbolTable
     semanticAnalyzer
-    codegen
+    codeGeneration
+    errorSystem
 )
 
 target_include_directories(MarbleTests PRIVATE

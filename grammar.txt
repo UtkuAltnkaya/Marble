@@ -1,24 +1,24 @@
 <program>                       ::= <declarations>
 <declarations>                  ::= <declaration> <declarations> | Epsilon
 <declaration>                   ::= <fn_declaration> | <struct_declaration> | <enum_declaration> | <impl_declaration>
-<fn_declaration>                ::= <access_specifier> fn <identifier> ( <params> ) -> <return_type> <block_statement>
+<fn_declaration>                ::= <access_specifier> fn <identifier> <generics> ( <params> ) -> <return_type> <block_statement>
 <access_specifier>              ::= public | private
 <params>                        ::= <variable_type> <params'> | Epsilon
 <params'>                       ::= , <variable_type> <params'> | Epsilon
 <variable_type>                 ::= <identifier> : <type_specifiers>
 <return_type>                   ::= <type_specifiers> | void
 <block_statement>               ::= { <statements> }
-<struct_declaration>            ::= <access_specifier> struct <identifier> { <struct_fields> }
+<struct_declaration>            ::= <access_specifier> struct <identifier> <generics> { <struct_fields> }
 <struct_fields>                 ::= <access_specifier> <variable_type> <struct_fields'> | Epsilon
 <struct_fields'>                ::= , <access_specifier> <variable_type> <struct_fields'> | Epsilon
 <enum_declaration>              ::= <access_specifier> enum <identifier> { <enum_fields> }
 <enum_fields>                   ::= <identifier> <enum_fields'>
 <enum_fields'>                  ::= , <identifier> <enum_fields'> | Epsilon
-<impl_declaration>              ::= impl <identifier> { <member_functions> }
+<impl_declaration>              ::= impl <type_specifier> { <member_functions> }
 <member_functions>              ::= <member_function> <member_functions'>
 <member_functions'>             ::= <member_function> <member_functions'> | Epsilon
-<member_function>               ::= <fn_declaration> | <access_specifier> fn <method> <identifier> ( <params> ) -> <return_type> <block_statement>
-<method>                        ::= <identifier> -> <pointer_type>
+<member_function>               ::= <fn_declaration> | <access_specifier> fn <method> <identifier> <generics> ( <params> ) -> <return_type> <block_statement>
+<method>                        ::= <identifier> -> <pointer_type> | <identifier> . <user_define>
 <statements>                    ::= <statement> <statements'> 
 <statements'>                   ::= <statement> <statements'> | Epsilon
 <statement>                     ::= <let_statement> | <if_statement> | <for_statement> | <while_statement> | <defer_statement> | <expression_statement> 
@@ -30,7 +30,8 @@
 <else_ifs>                      ::= <else_if> <else_ifs> | Epsilon
 <else_if>                       ::= else if ( <expression> ) <block_statement>
 <else>                          ::= else <block_statement>
-<for_statement>                 ::= for ( <let_statement> ; <expression> ; <expression> ) <block_statement>
+<for_init>                      ::= <let_statement> | <expression>
+<for_statement>                 ::= for ( <for_init> ; <expression> ; <expression> ) <block_statement>
 <while_statement>               ::= while ( <expression> ) <block_statement>
 <defer_statement>               ::= defer <expression>;
 <expression_statement>          ::= <expression>;
@@ -43,6 +44,9 @@
                                     | <member_access_expression> 
                                     | <object_init_expression> 
                                     | <primitive_expression> 
+                                    | <cast_expression>
+                                    | <identifier_expression>
+                                    | <namespace_expression>
 
 <binary_expression>             ::= <expression> <binary_operator> <expression>
 <binary_operator>               ::= + | - | * | / | == | != | >= | <= | < | > | % | & | && | '|' | '||' | << | >>
@@ -66,12 +70,16 @@
 <object_fields'>                ::= , <object_field> <object_fields'> | Epsilon
 <object_field>                  ::= <identifier> : <expression>
 <identifier_expression>         ::= <identifier>
-<primitive_expression>          ::= TOKEN_TYPE_NUMBER | TOKEN_TYPE_CHAR | TOKEN_TYPE_STRING | TOKEN_TYPE_TRUE | TOKEN_TYPE_FALSE
+<primitive_expression>          ::= TOKEN_TYPE_NUMBER | TOKEN_TYPE_CHAR | TOKEN_TYPE_STRING | TOKEN_TYPE_TRUE | TOKEN_TYPE_FALSE | TOKEN_TYPE_NULL
 <cast_expression>               ::= <expression> as <type_specifier>
-<type_specifier>                ::= TOKEN_TYPE_INT | TOKEN_TYPE_FLOAT | TOKEN_TYPE_DOUBLE | TOKEN_TYPE_USIZE | TOKEN_TYPE_CHAR_KEYWORD | TOKEN_TYPE_STR | TOKEN_TYPE_BOOL
-<type_specifiers>               ::= <type_specifier> | <user_define> | <array_type> | <pointer_type>
+<type_specifier>                ::= TOKEN_TYPE_INT | TOKEN_TYPE_FLOAT | TOKEN_TYPE_DOUBLE | TOKEN_TYPE_USIZE | TOKEN_TYPE_CHAR_KEYWORD | TOKEN_TYPE_STR | TOKEN_TYPE_BOOL | <const_type>
+<type_specifiers>               ::= <type_specifier> | <user_define> | <array_type> | <pointer_type> | <generic_type>
+<const_type>                    ::= const <type_specifier> | Epsilon
 <array_type>                    ::= <type_specifiers>[TOKEN_TYPE_NUMBER]
 <pointer_type>                  ::= <type_specifiers>* <pointer_type'>
 <pointer_type'>                 ::= * <pointer_type> | Epsilon
+<generic_type>                  ::= <identifier> < <generics> >
 <user_define>                   ::= <identifier>
 <identifier>                    ::= TOKEN_TYPE_IDENTIFIER
+<generics>                      ::= < <generic> <generics> > | Epsilon
+<generic>                       ::= <identifier> | <generic>

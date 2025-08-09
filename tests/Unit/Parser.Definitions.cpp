@@ -184,7 +184,7 @@ TEST_P(ParserImpl, Impl)
     ASSERT_NE(castedImplDef, nullptr);
 
     EXPECT_EQ(castedImplDef->GetImplName()->GetType(), Types::UserDefine);
-    EXPECT_EQ(castedImplDef->GetImplName()->UserDefine().Id(), "Person");
+    EXPECT_EQ(**castedImplDef->GetImplName()->UserDefine(), "Person");
     EXPECT_EQ(castedImplDef->GetMemberFunctions().size(), 1);
     ASSERT_EQ(castedImplDef->GetGenerics(), nullptr);
 
@@ -194,7 +194,7 @@ TEST_P(ParserImpl, Impl)
     EXPECT_EQ(prototype.GetName(), "new");
     EXPECT_EQ(prototype.GetParams().size(), 0);
     EXPECT_EQ(prototype.GetReturnType()->GetType(), Types::UserDefine);
-    EXPECT_EQ(prototype.GetReturnType()->UserDefine().Id(), "Person");
+    EXPECT_EQ(**prototype.GetReturnType()->UserDefine(), "Person");
 }
 
 TEST_P(ParserImplWithGenerics, ImplWithGenerics)
@@ -206,12 +206,12 @@ TEST_P(ParserImplWithGenerics, ImplWithGenerics)
     ASSERT_NE(castedImplDef, nullptr);
 
     EXPECT_EQ(castedImplDef->GetImplName()->GetType(), Types::UserDefine);
-    EXPECT_EQ(castedImplDef->GetImplName()->UserDefine().Id(), "Stack");
+    EXPECT_EQ(**castedImplDef->GetImplName()->UserDefine(), "Stack");
 
     ASSERT_NE(castedImplDef->GetGenerics(), nullptr);
     EXPECT_EQ(castedImplDef->GetGenerics()->Types().size(), 1);
     EXPECT_EQ(castedImplDef->GetGenerics()->Types().at(0)->GetType(), Types::UserDefine);
-    EXPECT_EQ(castedImplDef->GetGenerics()->Types().at(0)->UserDefine().Id(), "T");
+    EXPECT_EQ(**castedImplDef->GetGenerics()->Types().at(0)->UserDefine(), "T");
 
     EXPECT_EQ(castedImplDef->GetMemberFunctions().size(), 1);
 
@@ -228,7 +228,7 @@ TEST_P(ParserImplWithGenerics, ImplWithGenerics)
     EXPECT_EQ(pointerType->Generic().OuterType.Id(), "Stack");
     EXPECT_EQ(pointerType->Generic().InnerType.size(), 1);
     EXPECT_EQ(pointerType->Generic().InnerType.at(0)->GetType(), Types::UserDefine);
-    EXPECT_EQ(pointerType->Generic().InnerType.at(0)->UserDefine().Id(), "T");
+    EXPECT_EQ(**pointerType->Generic().InnerType.at(0)->UserDefine(), "T");
 }
 
 INSTANTIATE_TEST_SUITE_P(ParserDefinitions, ParserFunction, ::testing::Values("fn main() -> void {}"));
@@ -236,5 +236,5 @@ INSTANTIATE_TEST_SUITE_P(ParserDefinitions, ParserFunctionWithParams, ::testing:
 INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserStruct, ::testing::Values("pub struct Person {pub name:str,age:int}"));
 INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserStructWithGeneric, ::testing::Values("pub struct Pair<T,U> {first: T*,second:U}"));
 INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserEnum, ::testing::Values("pub enum Types {Int,Float}"));
-INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserImpl, ::testing::Values("impl Person { fn new() -> Person {}}"));
-INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserImplWithGenerics, ::testing::Values("impl Stack<T> { fn (s:Stack<T>*) get_data<T>() -> T* {}}"));
+INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserImpl, ::testing::Values("struct Person {} impl Person { fn new() -> Person {}}"));
+INSTANTIATE_TEST_SUITE_P(ParserDefinition, ParserImplWithGenerics, ::testing::Values("struct Stack<T> {} impl Stack<T> { fn (s:Stack<T>*) get_data<T>() -> T* {}}"));

@@ -4,7 +4,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> ArrayInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> ArrayInitExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         if (m_Array.size() == 0)
         {

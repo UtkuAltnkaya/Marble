@@ -4,7 +4,7 @@
 
 namespace Marble
 {
-    Ref<TypeSpecifier> CastExpression::Analyze(SemanticAnalyzer &semanticAnalyzer)
+    Ref<TypeSpecifier> CastExpression::Analyze(SemanticAnalyzer &semanticAnalyzer, Ref<TypeSpecifier> baseType)
     {
         Ref<TypeSpecifier> fromType = m_Expression->Analyze(semanticAnalyzer);
         Ref<TypeSpecifier> toType = m_TypeSpecifier;

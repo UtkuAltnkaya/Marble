@@ -6,6 +6,7 @@
 #include "Parser/Parser.hpp"
 #include "Ast/Program.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include "ErrorSystem/ErrorSystem.hpp"
 #include "TestUtils/MockClasses.hpp"
 
 namespace MarbleTest
@@ -17,8 +18,14 @@ namespace MarbleTest
     protected:
         void SetUp() override
         {
+            ErrorSystem::Init();
             m_File = MakeBox<MockFile>(GetParam());
             m_Lexer = MakeBox<Lexer>(*m_File.get());
+        }
+
+        void TearDown() override
+        {
+            ErrorSystem::Shutdown();
         }
 
         std::vector<Box<Token>> GetAllTokens()
@@ -56,6 +63,7 @@ namespace MarbleTest
         void SetUp() override
         {
             SymbolTable::Init();
+            ErrorSystem::Init();
             m_File = MakeBox<MockFile>(GetParam());
             m_Lexer = MakeBox<Lexer>(*m_File.get());
             m_Parser = MakeBox<Parser>(*m_Lexer.get());
@@ -81,6 +89,7 @@ namespace MarbleTest
         void TearDown() override
         {
             SymbolTable::ShutDown();
+            ErrorSystem::Shutdown();
         }
 
         const BlockStatement *PassUntilBlock()
