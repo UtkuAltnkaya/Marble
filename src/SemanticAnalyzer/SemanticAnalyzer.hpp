@@ -22,7 +22,7 @@ namespace Marble
         Ref<TypeSpecifier> UnifyArithmeticTypes(Ref<TypeSpecifier> a, Ref<TypeSpecifier> b);
         void RegisterFunction(Box<FunctionDefinition> functionDefinition);
 
-        const std::string &InstantiateGenerics(const std::string &name, const Generics *generics);
+        const std::string &InstantiateGenerics(const std::string &name, const Generics *generics, const Ast *node);
         const std::string &InstantiateGenerics(const std::string &name, const std::vector<Ref<TypeSpecifier>> &typeArgs);
 
         inline Ref<Marble::Program> Program() { return m_Program; }

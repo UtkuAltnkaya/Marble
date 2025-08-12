@@ -21,7 +21,7 @@ namespace Marble
 
         if (m_Generics)
         {
-            name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get());
+            name = semanticAnalyzer.InstantiateGenerics(*identifierExpression->GetIdentifier(), m_Generics.get(), this);
         }
 
         SymbolIterator iter;

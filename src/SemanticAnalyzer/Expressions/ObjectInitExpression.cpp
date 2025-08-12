@@ -20,7 +20,7 @@ namespace Marble
 
         if (structNode->IsGeneric())
         {
-            const std::string &expandedName = semanticAnalyzer.InstantiateGenerics(*structName->GetIdentifier(), m_Generics.get());
+            const std::string &expandedName = semanticAnalyzer.InstantiateGenerics(*structName->GetIdentifier(), m_Generics.get(), this);
             structNode = SymbolIterator().Struct(expandedName);
             structName->GetIdentifier().Id(expandedName);
         }

@@ -25,7 +25,7 @@ impl Rectangle {
     }
 
     pub fn (r: Rectangle*) area() -> int {
-        return r->width + r->height;
+        return r->width * r->height;
     }
 
     pub fn (r: Rectangle*) perimeter() -> int {

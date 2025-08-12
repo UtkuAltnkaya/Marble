@@ -35,9 +35,12 @@ namespace Marble
         m_Program->Definitions().push_back(std::move(functionDefinition));
     }
 
-    const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const Generics *generics)
+    const std::string &SemanticAnalyzer::InstantiateGenerics(const std::string &name, const Generics *generics, const Ast *node)
     {
-        ASSERT_A(generics != nullptr, "Generic must be provided");
+        if (!generics)
+        {
+            ErrorSystem::AddError(*this, node, "Generic must be provided", true);
+        }
         return InstantiateGenerics(name, generics->Types());
     }
 
