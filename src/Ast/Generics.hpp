@@ -3,12 +3,13 @@
 #include <vector>
 #include "Ast/Ast.hpp"
 #include "Ast/TypeSpecifier.hpp"
+#include "Utils/Derive/Debug.hpp"
 
 namespace Marble
 {
     enum class DefinitionType : int;
 
-    class Generics : public Ast
+    class Generics : public Ast, public Derive::Debug
     {
     public:
         Generics(std::vector<Ref<TypeSpecifier>> &&types, const Span &span);
@@ -38,6 +39,7 @@ namespace Marble
 
     private:
         std::vector<Ref<TypeSpecifier>> m_Types;
+        DERIVE_DEBUG(Generics, FIELD(m_Types))
     };
 
     enum class GenericInstanceKeyType

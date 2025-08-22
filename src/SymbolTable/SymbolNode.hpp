@@ -13,6 +13,7 @@
 #include "SymbolTable/SymbolData.hpp"
 #include "SymbolTable/SymbolIterator.hpp"
 #include "Utils/Macros.hpp"
+#include "Utils/Derive/Debug.hpp"
 
 namespace Marble
 {
@@ -23,7 +24,7 @@ namespace Marble
     concept SymbolAstStructOrEnumNodeType = std::is_base_of_v<Marble::Ast, T> && (std::is_same_v<T, StructDefinition> || std::is_same_v<T, EnumDefinition>);
 
     class BlockSymbolNode;
-    class SymbolNode
+    class SymbolNode : public Derive::Debug
     {
     public:
         friend class SymbolIterator;
@@ -108,6 +109,8 @@ namespace Marble
 
     private:
         std::unordered_map<std::string, std::string> m_Methods;
+
+        DERIVE_DEBUG(StructOrEnumSymbolNode, FIELD(m_Block), FIELD(m_SymbolData), FIELD(m_Methods))
     };
 
     class FunctionSymbolNode : public SymbolNode
@@ -128,6 +131,8 @@ namespace Marble
         bool m_IsMethod;
         Ref<TypeSpecifier> m_ReturnType;
         std::vector<Ref<TypeSpecifier>> m_Params;
+
+        DERIVE_DEBUG(FunctionSymbolNode, FIELD(m_Block), FIELD(m_SymbolData), FIELD(m_IsMethod), FIELD(m_ReturnType), FIELD(m_Params))
     };
 
     class VariableSymbolNode : public SymbolNode
@@ -161,6 +166,8 @@ namespace Marble
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;
+
+        DERIVE_DEBUG(VariableSymbolNode, FIELD(m_Block), FIELD(m_SymbolData), FIELD(m_TypeSpecifier))
     };
 
     class BlockSymbolNode : public SymbolNode
@@ -180,6 +187,8 @@ namespace Marble
     private:
         SymbolNode *m_Parent;
         std::unordered_map<std::string, SymbolNode *> m_Children;
+
+        DERIVE_DEBUG(BlockSymbolNode, FIELD(m_Block), FIELD(m_Children))
     };
 
 } // namespace Marble

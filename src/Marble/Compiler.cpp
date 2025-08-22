@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "Marble/Compiler.hpp"
 #include "ErrorSystem/ErrorSystem.hpp"
 
@@ -13,6 +14,8 @@ namespace Marble
 
     Compiler::~Compiler()
     {
+        PrintAst();
+        PrintSymbolTable();
         ErrorSystem::Shutdown();
         SymbolTable::ShutDown();
     }
@@ -36,14 +39,13 @@ namespace Marble
             ErrorSystem::AddError("Filename required");
         }
         File file{*optionalFileName};
-        Ref<Program> program = nullptr;
         {
             Lexer lexer{file};
             Parser parser{lexer};
-            program = parser.Parse();
+            m_Program = parser.Parse();
         }
         {
-            SemanticAnalyzer semanticAnalyzer{program, file};
+            SemanticAnalyzer semanticAnalyzer{m_Program, file};
             semanticAnalyzer.Analyze();
         }
         if (errorSystem.IsError())
@@ -54,7 +56,7 @@ namespace Marble
         if (false)
         {
             CodegenContext codegenContext{file.FileName()};
-            codegenContext.Generate(program);
+            codegenContext.Generate(m_Program);
             codegenContext.Print();
         }
 
@@ -72,6 +74,19 @@ namespace Marble
             .AddFlag("--debug", "-d", "debug")
             .AddFlag("--object", "-c", "object")
             .AddFlag("--help", "-h", "help");
+    }
+
+    void Compiler::PrintAst()
+    {
+        std::ofstream file("out/ast.txt");
+        file << *m_Program;
+    }
+
+    void Compiler::PrintSymbolTable()
+    {
+
+        std::ofstream file("out/symbolTable.txt");
+        file << SymbolTable::Get();
     }
 
 } // namespace Marble

@@ -6,6 +6,7 @@
 #include "Ast/VariableType.hpp"
 #include "Ast/Generics.hpp"
 #include "Utils/Macros.hpp"
+#include "Utils/Derive/Debug.hpp"
 #include <vector>
 
 // TODO: Add interface or trait definition
@@ -27,7 +28,7 @@ namespace Marble
         MemberFunction,
     };
 
-    class Definition : public Ast
+    class Definition : public Ast, public Derive::Debug
     {
     public:
         Definition(const Span &span, DefinitionType definitionType);
@@ -152,6 +153,8 @@ namespace Marble
         Ref<TypeSpecifier> m_ReturnType;
         Box<Statement> m_Block;
         bool m_IsMethod;
+
+        DERIVE_DEBUG(FunctionDefinition, FIELD(m_AccessSpecifier), FIELD(m_FunctionName), FIELD(m_Generics), FIELD(m_Params), FIELD(m_ReturnType), FIELD(m_Block))
     };
 
     class StructFieldDefinition : public Definition
@@ -175,6 +178,8 @@ namespace Marble
     private:
         AccessSpecifier m_AccessSpecifier;
         Box<VariableType> m_Field;
+
+        DERIVE_DEBUG(StructFieldDefinition, FIELD(m_AccessSpecifier), FIELD(m_Field))
     };
 
     class StructDefinition : public Definition
@@ -214,6 +219,8 @@ namespace Marble
         Box<Generics> m_Generics;
         std::vector<Box<StructFieldDefinition>> m_Field;
         ImplDefinition *m_ImplDefinition;
+
+        DERIVE_DEBUG(StructDefinition, FIELD(m_AccessSpecifier), FIELD(m_StructName), FIELD(m_Generics), FIELD(m_Field))
     };
 
     // TODO: Decide to allow assign numbers
@@ -241,6 +248,8 @@ namespace Marble
         Box<Identifier> m_EnumName;
         std::vector<Box<Identifier>> m_Fields;
         ImplDefinition *m_ImplDefinition;
+
+        DERIVE_DEBUG(EnumDefinition, FIELD(m_AccessSpecifier), FIELD(m_EnumName), FIELD(m_Fields))
     };
 
     class MemberFunctionPrototypeDefinition : public Definition
@@ -286,6 +295,8 @@ namespace Marble
         Box<Generics> m_Generics;
         std::vector<Box<VariableType>> m_Params;
         Ref<TypeSpecifier> m_ReturnType;
+
+        DERIVE_DEBUG(MemberFunctionPrototypeDefinition, FIELD(m_AccessSpecifier), FIELD(m_Method), FIELD(m_Name), FIELD(m_Generics), FIELD(m_Params), FIELD(m_ReturnType))
     };
 
     class MemberFunctionDefinition : public Definition
@@ -314,6 +325,8 @@ namespace Marble
     private:
         Box<MemberFunctionPrototypeDefinition> m_Prototype;
         Box<Statement> m_Block;
+
+        DERIVE_DEBUG(MemberFunctionDefinition, FIELD(m_Prototype), FIELD(m_Block))
     };
 
     class ImplDefinition : public Definition
@@ -343,6 +356,8 @@ namespace Marble
         Ref<TypeSpecifier> m_ImplName;
         Box<Generics> m_Generics;
         std::vector<Box<MemberFunctionDefinition>> m_MemberFunctions;
+
+        DERIVE_DEBUG(ImplDefinition, FIELD(m_ImplName), FIELD(m_Generics), FIELD(m_MemberFunctions))
     };
 
 } // namespace Marble

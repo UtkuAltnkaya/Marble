@@ -19,9 +19,12 @@ namespace Marble
 
     private:
         void AddArgs();
+        void PrintAst();
+        void PrintSymbolTable();
 
     private:
         ArgParserBuilder m_ArgParserBuilder;
+        Ref<Program> m_Program;
     };
 
 } // namespace Marble

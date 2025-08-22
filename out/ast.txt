@@ -1,0 +1,570 @@
+Program {
+   m_Definitions: [
+      StructDefinition {
+         m_AccessSpecifier: enum(1)
+         m_StructName: Identifier {
+            m_Id: "std"
+         }
+
+         m_Generics: nullptr
+         m_Field: [
+         ]
+      }
+
+      FunctionDefinition {
+         m_AccessSpecifier: enum(1)
+         m_FunctionName: Identifier {
+            m_Id: "main"
+         }
+
+         m_Generics: nullptr
+         m_Params: [
+         ]
+         m_ReturnType: TypeSpecifier {
+            m_TypeName: ""
+            m_Type: enum(8)
+            m_Variants: 
+         }
+
+         m_Block: BlockStatement {
+            m_Statements: [
+               LetStatement {
+                  m_Identifier: Identifier {
+                     m_Id: "vec1"
+                  }
+
+                  m_TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(10)
+                     m_Variants: PointerType {
+                        TypeSpecifier: TypeSpecifier {
+                           m_TypeName: ""
+                           m_Type: enum(9)
+                           m_Variants: UserDefineType {
+                              Type: Identifier {
+                                 m_Id: "Vec_int_55caba7e1ce4"
+                              }
+
+                              Kind: enum(0)
+                           }
+
+                        }
+
+                     }
+
+                  }
+
+                  m_Value: NamespaceExpression {
+                     m_Namespace: IdentifierExpression {
+                        m_Identifier: Identifier {
+                           m_Id: "Vec"
+                        }
+
+                     }
+
+                     m_Generics: Generics {
+                        m_Types: [
+                           TypeSpecifier {
+                              m_TypeName: "int"
+                              m_Type: enum(3)
+                              m_Variants: 
+                           }
+
+                        ]
+                     }
+
+                     m_Value: FunctionCallExpression {
+                        m_FnName: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "Vec_int_55caba7e1ce4_allocate_b9f1dd233c0a"
+                           }
+
+                        }
+
+                        m_Generics: nullptr
+                        m_Args: [
+                        ]
+                     }
+
+                  }
+
+               }
+
+            ]
+         }
+
+      }
+
+      FunctionDefinition {
+         m_AccessSpecifier: enum(0)
+         m_FunctionName: Identifier {
+            m_Id: "Vec_int_55caba7e1ce4_allocate_b9f1dd233c0a"
+         }
+
+         m_Generics: nullptr
+         m_Params: [
+         ]
+         m_ReturnType: TypeSpecifier {
+            m_TypeName: ""
+            m_Type: enum(10)
+            m_Variants: PointerType {
+               TypeSpecifier: TypeSpecifier {
+                  m_TypeName: ""
+                  m_Type: enum(9)
+                  m_Variants: UserDefineType {
+                     Type: Identifier {
+                        m_Id: "Vec_int_55caba7e1ce4"
+                     }
+
+                     Kind: enum(0)
+                  }
+
+               }
+
+            }
+
+         }
+
+         m_Block: BlockStatement {
+            m_Statements: [
+               LetStatement {
+                  m_Identifier: Identifier {
+                     m_Id: "vec"
+                  }
+
+                  m_TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(10)
+                     m_Variants: PointerType {
+                        TypeSpecifier: TypeSpecifier {
+                           m_TypeName: "Vec_int_55caba7e1ce4"
+                           m_Type: enum(9)
+                           m_Variants: UserDefineType {
+                              Type: Identifier {
+                                 m_Id: "Vec_int_55caba7e1ce4"
+                              }
+
+                              Kind: enum(0)
+                           }
+
+                        }
+
+                     }
+
+                  }
+
+                  m_Value: NamespaceExpression {
+                     m_Namespace: IdentifierExpression {
+                        m_Identifier: Identifier {
+                           m_Id: "std"
+                        }
+
+                     }
+
+                     m_Generics: nullptr
+                     m_Value: FunctionCallExpression {
+                        m_FnName: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "std_allocate_d23f08c93601_Vec_int_55caba7e1ce4_74ad3a87901e"
+                           }
+
+                        }
+
+                        m_Generics: nullptr
+                        m_Args: [
+                           CastExpression {
+                              m_TypeSpecifier: TypeSpecifier {
+                                 m_TypeName: ""
+                                 m_Type: enum(2)
+                                 m_Variants: 
+                              }
+
+                              m_Expression: PrimitiveExpression {
+                                 m_TypeSpecifier: TypeSpecifier {
+                                    m_TypeName: ""
+                                    m_Type: enum(3)
+                                    m_Variants: 
+                                 }
+
+                                 m_Value: "1"
+                              }
+
+                              m_Kind: enum(2)
+                           }
+
+                        ]
+                     }
+
+                  }
+
+               }
+
+               ExpressionStatement {
+                  m_Expression: AssignmentExpression {
+                     m_Variable: MemberAccessExpression {
+                        m_Object: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "vec"
+                           }
+
+                        }
+
+                        m_AccessType: enum(70)
+                        m_Property: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "data"
+                           }
+
+                        }
+
+                     }
+
+                     m_Value: NamespaceExpression {
+                        m_Namespace: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "std"
+                           }
+
+                        }
+
+                        m_Generics: nullptr
+                        m_Value: FunctionCallExpression {
+                           m_FnName: IdentifierExpression {
+                              m_Identifier: Identifier {
+                                 m_Id: "std_allocate_d23f08c93601_int_8fe120059efd"
+                              }
+
+                           }
+
+                           m_Generics: nullptr
+                           m_Args: [
+                              CastExpression {
+                                 m_TypeSpecifier: TypeSpecifier {
+                                    m_TypeName: ""
+                                    m_Type: enum(2)
+                                    m_Variants: 
+                                 }
+
+                                 m_Expression: PrimitiveExpression {
+                                    m_TypeSpecifier: TypeSpecifier {
+                                       m_TypeName: ""
+                                       m_Type: enum(3)
+                                       m_Variants: 
+                                    }
+
+                                    m_Value: "1"
+                                 }
+
+                                 m_Kind: enum(2)
+                              }
+
+                           ]
+                        }
+
+                     }
+
+                  }
+
+               }
+
+               ExpressionStatement {
+                  m_Expression: AssignmentExpression {
+                     m_Variable: MemberAccessExpression {
+                        m_Object: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "vec"
+                           }
+
+                        }
+
+                        m_AccessType: enum(70)
+                        m_Property: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "size"
+                           }
+
+                        }
+
+                     }
+
+                     m_Value: CastExpression {
+                        m_TypeSpecifier: TypeSpecifier {
+                           m_TypeName: ""
+                           m_Type: enum(2)
+                           m_Variants: 
+                        }
+
+                        m_Expression: PrimitiveExpression {
+                           m_TypeSpecifier: TypeSpecifier {
+                              m_TypeName: ""
+                              m_Type: enum(3)
+                              m_Variants: 
+                           }
+
+                           m_Value: "0"
+                        }
+
+                        m_Kind: enum(2)
+                     }
+
+                  }
+
+               }
+
+               ExpressionStatement {
+                  m_Expression: AssignmentExpression {
+                     m_Variable: MemberAccessExpression {
+                        m_Object: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "vec"
+                           }
+
+                        }
+
+                        m_AccessType: enum(70)
+                        m_Property: IdentifierExpression {
+                           m_Identifier: Identifier {
+                              m_Id: "capacity"
+                           }
+
+                        }
+
+                     }
+
+                     m_Value: CastExpression {
+                        m_TypeSpecifier: TypeSpecifier {
+                           m_TypeName: ""
+                           m_Type: enum(2)
+                           m_Variants: 
+                        }
+
+                        m_Expression: PrimitiveExpression {
+                           m_TypeSpecifier: TypeSpecifier {
+                              m_TypeName: ""
+                              m_Type: enum(3)
+                              m_Variants: 
+                           }
+
+                           m_Value: "1"
+                        }
+
+                        m_Kind: enum(2)
+                     }
+
+                  }
+
+               }
+
+               ReturnStatement {
+                  m_Expression: IdentifierExpression {
+                     m_Identifier: Identifier {
+                        m_Id: "vec"
+                     }
+
+                  }
+
+               }
+
+            ]
+         }
+
+      }
+
+      StructDefinition {
+         m_AccessSpecifier: enum(1)
+         m_StructName: Identifier {
+            m_Id: "Vec_int_55caba7e1ce4"
+         }
+
+         m_Generics: nullptr
+         m_Field: [
+            StructFieldDefinition {
+               m_AccessSpecifier: enum(1)
+               m_Field: VariableType {
+                  m_Identifier: Identifier {
+                     m_Id: "data"
+                  }
+
+                  m_TypeSpecifier: TypeSpecifier {
+                     m_TypeName: "int*"
+                     m_Type: enum(10)
+                     m_Variants: PointerType {
+                        TypeSpecifier: TypeSpecifier {
+                           m_TypeName: "int"
+                           m_Type: enum(3)
+                           m_Variants: 
+                        }
+
+                     }
+
+                  }
+
+               }
+
+            }
+
+            StructFieldDefinition {
+               m_AccessSpecifier: enum(1)
+               m_Field: VariableType {
+                  m_Identifier: Identifier {
+                     m_Id: "size"
+                  }
+
+                  m_TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(2)
+                     m_Variants: 
+                  }
+
+               }
+
+            }
+
+            StructFieldDefinition {
+               m_AccessSpecifier: enum(1)
+               m_Field: VariableType {
+                  m_Identifier: Identifier {
+                     m_Id: "capacity"
+                  }
+
+                  m_TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(2)
+                     m_Variants: 
+                  }
+
+               }
+
+            }
+
+         ]
+      }
+
+      FunctionDefinition {
+         m_AccessSpecifier: enum(0)
+         m_FunctionName: Identifier {
+            m_Id: "std_allocate_d23f08c93601_Vec_int_55caba7e1ce4_74ad3a87901e"
+         }
+
+         m_Generics: nullptr
+         m_Params: [
+            VariableType {
+               m_Identifier: Identifier {
+                  m_Id: "size"
+               }
+
+               m_TypeSpecifier: TypeSpecifier {
+                  m_TypeName: ""
+                  m_Type: enum(2)
+                  m_Variants: 
+               }
+
+            }
+
+         ]
+         m_ReturnType: TypeSpecifier {
+            m_TypeName: ""
+            m_Type: enum(10)
+            m_Variants: PointerType {
+               TypeSpecifier: TypeSpecifier {
+                  m_TypeName: "Vec_int_55caba7e1ce4"
+                  m_Type: enum(9)
+                  m_Variants: UserDefineType {
+                     Type: Identifier {
+                        m_Id: "Vec_int_55caba7e1ce4"
+                     }
+
+                     Kind: enum(0)
+                  }
+
+               }
+
+            }
+
+         }
+
+         m_Block: BlockStatement {
+            m_Statements: [
+               ReturnStatement {
+                  m_Expression: PrimitiveExpression {
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(14)
+                        m_Variants: 
+                     }
+
+                     m_Value: "null"
+                  }
+
+               }
+
+            ]
+         }
+
+      }
+
+      FunctionDefinition {
+         m_AccessSpecifier: enum(0)
+         m_FunctionName: Identifier {
+            m_Id: "std_allocate_d23f08c93601_int_8fe120059efd"
+         }
+
+         m_Generics: nullptr
+         m_Params: [
+            VariableType {
+               m_Identifier: Identifier {
+                  m_Id: "size"
+               }
+
+               m_TypeSpecifier: TypeSpecifier {
+                  m_TypeName: ""
+                  m_Type: enum(2)
+                  m_Variants: 
+               }
+
+            }
+
+         ]
+         m_ReturnType: TypeSpecifier {
+            m_TypeName: ""
+            m_Type: enum(10)
+            m_Variants: PointerType {
+               TypeSpecifier: TypeSpecifier {
+                  m_TypeName: "Vec_int_55caba7e1ce4"
+                  m_Type: enum(9)
+                  m_Variants: UserDefineType {
+                     Type: Identifier {
+                        m_Id: "Vec_int_55caba7e1ce4"
+                     }
+
+                     Kind: enum(0)
+                  }
+
+               }
+
+            }
+
+         }
+
+         m_Block: BlockStatement {
+            m_Statements: [
+               ReturnStatement {
+                  m_Expression: PrimitiveExpression {
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(14)
+                        m_Variants: 
+                     }
+
+                     m_Value: "null"
+                  }
+
+               }
+
+            ]
+         }
+
+      }
+
+   ]
+}

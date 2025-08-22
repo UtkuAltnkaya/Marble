@@ -6,6 +6,7 @@
 #include "Ast/Identifier.hpp"
 #include "Lexer/Token/Token.hpp"
 #include "Utils/Memory.hpp"
+#include "Utils/Derive/Debug.hpp"
 
 namespace Marble
 {
@@ -44,40 +45,54 @@ namespace Marble
     class SemanticAnalyzer;
     class CodegenContext;
 
-    struct ArrayType
+    struct ArrayType : public Derive::Debug
     {
+        ArrayType(Ref<Marble::TypeSpecifier> typeSpecifier, size_t size) : TypeSpecifier{typeSpecifier}, Size{size} {}
         Ref<Marble::TypeSpecifier> TypeSpecifier;
         size_t Size;
+
+        DERIVE_DEBUG(ArrayType, FIELD(TypeSpecifier), FIELD(Size))
     };
 
-    struct PointerType
+    struct PointerType : public Derive::Debug
     {
+        PointerType(Ref<Marble::TypeSpecifier> typeSpecifier) : TypeSpecifier{typeSpecifier} {}
         Ref<Marble::TypeSpecifier> TypeSpecifier;
+
+        DERIVE_DEBUG(PointerType, FIELD(TypeSpecifier))
     };
 
-    struct ConstantType
+    struct ConstantType : public Derive::Debug
     {
+        ConstantType(Ref<Marble::TypeSpecifier> typeSpecifier) : TypeSpecifier{typeSpecifier} {}
         Ref<Marble::TypeSpecifier> TypeSpecifier;
+
+        DERIVE_DEBUG(ConstantType, FIELD(TypeSpecifier))
     };
 
-    struct UserDefineType
+    struct UserDefineType : public Derive::Debug
     {
+        UserDefineType(const Identifier &type, UserDefineTypeKinds kind) : Type{type}, Kind{kind} {}
+        UserDefineType(Identifier &&type, UserDefineTypeKinds kind) : Type{std::move(type)}, Kind{kind} {}
         Identifier Type;
         UserDefineTypeKinds Kind;
 
         const Identifier &operator*() const { return Type; }
+        DERIVE_DEBUG(UserDefineType, FIELD(Type), FIELD(Kind))
     };
 
-    struct GenericType
+    struct GenericType : public Derive::Debug
     {
         GenericType(const Identifier &outerType, std::vector<Ref<TypeSpecifier>> &&innerType);
         GenericType(const GenericType &obj);
         GenericType &operator=(const GenericType &obj);
         Identifier OuterType;
         std::vector<Ref<TypeSpecifier>> InnerType;
+
+        DERIVE_DEBUG(GenericType, FIELD(OuterType), FIELD(InnerType))
     };
 
-    class TypeSpecifier : public Ast
+    class TypeSpecifier : public Ast, public Derive::Debug
     {
     public:
         TypeSpecifier(Types type);
@@ -140,7 +155,9 @@ namespace Marble
     private:
         std::string m_TypeName = "";
         Types m_Type;
-        std::variant<PointerType, UserDefineType, ArrayType, GenericType, ConstantType> m_Variants;
+        std::variant<std::monostate, PointerType, UserDefineType, ArrayType, GenericType, ConstantType> m_Variants;
+
+        DERIVE_DEBUG(TypeSpecifier, FIELD(m_TypeName), FIELD(m_Type), FIELD(m_Variants))
     };
 
 } // namespace Marble

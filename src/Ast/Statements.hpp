@@ -5,6 +5,7 @@
 #include "Ast/TypeSpecifier.hpp"
 #include "Ast/Expressions.hpp"
 #include "Utils/Macros.hpp"
+#include "Utils/Derive/Debug.hpp"
 
 namespace Marble
 {
@@ -22,7 +23,7 @@ namespace Marble
         Expression,
     };
 
-    class Statement : public Ast
+    class Statement : public Ast, public Derive::Debug
     {
     public:
         Statement(const Span &span, StatementType statementType);
@@ -102,6 +103,8 @@ namespace Marble
         Box<Identifier> m_Identifier;
         Ref<TypeSpecifier> m_TypeSpecifier;
         Box<Expression> m_Value;
+
+        DERIVE_DEBUG(LetStatement, FIELD(m_Identifier), FIELD(m_TypeSpecifier), FIELD(m_Value))
     };
 
     class ReturnStatement : public Statement
@@ -123,6 +126,8 @@ namespace Marble
 
     private:
         Box<Expression> m_Expression;
+
+        DERIVE_DEBUG(ReturnStatement, FIELD(m_Expression))
     };
 
     class DeferStatement : public Statement
@@ -142,6 +147,8 @@ namespace Marble
 
     private:
         Box<Expression> m_Expression;
+
+        DERIVE_DEBUG(DeferStatement, FIELD(m_Expression))
     };
 
     class BlockStatement : public Statement
@@ -163,6 +170,8 @@ namespace Marble
 
     private:
         std::vector<Box<Statement>> m_Statements;
+
+        DERIVE_DEBUG(BlockStatement, FIELD(m_Statements))
     };
 
     class ForStatement : public Statement
@@ -192,6 +201,8 @@ namespace Marble
         Box<Expression> m_Condition;
         Box<Expression> m_Increment;
         Box<Statement> m_Block;
+
+        DERIVE_DEBUG(ForStatement, FIELD(m_LetStatement), FIELD(m_AssignmentExpression), FIELD(m_Condition), FIELD(m_Increment), FIELD(m_Block))
     };
 
     class WhileStatement : public Statement
@@ -214,6 +225,8 @@ namespace Marble
     private:
         Box<Expression> m_Condition;
         Box<Statement> m_Block;
+
+        DERIVE_DEBUG(WhileStatement, FIELD(m_Condition), FIELD(m_Block))
     };
 
     class ElseStatement : public Statement
@@ -233,6 +246,8 @@ namespace Marble
 
     private:
         Box<Statement> m_Block;
+
+        DERIVE_DEBUG(ElseStatement, FIELD(m_Block))
     };
 
     class ElseIfStatement : public Statement
@@ -255,6 +270,8 @@ namespace Marble
     private:
         Box<Expression> m_Condition;
         Box<Statement> m_Block;
+
+        DERIVE_DEBUG(ElseIfStatement, FIELD(m_Condition), FIELD(m_Block))
     };
 
     class IfStatement : public Statement
@@ -282,6 +299,8 @@ namespace Marble
         Box<Statement> m_Block;
         std::vector<Box<Statement>> m_ElseIfStatements;
         Box<Statement> m_ElseStatement;
+
+        DERIVE_DEBUG(IfStatement, FIELD(m_Condition), FIELD(m_Block), FIELD(m_ElseIfStatements), FIELD(m_ElseStatement))
     };
 
     class ExpressionStatement : public Statement
@@ -322,6 +341,8 @@ namespace Marble
 
     private:
         Box<Expression> m_Expression;
+
+        DERIVE_DEBUG(ExpressionStatement, FIELD(m_Expression))
     };
 
 } // namespace Marble

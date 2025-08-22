@@ -3,10 +3,11 @@
 #include "Ast/Ast.hpp"
 #include "Ast/Identifier.hpp"
 #include "Ast/TypeSpecifier.hpp"
+#include "Utils/Derive/Debug.hpp"
 
 namespace Marble
 {
-    class VariableType : public Ast
+    class VariableType : public Ast, public Derive::Debug
     {
     public:
         VariableType(Box<Identifier> identifier, Ref<TypeSpecifier> typeSpecifier, const Span &span);
@@ -23,6 +24,8 @@ namespace Marble
     private:
         Box<Identifier> m_Identifier;
         Ref<TypeSpecifier> m_TypeSpecifier;
+
+        DERIVE_DEBUG(VariableType, FIELD(m_Identifier), FIELD(m_TypeSpecifier))
     };
 
 } // namespace Marble

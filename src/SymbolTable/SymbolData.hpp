@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ast/AccessSpecifier.hpp"
+#include "Utils/Derive/Debug.hpp"
 namespace Marble
 {
     enum class SymbolAccess
@@ -28,7 +29,7 @@ namespace Marble
         None,
     };
 
-    class SymbolData
+    class SymbolData : public Derive::Debug
     {
     public:
         SymbolData(const std::string &name, SymbolAccess access, SymbolNodeTypes nodeType, SymbolNodeBaseTypes baseType = SymbolNodeBaseTypes::None)
@@ -68,6 +69,8 @@ namespace Marble
         SymbolAccess m_Access;
         SymbolNodeTypes m_NodeType;
         SymbolNodeBaseTypes m_BaseType;
+
+        DERIVE_DEBUG(SymbolData, FIELD(m_Name), FIELD(m_Access), FIELD(m_NodeType), FIELD(m_BaseType))
     };
 
 } // namespace Marble

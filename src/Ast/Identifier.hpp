@@ -3,10 +3,11 @@
 #include <string>
 #include "Utils/Memory.hpp"
 #include "Ast/Ast.hpp"
+#include "Utils/Derive/Debug.hpp"
 
 namespace Marble
 {
-    class Identifier : public Ast
+    class Identifier : public Ast, public Derive::Debug
     {
     public:
         Identifier(const std::string &id, const Span &span);
@@ -36,6 +37,7 @@ namespace Marble
 
     private:
         std::string m_Id;
+        DERIVE_DEBUG(Identifier, FIELD(m_Id))
     };
 
 } // namespace Marble

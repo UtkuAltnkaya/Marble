@@ -4,6 +4,7 @@
 #include "Ast/Generics.hpp"
 #include "Ast/TypeSpecifier.hpp"
 #include "Utils/Macros.hpp"
+#include "Utils/Derive/Debug.hpp"
 #include <functional>
 #include <optional>
 
@@ -108,7 +109,7 @@ namespace Marble
     PostFix,
   };
 
-  class Expression : public Ast
+  class Expression : public Ast, public Derive::Debug
   {
   public:
     Expression(const Span &span, ExpressionType expressionType)
@@ -212,6 +213,8 @@ namespace Marble
     Box<Expression> m_Left;
     BinaryOperators m_Operator;
     Box<Expression> m_Right;
+
+    DERIVE_DEBUG(BinaryExpression, FIELD(m_Left), FIELD(m_Operator), FIELD(m_Right))
   };
 
   class UnaryExpression : public Expression
@@ -258,6 +261,8 @@ namespace Marble
     UnaryOperators m_UnaryOperator;
     Box<Expression> m_Value;
     UnaryExpressionType m_UnaryExpressionType;
+
+    DERIVE_DEBUG(UnaryExpression, FIELD(m_UnaryOperator), FIELD(m_Value), FIELD(m_UnaryExpressionType))
   };
 
   class CastExpression : public Expression
@@ -285,6 +290,8 @@ namespace Marble
     Ref<TypeSpecifier> m_TypeSpecifier;
     Box<Expression> m_Expression;
     ConversionKind m_Kind;
+
+    DERIVE_DEBUG(CastExpression, FIELD(m_TypeSpecifier), FIELD(m_Expression), FIELD(m_Kind))
   };
 
   class PrimitiveExpression : public Expression
@@ -316,6 +323,8 @@ namespace Marble
   private:
     Ref<TypeSpecifier> m_TypeSpecifier;
     std::string m_Value;
+
+    DERIVE_DEBUG(PrimitiveExpression, FIELD(m_TypeSpecifier), FIELD(m_Value))
   };
 
   class AssignmentExpression : public Expression
@@ -340,6 +349,8 @@ namespace Marble
   private:
     Box<Expression> m_Variable;
     Box<Expression> m_Value;
+
+    DERIVE_DEBUG(AssignmentExpression, FIELD(m_Variable), FIELD(m_Value))
   };
 
   class MemberAccessExpression : public Expression
@@ -373,6 +384,8 @@ namespace Marble
     Box<Expression> m_Object;
     TokenType m_AccessType;
     Box<Expression> m_Property;
+
+    DERIVE_DEBUG(MemberAccessExpression, FIELD(m_Object), FIELD(m_AccessType), FIELD(m_Property))
   };
 
   class FunctionCallExpression : public Expression
@@ -404,6 +417,8 @@ namespace Marble
     Box<Expression> m_FnName;
     Box<Generics> m_Generics;
     std::vector<Box<Expression>> m_Args;
+
+    DERIVE_DEBUG(FunctionCallExpression, FIELD(m_FnName), FIELD(m_Generics), FIELD(m_Args))
   };
 
   class ArrayIndexExpression : public Expression
@@ -433,6 +448,8 @@ namespace Marble
     Box<Expression> m_Array;
     Box<Expression> m_Index;
     Box<Expression> m_SecondIndex;
+
+    DERIVE_DEBUG(ArrayIndexExpression, FIELD(m_Array), FIELD(m_Index), FIELD(m_SecondIndex))
   };
 
   class NamespaceExpression : public Expression
@@ -460,6 +477,8 @@ namespace Marble
     Box<Expression> m_Namespace;
     Box<Generics> m_Generics;
     Box<Expression> m_Value;
+
+    DERIVE_DEBUG(NamespaceExpression, FIELD(m_Namespace), FIELD(m_Generics), FIELD(m_Value))
   };
 
   class ArrayInitExpression : public Expression
@@ -482,6 +501,8 @@ namespace Marble
   private:
     std::vector<Box<Expression>> m_Array;
     size_t m_Size;
+
+    DERIVE_DEBUG(ArrayInitExpression, FIELD(m_Array), FIELD(m_Size))
   };
 
   class ObjectInitExpression : public Expression
@@ -505,6 +526,8 @@ namespace Marble
     Box<Expression> m_Object;
     Box<Generics> m_Generics;
     std::vector<Box<Expression>> m_Fields;
+
+    DERIVE_DEBUG(ObjectInitExpression, FIELD(m_Object), FIELD(m_Generics), FIELD(m_Fields))
   };
 
   class FieldExpression : public Expression
@@ -525,6 +548,8 @@ namespace Marble
   private:
     Identifier m_Name;
     Box<Expression> m_Value;
+
+    DERIVE_DEBUG(FieldExpression, FIELD(m_Name), FIELD(m_Value))
   };
 
   class IdentifierExpression : public Expression
@@ -553,5 +578,7 @@ namespace Marble
 
   private:
     Identifier m_Identifier;
+
+    DERIVE_DEBUG(IdentifierExpression, FIELD(m_Identifier))
   };
 } // namespace Marble

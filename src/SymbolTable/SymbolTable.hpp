@@ -12,7 +12,7 @@ namespace Marble
         ~SymbolScopeGuard();
     };
 
-    class SymbolTable
+    class SymbolTable : public Derive::Debug
     {
     public:
         static void Init();
@@ -43,6 +43,8 @@ namespace Marble
     private:
         SymbolNode *m_Root;
         std::stack<SymbolNode *> m_Scope;
+
+        DERIVE_DEBUG(SymbolTable, FIELD(m_Root))
     };
 
 } // namespace Marble
