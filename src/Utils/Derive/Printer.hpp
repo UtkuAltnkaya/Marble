@@ -27,7 +27,7 @@ namespace Marble
             {
                 DecrementIndent();
                 Indent();
-                m_Os << "}\n";
+                m_Os << "}";
             }
 
             template <typename T>
@@ -84,10 +84,7 @@ namespace Marble
             void Print(const T &tuple)
             {
                 m_Os << "(";
-                IncrementIndent();
                 PrintTupleImpl(tuple, std::make_index_sequence<std::tuple_size_v<T>>{});
-                DecrementIndent();
-                Indent();
                 m_Os << ")";
             }
 
@@ -136,7 +133,6 @@ namespace Marble
             template <TupleLike T, std::size_t... Is>
             void PrintTupleImpl(const T &tuple, std::index_sequence<Is...>)
             {
-                Indent();
                 bool first = true;
                 ((first ? (first = false, Print(std::get<Is>(tuple)))
                         : (m_Os << ", ", Print(std::get<Is>(tuple)))),

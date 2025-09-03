@@ -47,16 +47,16 @@ namespace Marble
         llvm::BasicBlock *entryBB = llvm::BasicBlock::Create(codegenContext.Context(), "entry", function);
         builder.SetInsertPoint(entryBB);
 
-        SymbolTable &table = SymbolTable::Get();
         SymbolNode *node = SymbolIterator().Function(GetName());
-        SymbolIterator fnIter(node);
+        BlockSymbolNode *blockNode = node->Block();
+        SymbolIterator fnIter{blockNode};
+        SymbolScopeGuard guard{blockNode};
 
         if (!node)
         {
             throw "Cannot find function";
         }
 
-        table.EnterScope(node);
         unsigned i = 0;
         for (auto &arg : function->args())
         {
@@ -77,8 +77,6 @@ namespace Marble
         }
 
         m_Block->Codegen(codegenContext);
-
-        table.LeaveScope();
 
         BlockStatement *block = m_Block->Into<BlockStatement>();
         const std::vector<Box<Statement>> &statements = block->Statements();

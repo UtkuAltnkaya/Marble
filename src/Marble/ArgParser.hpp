@@ -60,7 +60,7 @@ namespace Marble
                 return std::get<T>(value);
             }
 
-            ErrorSystem::AddError("Cannot get the requested type", nullptr, true);
+            ErrorSystem::AddError("Cannot get the requested value", nullptr, true);
             UNREACHABLE();
         }
 

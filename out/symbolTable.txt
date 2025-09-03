@@ -2,554 +2,434 @@ SymbolTable {
    m_Root: BlockSymbolNode {
       m_Block: nullptr
       m_Children: [
-         (
-            "std_allocate_d23f08c93601_Vec_int_55caba7e1ce4_74ad3a87901e", FunctionSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "size", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "size"
-                              m_Access: enum(0)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                  ]
-               }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "std_allocate_d23f08c93601_Vec_int_55caba7e1ce4_74ad3a87901e"
-                  m_Access: enum(1)
-                  m_NodeType: enum(0)
-                  m_BaseType: enum(1)
-               }
-
-               m_IsMethod: 1
-               m_ReturnType: TypeSpecifier {
-                  m_TypeName: ""
-                  m_Type: enum(10)
-                  m_Variants: PointerType {
-                     TypeSpecifier: TypeSpecifier {
-                        m_TypeName: "Vec_int_55caba7e1ce4"
-                        m_Type: enum(9)
-                        m_Variants: UserDefineType {
-                           Type: Identifier {
-                              m_Id: "Vec_int_55caba7e1ce4"
-                           }
-
-                           Kind: enum(0)
-                        }
-
+         ("std_allocate_bb8132af7890_int_65a283439044", FunctionSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("size", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "size"
+                        m_Access: enum(0)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
                      }
-
-                  }
-
-               }
-
-               m_Params: [
-                  TypeSpecifier {
-                     m_TypeName: ""
-                     m_Type: enum(2)
-                     m_Variants: 
-                  }
-
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
                ]
             }
-         )
-         (
-            "std_deallocate_2c764f0b17e0", FunctionSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "ptr", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "ptr"
-                              m_Access: enum(0)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(10)
-                              m_Variants: PointerType {
-                                 TypeSpecifier: TypeSpecifier {
-                                    m_TypeName: ""
-                                    m_Type: enum(9)
-                                    m_Variants: UserDefineType {
-                                       Type: Identifier {
-                                          m_Id: "T"
-                                       }
-
-                                       Kind: enum(2)
-                                    }
-
-                                 }
-
-                              }
-
-                           }
-
-                        }
-                     )
-                  ]
+            m_SymbolData: SymbolData {
+               m_Name: "std_allocate_bb8132af7890_int_65a283439044"
+               m_Access: enum(1)
+               m_NodeType: enum(0)
+               m_BaseType: enum(1)
+            }
+            m_IsMethod: 1
+            m_ReturnType: TypeSpecifier {
+               m_TypeName: ""
+               m_Type: enum(10)
+               m_Variants: PointerType {
+                  TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(3)
+                     m_Variants: 
+                  }
                }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "std_deallocate_2c764f0b17e0"
-                  m_Access: enum(1)
-                  m_NodeType: enum(0)
-                  m_BaseType: enum(1)
-               }
-
-               m_IsMethod: 1
-               m_ReturnType: TypeSpecifier {
+            }
+            m_Params: [
+               TypeSpecifier {
                   m_TypeName: ""
-                  m_Type: enum(8)
+                  m_Type: enum(2)
                   m_Variants: 
                }
-
-               m_Params: [
-                  TypeSpecifier {
-                     m_TypeName: ""
-                     m_Type: enum(10)
-                     m_Variants: PointerType {
-                        TypeSpecifier: TypeSpecifier {
-                           m_TypeName: ""
-                           m_Type: enum(9)
-                           m_Variants: UserDefineType {
-                              Type: Identifier {
-                                 m_Id: "T"
-                              }
-
-                              Kind: enum(2)
-                           }
-
-                        }
-
+            ]
+         })
+         ("std_allocate_bb8132af7890_Vec_int_7d9d1441f1ac_83bb77f9bcd6", FunctionSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("size", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "size"
+                        m_Access: enum(0)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
                      }
-
-                  }
-
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
                ]
             }
-         )
-         (
-            "std_allocate_d23f08c93601", FunctionSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "size", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "size"
-                              m_Access: enum(0)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                  ]
-               }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "std_allocate_d23f08c93601"
-                  m_Access: enum(1)
-                  m_NodeType: enum(0)
-                  m_BaseType: enum(1)
-               }
-
-               m_IsMethod: 1
-               m_ReturnType: TypeSpecifier {
-                  m_TypeName: ""
-                  m_Type: enum(10)
-                  m_Variants: PointerType {
-                     TypeSpecifier: TypeSpecifier {
-                        m_TypeName: "Vec_int_55caba7e1ce4"
-                        m_Type: enum(9)
-                        m_Variants: UserDefineType {
-                           Type: Identifier {
-                              m_Id: "Vec_int_55caba7e1ce4"
-                           }
-
-                           Kind: enum(0)
-                        }
-
-                     }
-
-                  }
-
-               }
-
-               m_Params: [
-                  TypeSpecifier {
-                     m_TypeName: ""
-                     m_Type: enum(2)
-                     m_Variants: 
-                  }
-
-               ]
+            m_SymbolData: SymbolData {
+               m_Name: "std_allocate_bb8132af7890_Vec_int_7d9d1441f1ac_83bb77f9bcd6"
+               m_Access: enum(1)
+               m_NodeType: enum(0)
+               m_BaseType: enum(1)
             }
-         )
-         (
-            "main", FunctionSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "vec1", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "vec1"
-                              m_Access: enum(0)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(10)
-                              m_Variants: PointerType {
-                                 TypeSpecifier: TypeSpecifier {
-                                    m_TypeName: ""
-                                    m_Type: enum(9)
-                                    m_Variants: UserDefineType {
-                                       Type: Identifier {
-                                          m_Id: "Vec_int_55caba7e1ce4"
-                                       }
-
-                                       Kind: enum(0)
-                                    }
-
-                                 }
-
-                              }
-
-                           }
-
+            m_IsMethod: 1
+            m_ReturnType: TypeSpecifier {
+               m_TypeName: ""
+               m_Type: enum(10)
+               m_Variants: PointerType {
+                  TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(9)
+                     m_Variants: UserDefineType {
+                        Type: Identifier {
+                           m_Id: "Vec_int_7d9d1441f1ac"
                         }
-                     )
-                  ]
+                        Kind: enum(0)
+                     }
+                  }
                }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "main"
-                  m_Access: enum(2)
-                  m_NodeType: enum(0)
-                  m_BaseType: enum(1)
-               }
-
-               m_IsMethod: 0
-               m_ReturnType: TypeSpecifier {
+            }
+            m_Params: [
+               TypeSpecifier {
                   m_TypeName: ""
-                  m_Type: enum(8)
+                  m_Type: enum(2)
                   m_Variants: 
                }
-
-               m_Params: [
-               ]
-            }
-         )
-         (
-            "Vec_int_55caba7e1ce4", StructOrEnumSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "capacity", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "capacity"
-                              m_Access: enum(2)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                     (
-                        "size", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "size"
-                              m_Access: enum(2)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                     (
-                        "data", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "data"
-                              m_Access: enum(2)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: "int*"
-                              m_Type: enum(10)
-                              m_Variants: PointerType {
-                                 TypeSpecifier: TypeSpecifier {
-                                    m_TypeName: "int"
-                                    m_Type: enum(3)
-                                    m_Variants: 
-                                 }
-
-                              }
-
-                           }
-
-                        }
-                     )
-                  ]
-               }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "Vec_int_55caba7e1ce4"
-                  m_Access: enum(2)
-                  m_NodeType: enum(1)
-                  m_BaseType: enum(2)
-               }
-
-               m_Methods: [
-                  (
-                     "allocate", "Vec_int_55caba7e1ce4_allocate_b9f1dd233c0a"                  )
-               ]
-            }
-         )
-         (
-            "Vec", StructOrEnumSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "capacity", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "capacity"
-                              m_Access: enum(2)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                     (
-                        "size", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "size"
-                              m_Access: enum(2)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                     (
-                        "data", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "data"
-                              m_Access: enum(2)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(10)
-                              m_Variants: PointerType {
-                                 TypeSpecifier: TypeSpecifier {
-                                    m_TypeName: "int"
-                                    m_Type: enum(3)
-                                    m_Variants: 
-                                 }
-
-                              }
-
-                           }
-
-                        }
-                     )
-                  ]
-               }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "Vec"
-                  m_Access: enum(2)
-                  m_NodeType: enum(1)
-                  m_BaseType: enum(2)
-               }
-
-               m_Methods: [
-               ]
-            }
-         )
-         (
-            "std_allocate_d23f08c93601_int_8fe120059efd", FunctionSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "size", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "size"
-                              m_Access: enum(0)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(2)
-                              m_Variants: 
-                           }
-
-                        }
-                     )
-                  ]
-               }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "std_allocate_d23f08c93601_int_8fe120059efd"
-                  m_Access: enum(1)
-                  m_NodeType: enum(0)
-                  m_BaseType: enum(1)
-               }
-
-               m_IsMethod: 1
-               m_ReturnType: TypeSpecifier {
-                  m_TypeName: "Vec_int_55caba7e1ce4*"
-                  m_Type: enum(10)
-                  m_Variants: PointerType {
-                     TypeSpecifier: TypeSpecifier {
-                        m_TypeName: "Vec_int_55caba7e1ce4"
-                        m_Type: enum(9)
-                        m_Variants: UserDefineType {
-                           Type: Identifier {
-                              m_Id: "Vec_int_55caba7e1ce4"
-                           }
-
-                           Kind: enum(0)
-                        }
-
+            ]
+         })
+         ("Vec_int_7d9d1441f1ac_allocate_cd144ae5b67d", FunctionSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("vec", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "vec"
+                        m_Access: enum(0)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
                      }
-
-                  }
-
-               }
-
-               m_Params: [
-                  TypeSpecifier {
-                     m_TypeName: ""
-                     m_Type: enum(2)
-                     m_Variants: 
-                  }
-
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(10)
+                        m_Variants: PointerType {
+                           TypeSpecifier: TypeSpecifier {
+                              m_TypeName: ""
+                              m_Type: enum(9)
+                              m_Variants: UserDefineType {
+                                 Type: Identifier {
+                                    m_Id: "Vec_int_7d9d1441f1ac"
+                                 }
+                                 Kind: enum(0)
+                              }
+                           }
+                        }
+                     }
+                  })
                ]
             }
-         )
-         (
-            "Vec_int_55caba7e1ce4_allocate_b9f1dd233c0a", FunctionSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                     (
-                        "vec", VariableSymbolNode {
-                           m_Block: nullptr
-                           m_SymbolData: SymbolData {
-                              m_Name: "vec"
-                              m_Access: enum(0)
-                              m_NodeType: enum(4)
-                              m_BaseType: enum(0)
-                           }
-
-                           m_TypeSpecifier: TypeSpecifier {
-                              m_TypeName: ""
-                              m_Type: enum(10)
-                              m_Variants: PointerType {
-                                 TypeSpecifier: TypeSpecifier {
-                                    m_TypeName: "Vec_int_55caba7e1ce4"
-                                    m_Type: enum(9)
-                                    m_Variants: UserDefineType {
-                                       Type: Identifier {
-                                          m_Id: "Vec_int_55caba7e1ce4"
-                                       }
-
-                                       Kind: enum(0)
-                                    }
-
-                                 }
-
-                              }
-
-                           }
-
+            m_SymbolData: SymbolData {
+               m_Name: "Vec_int_7d9d1441f1ac_allocate_cd144ae5b67d"
+               m_Access: enum(1)
+               m_NodeType: enum(0)
+               m_BaseType: enum(1)
+            }
+            m_IsMethod: 1
+            m_ReturnType: TypeSpecifier {
+               m_TypeName: ""
+               m_Type: enum(10)
+               m_Variants: PointerType {
+                  TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(9)
+                     m_Variants: UserDefineType {
+                        Type: Identifier {
+                           m_Id: "Vec_int_7d9d1441f1ac"
                         }
-                     )
-                  ]
+                        Kind: enum(0)
+                     }
+                  }
                }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "Vec_int_55caba7e1ce4_allocate_b9f1dd233c0a"
-                  m_Access: enum(1)
-                  m_NodeType: enum(0)
-                  m_BaseType: enum(1)
+            }
+            m_Params: [
+            ]
+         })
+         ("Vec_int_7d9d1441f1ac", StructOrEnumSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("capacity", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "capacity"
+                        m_Access: enum(2)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
+                  ("size", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "size"
+                        m_Access: enum(2)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
+                  ("data", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "data"
+                        m_Access: enum(2)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(10)
+                        m_Variants: PointerType {
+                           TypeSpecifier: TypeSpecifier {
+                              m_TypeName: "int"
+                              m_Type: enum(3)
+                              m_Variants: 
+                           }
+                        }
+                     }
+                  })
+               ]
+            }
+            m_SymbolData: SymbolData {
+               m_Name: "Vec_int_7d9d1441f1ac"
+               m_Access: enum(2)
+               m_NodeType: enum(1)
+               m_BaseType: enum(2)
+            }
+            m_Methods: [
+               ("allocate", "Vec_int_7d9d1441f1ac_allocate_cd144ae5b67d")
+            ]
+         })
+         ("std_allocate_bb8132af7890", FunctionSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("size", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "size"
+                        m_Access: enum(0)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
+               ]
+            }
+            m_SymbolData: SymbolData {
+               m_Name: "std_allocate_bb8132af7890"
+               m_Access: enum(1)
+               m_NodeType: enum(0)
+               m_BaseType: enum(1)
+            }
+            m_IsMethod: 1
+            m_ReturnType: TypeSpecifier {
+               m_TypeName: ""
+               m_Type: enum(10)
+               m_Variants: PointerType {
+                  TypeSpecifier: TypeSpecifier {
+                     m_TypeName: ""
+                     m_Type: enum(9)
+                     m_Variants: UserDefineType {
+                        Type: Identifier {
+                           m_Id: "T"
+                        }
+                        Kind: enum(2)
+                     }
+                  }
                }
-
-               m_IsMethod: 1
-               m_ReturnType: TypeSpecifier {
+            }
+            m_Params: [
+               TypeSpecifier {
+                  m_TypeName: ""
+                  m_Type: enum(2)
+                  m_Variants: 
+               }
+            ]
+         })
+         ("main", FunctionSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("vec1", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "vec1"
+                        m_Access: enum(0)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(10)
+                        m_Variants: PointerType {
+                           TypeSpecifier: TypeSpecifier {
+                              m_TypeName: ""
+                              m_Type: enum(9)
+                              m_Variants: UserDefineType {
+                                 Type: Identifier {
+                                    m_Id: "Vec_int_7d9d1441f1ac"
+                                 }
+                                 Kind: enum(0)
+                              }
+                           }
+                        }
+                     }
+                  })
+               ]
+            }
+            m_SymbolData: SymbolData {
+               m_Name: "main"
+               m_Access: enum(2)
+               m_NodeType: enum(0)
+               m_BaseType: enum(1)
+            }
+            m_IsMethod: 0
+            m_ReturnType: TypeSpecifier {
+               m_TypeName: ""
+               m_Type: enum(8)
+               m_Variants: 
+            }
+            m_Params: [
+            ]
+         })
+         ("Vec", StructOrEnumSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("capacity", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "capacity"
+                        m_Access: enum(2)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
+                  ("size", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "size"
+                        m_Access: enum(2)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(2)
+                        m_Variants: 
+                     }
+                  })
+                  ("data", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "data"
+                        m_Access: enum(2)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(10)
+                        m_Variants: PointerType {
+                           TypeSpecifier: TypeSpecifier {
+                              m_TypeName: ""
+                              m_Type: enum(9)
+                              m_Variants: UserDefineType {
+                                 Type: Identifier {
+                                    m_Id: "T"
+                                 }
+                                 Kind: enum(2)
+                              }
+                           }
+                        }
+                     }
+                  })
+               ]
+            }
+            m_SymbolData: SymbolData {
+               m_Name: "Vec"
+               m_Access: enum(2)
+               m_NodeType: enum(1)
+               m_BaseType: enum(2)
+            }
+            m_Methods: [
+            ]
+         })
+         ("std_deallocate_d6ea9de17de9", FunctionSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
+                  ("ptr", VariableSymbolNode {
+                     m_Block: nullptr
+                     m_SymbolData: SymbolData {
+                        m_Name: "ptr"
+                        m_Access: enum(0)
+                        m_NodeType: enum(4)
+                        m_BaseType: enum(0)
+                     }
+                     m_TypeSpecifier: TypeSpecifier {
+                        m_TypeName: ""
+                        m_Type: enum(10)
+                        m_Variants: PointerType {
+                           TypeSpecifier: TypeSpecifier {
+                              m_TypeName: ""
+                              m_Type: enum(9)
+                              m_Variants: UserDefineType {
+                                 Type: Identifier {
+                                    m_Id: "T"
+                                 }
+                                 Kind: enum(2)
+                              }
+                           }
+                        }
+                     }
+                  })
+               ]
+            }
+            m_SymbolData: SymbolData {
+               m_Name: "std_deallocate_d6ea9de17de9"
+               m_Access: enum(1)
+               m_NodeType: enum(0)
+               m_BaseType: enum(1)
+            }
+            m_IsMethod: 1
+            m_ReturnType: TypeSpecifier {
+               m_TypeName: ""
+               m_Type: enum(8)
+               m_Variants: 
+            }
+            m_Params: [
+               TypeSpecifier {
                   m_TypeName: ""
                   m_Type: enum(10)
                   m_Variants: PointerType {
@@ -558,46 +438,32 @@ SymbolTable {
                         m_Type: enum(9)
                         m_Variants: UserDefineType {
                            Type: Identifier {
-                              m_Id: "Vec_int_55caba7e1ce4"
+                              m_Id: "T"
                            }
-
-                           Kind: enum(0)
+                           Kind: enum(2)
                         }
-
                      }
-
                   }
-
                }
-
-               m_Params: [
+            ]
+         })
+         ("std", StructOrEnumSymbolNode {
+            m_Block: BlockSymbolNode {
+               m_Block: nullptr
+               m_Children: [
                ]
             }
-         )
-         (
-            "std", StructOrEnumSymbolNode {
-               m_Block: BlockSymbolNode {
-                  m_Block: nullptr
-                  m_Children: [
-                  ]
-               }
-
-               m_SymbolData: SymbolData {
-                  m_Name: "std"
-                  m_Access: enum(2)
-                  m_NodeType: enum(1)
-                  m_BaseType: enum(2)
-               }
-
-               m_Methods: [
-                  (
-                     "deallocate", "std_deallocate_2c764f0b17e0"                  )
-                  (
-                     "allocate", "std_allocate_d23f08c93601"                  )
-               ]
+            m_SymbolData: SymbolData {
+               m_Name: "std"
+               m_Access: enum(2)
+               m_NodeType: enum(1)
+               m_BaseType: enum(2)
             }
-         )
+            m_Methods: [
+               ("deallocate", "std_deallocate_d6ea9de17de9")
+               ("allocate", "std_allocate_bb8132af7890")
+            ]
+         })
       ]
    }
-
 }

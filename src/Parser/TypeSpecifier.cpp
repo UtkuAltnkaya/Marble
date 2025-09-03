@@ -51,6 +51,22 @@ namespace Marble
     {
     }
 
+    ArrayType::ArrayType(const ArrayType &obj) : TypeSpecifier{obj.TypeSpecifier->Clone()}, Size{obj.Size}
+    {
+    }
+
+    PointerType::PointerType(const PointerType &obj) : TypeSpecifier{obj.TypeSpecifier->Clone()}
+    {
+    }
+
+    ConstantType::ConstantType(const ConstantType &obj) : TypeSpecifier{obj.TypeSpecifier->Clone()}
+    {
+    }
+
+    UserDefineType::UserDefineType(const UserDefineType &obj) : Type{obj.Type}, Kind{obj.Kind}
+    {
+    }
+
     GenericType::GenericType(const Identifier &outerType, std::vector<Ref<TypeSpecifier>> &&innerType)
         : OuterType{outerType}, InnerType{std::move(innerType)}
     {

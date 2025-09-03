@@ -24,7 +24,7 @@ namespace Marble
             }
             args.push_back(argVal);
         }
-
+        // TODO check?
         if (function->getReturnType()->isVoidTy())
         {
             return builder.CreateCall(function, args);

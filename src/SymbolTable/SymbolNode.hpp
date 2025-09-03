@@ -93,6 +93,8 @@ namespace Marble
         inline const std::unordered_map<std::string, std::string> &Methods() const { return m_Methods; }
         void InsertMethod(const std::string &methodName, const std::string &functionName);
         std::optional<std::reference_wrapper<const std::string>> LookFunctionName(const std::string &methodName);
+        llvm::StructType *LLVMStructType();
+        void LLVMStructType(llvm::StructType *llvmStructType);
 
         template <SymbolAstStructOrEnumNodeType T>
         T *Ast()
@@ -109,7 +111,7 @@ namespace Marble
 
     private:
         std::unordered_map<std::string, std::string> m_Methods;
-
+        llvm::StructType *m_LLVMStructType;
         DERIVE_DEBUG(StructOrEnumSymbolNode, FIELD(m_Block), FIELD(m_SymbolData), FIELD(m_Methods))
     };
 

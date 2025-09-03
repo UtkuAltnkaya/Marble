@@ -2,6 +2,7 @@
 #include "SemanticAnalyzer/SemanticAnalyzer.hpp"
 #include "SymbolTable/SymbolTable.hpp"
 #include "Utils/IDGenerator.hpp"
+#include "Utils/Derive/Printer.hpp"
 
 namespace Marble
 {
@@ -29,10 +30,12 @@ namespace Marble
             implDefinition = structDefinition->GetImplDefinition();
             definition = structDefinition;
         }
+
         if (m_Generis.contains(key))
         {
             return m_Generis[key];
         }
+
         Box<Definition> expandedDefinition = Instantiate(definition, key, typeArgs);
 
         SymbolTable::Get().Insert(expandedDefinition.get());

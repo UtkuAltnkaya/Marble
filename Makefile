@@ -14,7 +14,7 @@ marble:
 	./build/out
 
 valgrind: 
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./build/src/Marble/marble -f main.mb
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=./out/memory-summary.txt ./build/src/Marble/marble -f main.mb
 
 
 test:

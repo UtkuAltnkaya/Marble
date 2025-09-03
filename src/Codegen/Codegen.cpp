@@ -36,17 +36,8 @@ namespace Marble
         return tmpB.CreateAlloca(type, nullptr, name);
     }
 
-    SymbolNode *CodegenContext::GetNamedUserDefinedType(const std::string &name)
+    StructOrEnumSymbolNode *CodegenContext::GetNamedUserDefinedType(const std::string &name)
     {
-        SymbolIterator iter;
-        if (auto node = iter.Struct(name); node)
-        {
-            return node;
-        }
-        if (auto node = iter.Enum(name); node)
-        {
-            return node;
-        }
-        return nullptr;
+        return SymbolIterator().StructOrEnum(name);
     }
 } // namespace Marble

@@ -11,6 +11,10 @@ namespace Marble
 
     SymbolNode::~SymbolNode()
     {
+        if (m_Block)
+        {
+            delete m_Block;
+        }
     }
 
     BlockSymbolNode *SymbolNode::Block()
@@ -78,6 +82,18 @@ namespace Marble
         return std::nullopt;
     }
 
+    llvm::StructType *StructOrEnumSymbolNode::LLVMStructType()
+    {
+        ASSERT_A(m_SymbolData.NodeType() == SymbolNodeTypes::Struct, "Cannot used with enum symbols");
+        return m_LLVMStructType;
+    }
+
+    void StructOrEnumSymbolNode::LLVMStructType(llvm::StructType *llvmStructType)
+    {
+        ASSERT_A(m_SymbolData.NodeType() == SymbolNodeTypes::Struct, "Cannot used with enum symbols");
+        m_LLVMStructType = llvmStructType;
+    }
+
     FunctionSymbolNode::FunctionSymbolNode(const FunctionDefinition &fnDefinition)
         : SymbolNode{SymbolData{fnDefinition.GetName(), SymbolData::FromAccessSpecifier(fnDefinition.GetAccessSpecifier()),
                                 SymbolNodeTypes::Function, SymbolNodeBaseTypes::Function}}
@@ -124,6 +140,7 @@ namespace Marble
 
     BlockSymbolNode::~BlockSymbolNode()
     {
+
         for (auto &[key, value] : m_Children)
         {
             delete value;

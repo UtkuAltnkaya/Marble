@@ -53,12 +53,9 @@ namespace Marble
             throw CompilationTerminatedException();
         }
 
-        if (false)
-        {
-            CodegenContext codegenContext{file.FileName()};
-            codegenContext.Generate(m_Program);
-            codegenContext.Print();
-        }
+        CodegenContext codegenContext{file.FileName()};
+        codegenContext.Generate(m_Program);
+        codegenContext.Print();
 
         if (errorSystem.IsWarning())
         {
@@ -84,7 +81,6 @@ namespace Marble
 
     void Compiler::PrintSymbolTable()
     {
-
         std::ofstream file("out/symbolTable.txt");
         file << SymbolTable::Get();
     }

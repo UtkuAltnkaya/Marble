@@ -12,14 +12,9 @@ namespace Marble
 
         const std::string &structName = m_StructName->Id();
 
-        TODO("HANDLE STRUCT TYPE");
-        // SymbolTable &table = SymbolTable::GetInstance();
-        // SymbolNode *node = table.Iter().Struct(structName).Find();
-        // ASSERT_D(node != nullptr, "Cannot find struct");
-        // StructSymbolNode *structNode = node->Into<StructSymbolNode>();
-        // llvm::StructType *structType = structNode->StructType();
-
-        llvm::StructType *structType = nullptr;
+        StructOrEnumSymbolNode *node = SymbolIterator().StructOrEnum(structName);
+        ASSERT_D(node != nullptr, "Cannot find struct");
+        llvm::StructType *structType = node->LLVMStructType();
 
         if (structType)
         {
@@ -47,7 +42,7 @@ namespace Marble
             fieldTypes.push_back(llvmType);
         }
         structType->setBody(fieldTypes);
-        // structNode->StructType(structType);
+        node->LLVMStructType(structType);
         return nullptr;
     }
 

@@ -48,6 +48,7 @@ namespace Marble
     struct ArrayType : public Derive::Debug
     {
         ArrayType(Ref<Marble::TypeSpecifier> typeSpecifier, size_t size) : TypeSpecifier{typeSpecifier}, Size{size} {}
+        ArrayType(const ArrayType &obj);
         Ref<Marble::TypeSpecifier> TypeSpecifier;
         size_t Size;
 
@@ -57,14 +58,15 @@ namespace Marble
     struct PointerType : public Derive::Debug
     {
         PointerType(Ref<Marble::TypeSpecifier> typeSpecifier) : TypeSpecifier{typeSpecifier} {}
+        PointerType(const PointerType &obj);
         Ref<Marble::TypeSpecifier> TypeSpecifier;
-
         DERIVE_DEBUG(PointerType, FIELD(TypeSpecifier))
     };
 
     struct ConstantType : public Derive::Debug
     {
         ConstantType(Ref<Marble::TypeSpecifier> typeSpecifier) : TypeSpecifier{typeSpecifier} {}
+        ConstantType(const ConstantType &obj);
         Ref<Marble::TypeSpecifier> TypeSpecifier;
 
         DERIVE_DEBUG(ConstantType, FIELD(TypeSpecifier))
@@ -74,9 +76,9 @@ namespace Marble
     {
         UserDefineType(const Identifier &type, UserDefineTypeKinds kind) : Type{type}, Kind{kind} {}
         UserDefineType(Identifier &&type, UserDefineTypeKinds kind) : Type{std::move(type)}, Kind{kind} {}
+        UserDefineType(const UserDefineType &obj);
         Identifier Type;
         UserDefineTypeKinds Kind;
-
         const Identifier &operator*() const { return Type; }
         DERIVE_DEBUG(UserDefineType, FIELD(Type), FIELD(Kind))
     };
@@ -142,6 +144,9 @@ namespace Marble
         llvm::Type *ToLLVMType(CodegenContext &codegenContext);
 
     private:
+        llvm::Type *ToUserDefineType(CodegenContext &codegenContext);
+
+    private:
         static Ref<TypeSpecifier> Primitive(Parser &parser);
         static Ref<TypeSpecifier> UserDefine(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
         static Ref<TypeSpecifier> Complex(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
@@ -149,7 +154,6 @@ namespace Marble
         static Ref<TypeSpecifier> TwoDimensionalArray(Parser &parser, Ref<TypeSpecifier> typeSpecifier, size_t size);
         static Ref<TypeSpecifier> Pointer(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
         static Ref<TypeSpecifier> Generic(Parser &parser, Ref<TypeSpecifier> typeSpecifier);
-
         static Types GetPrimitive(Parser &parser);
 
     private:
