@@ -148,6 +148,8 @@ namespace Marble
         ~VariableSymbolNode() = default;
 
         inline Ref<TypeSpecifier> GetTypeSpecifier() const { return m_TypeSpecifier; }
+        inline llvm::AllocaInst *Alloca() const { return m_Alloca; }
+        inline void Alloca(llvm::AllocaInst *alloca) { m_Alloca = alloca; }
 
         template <SymbolAstVariableNodeType T>
         T *Ast()
@@ -168,6 +170,7 @@ namespace Marble
 
     private:
         Ref<TypeSpecifier> m_TypeSpecifier;
+        llvm::AllocaInst *m_Alloca;
 
         DERIVE_DEBUG(VariableSymbolNode, FIELD(m_Block), FIELD(m_SymbolData), FIELD(m_TypeSpecifier))
     };

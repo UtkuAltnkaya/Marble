@@ -14,10 +14,7 @@ namespace Marble
     {
         ASSERT_A(node != nullptr, "Symbol node is nullptr");
         m_Node = node->TryInto<BlockSymbolNode>();
-        if (!m_Node)
-        {
-            ErrorSystem::AddError("Node must be a block symbol");
-        }
+        ASSERT_A(m_Node != nullptr, "Node must be a block symbol");
     }
 
     FunctionSymbolNode *SymbolIterator::Function(const std::string &name)
